@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.jute.BinaryOutputArchive;
 import org.apache.jute.Record;
 import org.apache.zookeeper.Quotas;
@@ -46,6 +47,8 @@ import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.metrics.Counter;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.RequestHeader;
+import org.apache.zookeeper.server.auth.Identities;
+import org.apache.zookeeper.server.auth.X509AuthenticationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,9 +63,10 @@ public abstract class ServerCnxn implements Stats, Watcher {
     public static final Object me = new Object();
     private static final Logger LOG = LoggerFactory.getLogger(ServerCnxn.class);
 
-    private Set<Id> authInfo = Collections.newSetFromMap(new ConcurrentHashMap<Id, Boolean>());
+    private final Set<Id> authInfo = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
-    private static final byte[] fourBytes = new byte[4];
+    // x509 client identity
+    protected Identities x509ClientId;
 
     /**
      * If the client is of old version, we don't send r-o mode info to it.
@@ -187,7 +191,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
      *               list of children response cache, ...) object to look up to when applicable.
      */
     public abstract int sendResponse(ReplyHeader h, Record r, String tag,
-                                      String cacheKey, Stat stat, int opCode) throws IOException;
+                                     String cacheKey, Stat stat, int opCode) throws IOException;
 
     public int sendResponse(ReplyHeader h, Record r, String tag) throws IOException {
         return sendResponse(h, r, tag, null, null, -1);
@@ -278,10 +282,16 @@ public abstract class ServerCnxn implements Stats, Watcher {
 
     public void addAuthInfo(Id id) {
         authInfo.add(id);
+        if (id != null && X509AuthenticationProvider.SCHEME.equals(id.getScheme())) {
+            this.x509ClientId = new Identities(id.getId());
+        }
     }
 
-    public boolean removeAuthInfo(Id id) {
-        return authInfo.remove(id);
+    /**
+     * @return  client id in X509 certificate.
+     */
+    public Identities getX509ClientId() {
+        return x509ClientId;
     }
 
     abstract void sendBuffer(ByteBuffer... buffers);
@@ -301,7 +311,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
     protected static class CloseRequestException extends IOException {
 
         private static final long serialVersionUID = -7854505709816442681L;
-        private DisconnectReason reason;
+        private final DisconnectReason reason;
 
         public CloseRequestException(String msg, DisconnectReason reason) {
             super(msg);
@@ -316,9 +326,9 @@ public abstract class ServerCnxn implements Stats, Watcher {
     protected static class EndOfStreamException extends IOException {
 
         private static final long serialVersionUID = -8255690282104294178L;
-        private DisconnectReason reason;
+        private final DisconnectReason reason;
 
-        public EndOfStreamException(String msg, DisconnectReason reason) {
+        public EndOfStreamException(String msg, ServerCnxn.DisconnectReason reason) {
             super(msg);
             this.reason = reason;
         }
@@ -326,7 +336,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
         public String toString() {
             return "EndOfStreamException: " + getMessage();
         }
-        public DisconnectReason getReason() {
+        public ServerCnxn.DisconnectReason getReason() {
             return reason;
         }
 
@@ -555,7 +565,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
     }
 
     public synchronized Map<String, Object> getConnectionInfo(boolean brief) {
-        Map<String, Object> info = new LinkedHashMap<String, Object>();
+        Map<String, Object> info = new LinkedHashMap<>();
         info.put("remote_socket_address", getRemoteSocketAddress());
         info.put("interest_ops", getInterestOps());
         info.put("outstanding_requests", getOutstandingRequests());

@@ -33,6 +33,9 @@ import org.apache.zookeeper.Environment;
 import org.apache.zookeeper.Login;
 import org.apache.zookeeper.common.ZKConfig;
 import org.apache.zookeeper.jmx.MBeanRegistry;
+import org.apache.zookeeper.server.auth.AuthorizationProvider;
+import org.apache.zookeeper.server.auth.Identities;
+import org.apache.zookeeper.server.auth.ProviderRegistry;
 import org.apache.zookeeper.server.auth.SaslServerCallbackHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,6 +224,27 @@ public abstract class ServerCnxnFactory {
             }
         }
 
+    }
+
+    /**
+     * Check authorization on client identity from x509 certificate.
+     *
+     * Authorization is skipped if authorization provider
+     * is not configured, or x509 identity is not present.
+     *
+     * Note that NIOServerCnxnFactory does not support tls connection yet
+     * and x509 identity is not available, and authorization is not supported
+     * when NIOServerCnxnFactory is used in zookeeper server, i.e. all client
+     * connections will go through.
+     *
+     * @param cnxn  server connection for client identity
+     * @return  AuthorizationResult from authorizationProvider, or null if authorizationProvider is not specified.
+     */
+    protected AuthorizationProvider.AuthorizationResult isConnectionAllowed(final ServerCnxn cnxn) {
+        final AuthorizationProvider authorizationProvider = ProviderRegistry.getAuthorizationProvider();
+        final Identities clientIdentities = cnxn.getX509ClientId();
+
+        return authorizationProvider == null ? null : authorizationProvider.checkConnectPermission(clientIdentities);
     }
 
     /**

@@ -117,6 +117,15 @@ public final class ServerMetrics {
 
         ENSEMBLE_AUTH_SKIP = metricsContext.getCounter("ensemble_auth_skip");
 
+        /*
+         * Count of authorized vs unauthorized connections.
+         */
+        CONNECTION_AUTHORIZED = metricsContext.getCounter("connection_authorized");
+        CONNECTION_AUTHORIZED_SHADOW = metricsContext.getCounter("connection_authorized_shadow");
+        CONNECTION_UNAUTHORIZED = metricsContext.getCounter("connection_unauthorized");
+        CONNECTION_UNAUTHORIZED_SHADOW = metricsContext.getCounter("connection_unauthorized_shadow");
+        UPDATE_AUTHORIZATION_FAILED = metricsContext.getCounter("update_authorization_failed");
+
         PREP_PROCESSOR_QUEUE_TIME = metricsContext.getSummary("prep_processor_queue_time_ms", DetailLevel.ADVANCED);
         PREP_PROCESSOR_QUEUE_SIZE = metricsContext.getSummary("prep_processor_queue_size", DetailLevel.BASIC);
         PREP_PROCESSOR_QUEUED = metricsContext.getCounter("prep_processor_request_queued");
@@ -500,6 +509,14 @@ public final class ServerMetrics {
      */
     public final Counter RESPONSE_BYTES;
     public final Counter WATCH_BYTES;
+    /*
+     * Count of authorized vs unauthorized connections.
+     */
+    public final Counter CONNECTION_AUTHORIZED;
+    public final Counter CONNECTION_AUTHORIZED_SHADOW;
+    public final Counter CONNECTION_UNAUTHORIZED;
+    public final Counter CONNECTION_UNAUTHORIZED_SHADOW;
+    public final Counter UPDATE_AUTHORIZATION_FAILED;
 
     public final Summary JVM_PAUSE_TIME;
 

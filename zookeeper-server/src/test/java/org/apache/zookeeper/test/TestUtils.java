@@ -20,6 +20,8 @@ package org.apache.zookeeper.test;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import java.io.File;
+import java.util.concurrent.Callable;
+import org.junit.Assert;
 
 /**
  * This class contains test utility methods
@@ -55,6 +57,25 @@ public class TestUtils {
 
     public static boolean deleteFileRecursively(File file) {
         return deleteFileRecursively(file, false);
+    }
+
+    public static void assertTimeout(final Callable<Boolean> call, final boolean expected, final long timeout) throws Exception {
+        final long delay = 100;
+        final long retries = timeout / delay;
+        for (int i = 0; i < retries; ++i) {
+            if (call.call() == expected) {
+                return;
+            }
+            try {
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                Assert.fail("Test thread is interrupted.");
+            }
+        }
+
+        if (call.call() != expected) {
+            Assert.fail(String.format("Test failed after %s msec", timeout));
+        }
     }
 
 }

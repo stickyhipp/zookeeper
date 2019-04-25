@@ -47,6 +47,8 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
@@ -70,6 +72,11 @@ import org.apache.zookeeper.common.SSLContextAndOptions;
 import org.apache.zookeeper.common.X509Exception;
 import org.apache.zookeeper.common.X509Exception.SSLContextException;
 import org.apache.zookeeper.server.NettyServerCnxn.HandshakeState;
+import org.apache.zookeeper.server.auth.AuthStatus;
+import org.apache.zookeeper.server.auth.AuthorizationProvider;
+import org.apache.zookeeper.server.auth.Identities;
+import org.apache.zookeeper.server.auth.Identity;
+import org.apache.zookeeper.server.auth.Identity.Type;
 import org.apache.zookeeper.server.auth.ProviderRegistry;
 import org.apache.zookeeper.server.auth.X509AuthenticationProvider;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
@@ -121,6 +128,20 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
     private static final AttributeKey<NettyServerCnxn> CONNECTION_ATTRIBUTE = AttributeKey.valueOf("NettyServerCnxn");
 
     private static final AtomicReference<ByteBufAllocator> TEST_ALLOCATOR = new AtomicReference<>(null);
+
+    public static final String WHITELIST_LOCAL_HOST_ID_KEY = "zookeeper.netty.whitelistLocalHostIdentity";
+    private boolean whitelistLocalHostIdentity;
+
+    public static boolean isLocalAddress(InetAddress addr) {
+        if (addr.isAnyLocalAddress() || addr.isLoopbackAddress()) {
+          return true;
+        }
+        try {
+            return NetworkInterface.getByInetAddress(addr) != null;
+        } catch (SocketException e) {
+            return false;
+        }
+    }
 
     /**
      * A handler that detects whether the client would like to use
@@ -408,9 +429,10 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
                         } else {
                             // Certificate was requested but was optional
                             // TODO: what auth info should we set on the connection?
-                            final Channel futureChannel = future.getNow();
-                            allChannels.add(Objects.requireNonNull(futureChannel));
-                            addCnxn(cnxn);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Client does not send certificate: {}", cnxn.getRemoteSocketAddress());
+                            }
+                            acceptCnxn(future, cnxn);
                             return;
                         }
                     } catch (Exception e) {
@@ -434,18 +456,50 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
                         cnxn.close(ServerCnxn.DisconnectReason.SASL_AUTH_FAILURE);
                         return;
                     }
+
+                    Identities clientId = cnxn.getX509ClientId();
+                    InetSocketAddress addr = cnxn.getRemoteSocketAddress();
+                    if (whitelistLocalHostIdentity && isLocalAddress(addr.getAddress()) && clientId != null) {
+                        for (Identity id : clientId.getIds()) {
+                            if (id.getType() == Type.HOST) {
+                                // accept if any identity is HOST-typed and connection is from local
+                                acceptCnxn(future, cnxn);
+                                return;
+                            }
+                        }
+                    }
+
+                    AuthorizationProvider.AuthorizationResult result = isConnectionAllowed(cnxn);
+                    if (result == null || result.isAccepted()) {
+                        // accept if authorization is disabled, or in shadow mode, or identity passes ACL check
+                        acceptCnxn(future, cnxn);
+                    } else {
+                        // reject otherwise, i.e.:
+                        // 1) authorization is enabled in non-shadow mode, and
+                        // 2) identity fails ACL check, and
+                        // 3) it's not a local connection with a HOST identity
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Authorization failed for client id={} address={}", clientId, addr);
+                        }
+                        cnxn.close();
+                    }
+                    return;
                 }
 
-                final Channel futureChannel = future.getNow();
-                allChannels.add(Objects.requireNonNull(futureChannel));
-                addCnxn(cnxn);
+                // reaches here only if client auth is not enabled. accept the connection.
+                acceptCnxn(future, cnxn);
             } else {
-                LOG.error("Unsuccessful handshake with session 0x{}", Long.toHexString(cnxn.getSessionId()));
+                LOG.error("Unsuccessful handshake with client {}", cnxn.getRemoteSocketAddress());
                 ServerMetrics.getMetrics().UNSUCCESSFUL_HANDSHAKE.add(1);
                 cnxn.close(ServerCnxn.DisconnectReason.FAILED_HANDSHAKE);
             }
         }
 
+        private void acceptCnxn(Future<Channel> future, NettyServerCnxn cnxn) {
+            final Channel futureChannel = future.getNow();
+            allChannels.add(Objects.requireNonNull(futureChannel));
+            addCnxn(cnxn);
+        }
     }
 
     @Sharable
@@ -503,6 +557,9 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
 
         this.advancedFlowControlEnabled = Boolean.getBoolean(NETTY_ADVANCED_FLOW_CONTROL);
         LOG.info("{} = {}", NETTY_ADVANCED_FLOW_CONTROL, this.advancedFlowControlEnabled);
+
+        this.whitelistLocalHostIdentity = Boolean.valueOf(System.getProperty(WHITELIST_LOCAL_HOST_ID_KEY, "true"));
+        LOG.info("{} = {}", WHITELIST_LOCAL_HOST_ID_KEY, this.whitelistLocalHostIdentity);
 
         setOutstandingHandshakeLimit(Integer.getInteger(OUTSTANDING_HANDSHAKE_LIMIT, -1));
 

@@ -1602,6 +1602,19 @@ and [SASL authentication for ZooKeeper](https://cwiki.apache.org/confluence/disp
     (using the same configuration as the secure client port).
     Default: false
 
+* *zookeeper.authorizationProvider* :
+    (Java system property only: **zookeeper.authorizationProvider**)
+    **New in 3.6.0:**
+    Specifies a subclass of **org.apache.zookeeper.server.auth.AuthorizationProvider**
+    to use for secure client authorization. AuthorizationProvider is targeted towards
+    authorization based external identity and access policy system. An implementation
+    of AuthorizationProvider org.apache.zookeeper.server.auth.ACLAuthorizationProvider
+    is added to check permissions on secured client identities from X509AuthenticationProvider
+    based on permissions stored as system znode under /zookeeper. Those permissions
+    are expected to come from external system and can be synced via external tool.
+    To configure the ZooKeeper server to use the custom provider for authorization,
+    set the property **zookeeper.authorizationProvider** to the fully-qualified class name of the custom
+    implementation which will load the provider instance into the ProviderRegistry during start up.
 * *authProvider*:
     (Java system property: **zookeeper.authProvider**)
     You can specify multiple authentication provider classes for ZooKeeper.

@@ -50,6 +50,8 @@ import org.slf4j.LoggerFactory;
  */
 public class X509AuthenticationProvider implements AuthenticationProvider {
 
+    public static final String SCHEME = "x509";
+
     static final String ZOOKEEPER_X509AUTHENTICATIONPROVIDER_SUPERUSER = "zookeeper.X509AuthenticationProvider.superUser";
     private static final Logger LOG = LoggerFactory.getLogger(X509AuthenticationProvider.class);
     private final X509TrustManager trustManager;
@@ -127,7 +129,7 @@ public class X509AuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public String getScheme() {
-        return "x509";
+        return SCHEME;
     }
 
     @Override

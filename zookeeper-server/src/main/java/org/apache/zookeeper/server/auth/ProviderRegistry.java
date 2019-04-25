@@ -21,6 +21,9 @@ package org.apache.zookeeper.server.auth;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.google.common.base.Strings;
+import org.apache.zookeeper.server.ZKDatabase;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +36,17 @@ public class ProviderRegistry {
 
     private static boolean initialized = false;
     private static final Map<String, AuthenticationProvider> authenticationProviders = new HashMap<>();
+    private static AuthorizationProvider authorizationProvider;
+
+    // jvm option to enable authorization check
+    public static final String AUTHORIZATION_PROVIDER = "zookeeper.authorizationProvider";
 
     //VisibleForTesting
     public static void reset() {
         synchronized (ProviderRegistry.class) {
             initialized = false;
             authenticationProviders.clear();
+            authorizationProvider = null;
         }
     }
 
@@ -77,6 +85,10 @@ public class ProviderRegistry {
         return authenticationProviders.get(scheme);
     }
 
+    public static AuthorizationProvider getAuthorizationProvider() {
+        return authorizationProvider;
+    }
+
     public static void removeProvider(String scheme) {
         authenticationProviders.remove(scheme);
     }
@@ -89,4 +101,20 @@ public class ProviderRegistry {
         return sb.toString();
     }
 
+    public static synchronized void initAuthorizationProvider(final ZKDatabase zkDb) {
+        final String authorizationProviderClass = System.getProperty(AUTHORIZATION_PROVIDER);
+        if (!Strings.isNullOrEmpty(authorizationProviderClass)) {
+            authorizationProvider = createAuthorizationProvider(zkDb, authorizationProviderClass);
+        }
+    }
+
+    private static AuthorizationProvider createAuthorizationProvider(final ZKDatabase zkDb, final String className) {
+        try {
+            Class<?> klazz = Class.forName(className);
+            return (AuthorizationProvider) klazz.getDeclaredConstructor(ZKDatabase.class).newInstance(zkDb);
+        } catch (Throwable t) {
+            LOG.warn("Failed to create authorization provider", t);
+            return null;
+        }
+    }
 }

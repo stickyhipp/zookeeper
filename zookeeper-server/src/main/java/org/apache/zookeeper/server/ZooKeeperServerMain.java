@@ -31,6 +31,7 @@ import org.apache.zookeeper.metrics.impl.MetricsProviderBootstrap;
 import org.apache.zookeeper.server.admin.AdminServer;
 import org.apache.zookeeper.server.admin.AdminServer.AdminServerException;
 import org.apache.zookeeper.server.admin.AdminServerFactory;
+import org.apache.zookeeper.server.auth.ProviderRegistry;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog.DatadirException;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
@@ -55,6 +56,7 @@ public class ZooKeeperServerMain {
     private ContainerManager containerManager;
     private MetricsProvider metricsProvider;
     private AdminServer adminServer;
+    private ZooKeeperServer zkServer;
 
     /*
      * Start up the ZooKeeper server.
@@ -175,6 +177,9 @@ public class ZooKeeperServerMain {
             );
             containerManager.start();
             ZKAuditProvider.addZKStartStopAuditLog();
+
+            // initialize authorization provider
+            ProviderRegistry.initAuthorizationProvider(zkServer.getZKDatabase());
 
             // Watch status of ZooKeeper server. It will do a graceful shutdown
             // if the server is not running or hits an internal error.
