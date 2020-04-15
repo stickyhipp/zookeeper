@@ -31,7 +31,6 @@ public class Identity {
     // type + name must be unique identity
     protected Type type;
     protected String name;
-    protected String id;
 
     public enum Type {
         USER("user"),
@@ -54,7 +53,6 @@ public class Identity {
     public Identity(final Type type, final String name) {
         this.type = type;
         this.name = name;
-        this.id = createId();
     }
 
     public Type getType() {
@@ -90,10 +88,6 @@ public class Identity {
 
     @Override
     public String toString() {
-        return id;
-    }
-
-    protected String createId() {
-        return (this.type == null ? "" : this.type.name) + ":" + this.name;
+        return (type == null ? "" : type.name) + ":" + name;
     }
 }

@@ -43,9 +43,11 @@ public interface AuthorizationProvider {
     /**
      * Check if connection is authorized for the specified identity.
      *
-     * @param identity  client identity.
+     * @param identities client identity.
      * @return  true if connection is permitted.
      */
     AuthorizationResult checkConnectPermission(final Identities identities);
+
+    boolean isAdmin(final Identities identities);
 
 }

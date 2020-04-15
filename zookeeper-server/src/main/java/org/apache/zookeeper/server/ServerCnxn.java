@@ -66,7 +66,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
     private final Set<Id> authInfo = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     // x509 client identity
-    protected Identities x509ClientId;
+    private Identities x509ClientId;
 
     /**
      * If the client is of old version, we don't send r-o mode info to it.
@@ -275,15 +275,35 @@ public abstract class ServerCnxn implements Stats, Watcher {
 
     abstract void setSessionId(long sessionId);
 
-    /** auth info for the cnxn, returns an unmodifyable list */
+    /** auth info for the cnxn, returns an unmodifiable list */
     public List<Id> getAuthInfo() {
         return Collections.unmodifiableList(new ArrayList<>(authInfo));
     }
 
+    private String getAuthInfoAsStrings() {
+        List<Id> ids = getAuthInfo();
+        if (ids.size() < 1) {
+            return "";
+        }
+        final StringBuilder result = new StringBuilder("\n");
+        Id id = ids.get(0);
+        result.append(String.format("0:id='%s',scheme='%s'",id.getId(),id.getScheme()));
+        for (int i = 1; i < ids.size(); i++) {
+            id = ids.get(i);
+            result.append(String.format(",\n%d:id='%s',scheme='%s'",i,id.getId(),id.getScheme()));
+        }
+        return result.toString();
+    }
+
     public void addAuthInfo(Id id) {
-        authInfo.add(id);
-        if (id != null && X509AuthenticationProvider.SCHEME.equals(id.getScheme())) {
-            this.x509ClientId = new Identities(id.getId());
+        if (authInfo.contains(id)) {
+            LOG.debug("addAuthInfo {} already registered, skipping", id);
+        } else {
+            authInfo.add(id);
+            if (id != null && X509AuthenticationProvider.SCHEME.equals(id.getScheme())) {
+                LOG.debug("Setting x509ClientId scheme: \"{}\", id: \"{}\"", id.getScheme(), id.getId());
+                this.x509ClientId = new Identities(id.getId());
+            }
         }
     }
 
@@ -562,6 +582,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
             }
         }
         pwriter.print(")");
+        LOG.info("allAuthInfo [{}]: {}", getRemoteSocketAddress(), getAuthInfoAsStrings());
     }
 
     public synchronized Map<String, Object> getConnectionInfo(boolean brief) {
@@ -584,6 +605,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
             info.put("avg_latency", getAvgLatency());
             info.put("max_latency", getMaxLatency());
         }
+        LOG.info("allAuthInfo [{}]: {}", getRemoteSocketAddress(), getAuthInfoAsStrings());
         return info;
     }
 

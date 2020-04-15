@@ -18,6 +18,7 @@
 
 package org.apache.zookeeper.server.auth;
 
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.X509KeyManager;
@@ -25,7 +26,6 @@ import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.common.ClientX509Util;
-import org.apache.zookeeper.common.X509Exception;
 import org.apache.zookeeper.common.X509Exception.KeyManagerException;
 import org.apache.zookeeper.common.X509Exception.TrustManagerException;
 import org.apache.zookeeper.common.X509Util;
@@ -52,7 +52,7 @@ public class X509AuthenticationProvider implements AuthenticationProvider {
 
     public static final String SCHEME = "x509";
 
-    static final String ZOOKEEPER_X509AUTHENTICATIONPROVIDER_SUPERUSER = "zookeeper.X509AuthenticationProvider.superUser";
+    private static final String ZOOKEEPER_X509AUTHENTICATIONPROVIDER_SUPERUSER = "zookeeper.X509AuthenticationProvider.superUser";
     private static final Logger LOG = LoggerFactory.getLogger(X509AuthenticationProvider.class);
     private final X509TrustManager trustManager;
     private final X509KeyManager keyManager;
@@ -65,7 +65,7 @@ public class X509AuthenticationProvider implements AuthenticationProvider {
      * <br><code>zookeeper.ssl.keyStore.password</code>
      * <br><code>zookeeper.ssl.trustStore.password</code>
      */
-    public X509AuthenticationProvider() throws X509Exception {
+    public X509AuthenticationProvider() {
         ZKConfig config = new ZKConfig();
         try (X509Util x509Util = new ClientX509Util()) {
             String keyStoreLocation = config.getProperty(x509Util.getSslKeystoreLocationProperty(), "");
@@ -132,41 +132,72 @@ public class X509AuthenticationProvider implements AuthenticationProvider {
         return SCHEME;
     }
 
-    @Override
-    public KeeperException.Code handleAuthentication(ServerCnxn cnxn, byte[] authData) {
-        X509Certificate[] certChain = (X509Certificate[]) cnxn.getClientCertificateChain();
+    /**
+     * Extract the clientId from the ServerCnxn client cert chain.
+     *
+     * @param cnxn - ServerCnxn
+     * @return client id
+     * @throws KeeperException
+     */
+    private String getClientId(ServerCnxn cnxn) throws KeeperException {
+        Certificate[] certChain = cnxn.getClientCertificateChain();
 
         if (certChain == null || certChain.length == 0) {
-            return KeeperException.Code.AUTHFAILED;
+            throw new KeeperException.AuthFailedException();
+        }
+
+        // Java arrays are reified, so we can't simply cast a
+        // Certificate[] to a X509Certificate[], even if all the
+        // elements in the Certificate[] are of type X509Certificate.
+        // We have to make a new array and copy all the elements.
+        X509Certificate[] x509CertChain = new X509Certificate[certChain.length];
+        for (int i = 0; i < certChain.length; i++) {
+            if (!(certChain[i] instanceof X509Certificate)) {
+                LOG.error("Certificate {} is not a X509Certificate", certChain[i]);
+                throw new KeeperException.AuthFailedException();
+            }
+            x509CertChain[i] = (X509Certificate) certChain[i];
         }
 
         if (trustManager == null) {
             LOG.error("No trust manager available to authenticate session 0x{}", Long.toHexString(cnxn.getSessionId()));
-            return KeeperException.Code.AUTHFAILED;
+            throw new KeeperException.AuthFailedException();
         }
 
-        X509Certificate clientCert = certChain[0];
+        X509Certificate clientCert = x509CertChain[0];
 
         try {
             // Authenticate client certificate
-            trustManager.checkClientTrusted(certChain, clientCert.getPublicKey().getAlgorithm());
+            trustManager.checkClientTrusted(x509CertChain,
+                    clientCert.getPublicKey().getAlgorithm());
         } catch (CertificateException ce) {
-            LOG.error("Failed to trust certificate for session 0x{}", Long.toHexString(cnxn.getSessionId()), ce);
-            return KeeperException.Code.AUTHFAILED;
+            LOG.error("Failed to trust certificate for session 0x" + Long.toHexString(cnxn.getSessionId()), ce);
+            throw new KeeperException.AuthFailedException();
         }
+        return getClientId(clientCert);
+    }
 
-        String clientId = getClientId(clientCert);
-
-        if (clientId.equals(System.getProperty(ZOOKEEPER_X509AUTHENTICATIONPROVIDER_SUPERUSER))) {
+    protected void checkForSuper(ServerCnxn cnxn, String clientId, byte[] authData) throws KeeperException {
+        if (matches(clientId, System.getProperty(ZOOKEEPER_X509AUTHENTICATIONPROVIDER_SUPERUSER))) {
             cnxn.addAuthInfo(new Id("super", clientId));
             LOG.info("Authenticated Id '{}' as super user", clientId);
         }
+    }
 
-        Id authInfo = new Id(getScheme(), clientId);
-        cnxn.addAuthInfo(authInfo);
+    @Override
+    public KeeperException.Code handleAuthentication(ServerCnxn cnxn, byte[] authData) {
+        try {
+            String clientId = getClientId(cnxn);
+            checkForSuper(cnxn, clientId, authData);
+            Id authInfo = new Id(getScheme(), clientId);
+            cnxn.addAuthInfo(authInfo);
 
-        LOG.info("Authenticated Id '{}' for Scheme '{}'", authInfo.getId(), authInfo.getScheme());
-        return KeeperException.Code.OK;
+            LOG.debug("Authenticated Id '{}' for Scheme '{}'", authInfo.getId(), authInfo.getScheme());
+            return KeeperException.Code.OK;
+        } catch (Exception e) {
+            LOG.error("Failed to authenticate session 0x{}", Long.toHexString(cnxn.getSessionId()), e);
+            return KeeperException.Code.AUTHFAILED;
+        }
     }
 
     /**
@@ -185,12 +216,10 @@ public class X509AuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean matches(String id, String aclExpr) {
-        if (System.getProperty(ZOOKEEPER_X509AUTHENTICATIONPROVIDER_SUPERUSER) != null) {
-            return id.equals(System.getProperty(ZOOKEEPER_X509AUTHENTICATIONPROVIDER_SUPERUSER))
-                   || id.equals(aclExpr);
+        if (id == null || id.length() == 0 || aclExpr == null || aclExpr.length() == 0) {
+            return false;
         }
-
-        return id.equals(aclExpr);
+        return (id.equals(aclExpr));
     }
 
     @Override
@@ -204,6 +233,7 @@ public class X509AuthenticationProvider implements AuthenticationProvider {
             new X500Principal(id);
             return true;
         } catch (IllegalArgumentException e) {
+            LOG.warn("Error creating X500Principal for {}", id, e);
             return false;
         }
     }

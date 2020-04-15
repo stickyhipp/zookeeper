@@ -1043,7 +1043,17 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements Req
                 }
             } else {
                 ServerAuthenticationProvider ap = ProviderRegistry.getServerProvider(id.getScheme());
-                if (ap == null || !ap.isValid(id.getId())) {
+                if (ap == null) {
+                    LOG.warn(
+                            "No authentication provider for scheme: {}\nRegistered providers: {}",
+                            id.getScheme(),
+                            ProviderRegistry.listProviders());
+                    throw new KeeperException.InvalidACLException(path);
+                }
+                if (!ap.isValid(id.getId())) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("ACL {} is not valid", id);
+                    }
                     throw new KeeperException.InvalidACLException(path);
                 }
                 rv.add(a);

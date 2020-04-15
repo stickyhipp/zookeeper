@@ -48,6 +48,18 @@ public class Identities {
         return idString;
     }
 
+    public String getIdsAsString() {
+        if (ids == null || ids.size() < 1) {
+            return "";
+        }
+        final StringBuilder result = new StringBuilder();
+        result.append(ids.get(0).toString());
+        ids.stream().skip(1).forEach(identity -> {
+            result.append(",").append(identity);
+        });
+        return result.toString();
+    }
+
     /**
      * Parse input string
      * @param id a comma-separated list of identities formatted as type:name
@@ -55,6 +67,9 @@ public class Identities {
      */
     private List<Identity> parseIdString(final String id) {
         List<Identity> idsList = new ArrayList<>();
+        if (id == null) {
+            return idsList;
+        }
         String[] parts = id.split(",");
         for (String part : parts) {
             final int index = part.indexOf(':');
@@ -72,7 +87,9 @@ public class Identities {
             } else if (type.equals(Identity.Type.JOB.name)) {
                 idsList.add(new Identity(Identity.Type.JOB, name));
             } else {
-                LOG.warn("Unknown identity type found when parsing idString: " + type);
+                LOG.warn("Unknown identity type found when parsing idString: \"{}\"", type);
+                // make sure that any unexpectedly-formatted id string still gets traced in some form,
+                // instead of just being ignored...
                 idsList.add(new Identity(Identity.Type.UNKNOWN_TYPE, part));
             }
         }

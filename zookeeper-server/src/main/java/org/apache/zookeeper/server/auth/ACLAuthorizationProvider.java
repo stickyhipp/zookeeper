@@ -21,6 +21,7 @@ package org.apache.zookeeper.server.auth;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.jmx.MBeanRegistry;
 import org.apache.zookeeper.jmx.ZKMBeanInfo;
 import org.apache.zookeeper.server.DataNode;
@@ -42,7 +43,6 @@ import java.util.zip.CRC32;
 /**
  * AuthorizationProvider using acls to check permissions.
  * ACLs are stored inside znodes under /zookeeper.
- *
  */
 public class ACLAuthorizationProvider implements AuthorizationProvider {
 
@@ -172,6 +172,12 @@ public class ACLAuthorizationProvider implements AuthorizationProvider {
 
     @Override
     public AuthorizationResult checkConnectPermission(final Identities identities) {
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("checkConnectPerms identities: \"{}\",\nidentities parsed:\"{}\"",
+                    identities != null ? identities.toString() : "null",
+                    identities != null ? identities.getIdsAsString() : "null");
+        }
         boolean authorized;
         Identity authorizedId = null;
         final boolean shadowEnabled = forceShadowMode || shadow.get();
@@ -186,6 +192,9 @@ public class ACLAuthorizationProvider implements AuthorizationProvider {
             authorized = false;
             for (Identity id : identities.getIds()) {
                 if (permissions.containsKey(id)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("permissions contains {}", id);
+                    }
                     authorized = true;
                     authorizedId = id;
                     break;
@@ -208,6 +217,29 @@ public class ACLAuthorizationProvider implements AuthorizationProvider {
         }
 
         return new AuthorizationResult(authorized, shadowEnabled, authorizedId);
+    }
+
+    @Override
+    public boolean isAdmin(final Identities identities) {
+        if (identities == null || identities.getIds().size() == 0) {
+            return false;
+        }
+
+        for (Identity identity : identities.getIds()) {
+            if (permissions.containsKey(identity)) {
+                int permission = permissions.get(identity);
+                if ((permission & ZooDefs.Perms.ADMIN) == ZooDefs.Perms.ADMIN) {
+                    LOG.info("isAdmin: Identity {} perm {} has admin bit", identity.toString(), permission);
+                    // if ANY identity is an admin return true.  TODO: consider stricter model of ALL identities?
+                    return true;
+                } else {
+                    LOG.info("isAdmin: Identity {} perm {} does not have admin bit", identity.toString(), permission);
+                }
+            } else {
+                LOG.info("isAdmin: Identity {} not registered", identity.toString());
+            }
+        }
+        return false;
     }
 
     private void updateAclsFromDataTree() {
@@ -247,7 +279,13 @@ public class ACLAuthorizationProvider implements AuthorizationProvider {
         final Map<Identity, Integer> perms = new HashMap<>();
 
         for (ACLConfig config: acls) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ACLConfig {}", config);
+            }
             for (Identity identity: config.getIdentities()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("identity \"{}\"", identity.toString());
+                }
                 if (perms.containsKey(identity)) {
                     perms.put(identity, perms.get(identity) | config.getPermission());
                 } else {

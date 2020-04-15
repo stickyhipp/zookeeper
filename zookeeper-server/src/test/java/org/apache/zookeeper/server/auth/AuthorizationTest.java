@@ -53,7 +53,7 @@ public class AuthorizationTest {
             "    ]" +
             "  }, {" +
             "    \"aclType\" : \"ensemble\"," +
-            "    \"permission\" : 1," +
+            "    \"permission\" : 16," +
             "    \"identities\" : [" +
             "      {\"type\": \"user\", \"name\":\"test_user_1\"}," +
             "      {\"type\": \"user\", \"name\":\"test_user_2\"}," +
@@ -84,7 +84,7 @@ public class AuthorizationTest {
             "    ]" +
             "  }, {" +
             "    \"aclType\" : \"ensemble\"," +
-            "    \"permission\" : 2," +
+            "    \"permission\" : 16," +
             "    \"identities\" : [" +
             "      {\"type\": \"user\", \"name\":\"test_user_1\"}," +
             "      {\"type\": \"user\", \"name\":\"test_user_2\"}," +
@@ -221,6 +221,11 @@ public class AuthorizationTest {
         Assert.assertNull(provider.checkConnectPermission(svcc).authorizedId);
         Assert.assertEquals(svca.getIds().get(0), provider.checkConnectPermission(user4svca).authorizedId);
 
+        // test isAdmin, for single entry false and true
+        Identities user = new Identities("user:test_user");
+        Assert.assertFalse(provider.isAdmin(user));
+        Assert.assertTrue(provider.isAdmin(user1));
+
         // now update acls and test again
         dt.setData(ACLAuthorizationProvider.aclZookeeper, updatedAclJson.getBytes(), 0, 0, 0);
 
@@ -255,6 +260,9 @@ public class AuthorizationTest {
         Assert.assertEquals(user3.getIds().get(0), provider.checkConnectPermission(user3).authorizedId);
         Assert.assertNull(provider.checkConnectPermission(svca).authorizedId);
         Assert.assertNull(provider.checkConnectPermission(user4svca).authorizedId);
+
+        // user1 is now in both perms 1 and 16
+        Assert.assertTrue(provider.isAdmin(user1));
     }
 
     @Test

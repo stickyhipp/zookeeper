@@ -21,17 +21,10 @@ package org.apache.zookeeper.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigInteger;
 import java.net.Socket;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SignatureException;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
@@ -78,6 +71,13 @@ public class X509AuthTest extends ZKTestCase {
         cnxn.clientChain = new X509Certificate[]{superCert};
         assertEquals(KeeperException.Code.OK, provider.handleAuthentication(cnxn, null));
         assertEquals("super", cnxn.getAuthInfo().get(0).getScheme());
+
+        System.setProperty("zookeeper.X509AuthenticationProvider.superUser", "");
+        provider = createProvider(superCert);
+        cnxn = new MockServerCnxn();
+        cnxn.clientChain = new X509Certificate[]{superCert};
+        assertEquals(KeeperException.Code.OK, provider.handleAuthentication(cnxn, null));
+        assertEquals("x509", cnxn.getAuthInfo().get(0).getScheme());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class X509AuthTest extends ZKTestCase {
 
     }
 
-    private static class TestCertificate extends X509Certificate {
+    public static class TestCertificate extends X509Certificate {
 
         private byte[] encoded;
         private X500Principal principal;
@@ -133,10 +133,10 @@ public class X509AuthTest extends ZKTestCase {
             return null;
         }
         @Override
-        public void checkValidity() throws CertificateExpiredException, CertificateNotYetValidException {
+        public void checkValidity() {
         }
         @Override
-        public void checkValidity(Date date) throws CertificateExpiredException, CertificateNotYetValidException {
+        public void checkValidity(Date date) {
         }
         @Override
         public int getVersion() {
@@ -163,7 +163,7 @@ public class X509AuthTest extends ZKTestCase {
             return null;
         }
         @Override
-        public byte[] getTBSCertificate() throws CertificateEncodingException {
+        public byte[] getTBSCertificate() {
             return null;
         }
         @Override
@@ -199,14 +199,14 @@ public class X509AuthTest extends ZKTestCase {
             return 0;
         }
         @Override
-        public byte[] getEncoded() throws CertificateEncodingException {
+        public byte[] getEncoded() {
             return encoded;
         }
         @Override
-        public void verify(PublicKey key) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        public void verify(PublicKey key) {
         }
         @Override
-        public void verify(PublicKey key, String sigProvider) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        public void verify(PublicKey key, String sigProvider) {
         }
         @Override
         public String toString() {
@@ -277,7 +277,7 @@ public class X509AuthTest extends ZKTestCase {
 
     }
 
-    protected X509AuthenticationProvider createProvider(X509Certificate trustedCert) {
+    private X509AuthenticationProvider createProvider(X509Certificate trustedCert) {
         return new X509AuthenticationProvider(new TestTrustManager(trustedCert), new TestKeyManager());
     }
 

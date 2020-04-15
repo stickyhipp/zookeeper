@@ -32,7 +32,7 @@ import java.util.List;
 public class ACLConfigTest {
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static final String aclJson = "{" +
+    private static final String aclJson = "{" +
             "  \"acl\" : [ {" +
             "    \"aclType\" : \"ensemble\"," +
             "    \"permission\" : 1," +
@@ -53,6 +53,23 @@ public class ACLConfigTest {
             "  } ]," +
             "  \"shadow\" : false" +
             "}";
+
+    private static final String aclSingleUser = "{\"acl\":[{\"aclType\":\"ensemble\",\"identities\":[{\"name\":\"pwelch\",\"type\":\"user\"}],\"permission\":16}],\"shadow\":false}";
+
+
+    @Test
+    public void testSingleUserAcl() throws IOException {
+        mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true);
+        ACLAuthorizationProvider.ACLConfigs aclConfigs = mapper.readValue(aclSingleUser, ACLAuthorizationProvider.ACLConfigs.class);
+
+        Assert.assertEquals(1, aclConfigs.getAcl().size());
+        Assert.assertFalse(aclConfigs.isShadow());
+
+        EnsembleACLConfig admin = (EnsembleACLConfig) aclConfigs.getAcl().get(0);
+        Assert.assertEquals(ZooDefs.Perms.ADMIN, admin.getPermission());
+        Assert.assertEquals(1, admin.getIdentities().size());
+        Assert.assertEquals("user:pwelch", admin.getIdentities().get(0).toString());
+    }
 
     @Test
     public void testSerialization() throws JsonProcessingException {

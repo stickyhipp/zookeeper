@@ -29,10 +29,12 @@ public class EnsembleACLConfig implements ACLConfig {
     private int permission;
     private List<Identity> identities;
 
+    // Needed for the JSon parser
+    @SuppressWarnings("unused")
     public EnsembleACLConfig() {}
 
     // for testing
-    public EnsembleACLConfig(final int permission, final List<Identity> identities) {
+    EnsembleACLConfig(final int permission, final List<Identity> identities) {
         this.permission = permission;
         this.identities = new ArrayList<>(identities);
     }
@@ -43,5 +45,9 @@ public class EnsembleACLConfig implements ACLConfig {
 
     public int getPermission() {
         return permission;
+    }
+
+    public String toString() {
+        return String.format("aclType: ensemble, permission: %d, numAcls: %d", permission, identities == null ? 0 : identities.size());
     }
 }

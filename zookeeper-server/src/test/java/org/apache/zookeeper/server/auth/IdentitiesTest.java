@@ -44,36 +44,42 @@ public class IdentitiesTest {
         Assert.assertEquals(Identity.Type.USER, ids.getIds().get(0).getType());
         Assert.assertEquals("test_user/dev123.example.com", ids.getIds().get(0).getName());
         Assert.assertEquals(user1, ids.getIds().get(0).toString());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(user2);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.USER, ids.getIds().get(0).getType());
         Assert.assertEquals("test_user_without_host", ids.getIds().get(0).getName());
         Assert.assertEquals(user2, ids.getIds().get(0).toString());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(svc1);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.SERVICE_IDENTITY, ids.getIds().get(0).getType());
         Assert.assertEquals("zk-client", ids.getIds().get(0).getName());
         Assert.assertEquals(svc1, ids.getIds().get(0).toString());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(job1);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.JOB, ids.getIds().get(0).getType());
         Assert.assertEquals("some-job-name", ids.getIds().get(0).getName());
         Assert.assertEquals(job1, ids.getIds().get(0).toString());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(host1);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.HOST, ids.getIds().get(0).getType());
         Assert.assertEquals("abc123.domain.com", ids.getIds().get(0).getName());
         Assert.assertEquals(host1, ids.getIds().get(0).toString());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(host_tier1);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.HOST_TIER, ids.getIds().get(0).getType());
         Assert.assertEquals("abc", ids.getIds().get(0).getName());
         Assert.assertEquals(host_tier1, ids.getIds().get(0).toString());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
     }
 
     @Test
@@ -83,24 +89,28 @@ public class IdentitiesTest {
         Assert.assertEquals(Identity.Type.UNKNOWN_TYPE, ids.getIds().get(0).getType());
         Assert.assertEquals(malformed1, ids.getIds().get(0).getName());
         Assert.assertEquals(":" + malformed1, ids.getIds().get(0).toString());
+        Assert.assertEquals(":" + ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(malformed2);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.UNKNOWN_TYPE, ids.getIds().get(0).getType());
         Assert.assertEquals(malformed2, ids.getIds().get(0).getName());
         Assert.assertEquals(":" + malformed2, ids.getIds().get(0).toString());
+        Assert.assertEquals(":" + ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(malformed3);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.SERVICE_IDENTITY, ids.getIds().get(0).getType());
         Assert.assertEquals("multiple_colon:", ids.getIds().get(0).getName());
         Assert.assertEquals(malformed3, ids.getIds().get(0).toString());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
 
         ids = new Identities(malformed4);
         Assert.assertEquals(1, ids.getIds().size());
         Assert.assertEquals(Identity.Type.UNKNOWN_TYPE, ids.getIds().get(0).getType());
         Assert.assertEquals(malformed4, ids.getIds().get(0).getName());
         Assert.assertEquals(":" + malformed4, ids.getIds().get(0).toString());
+        Assert.assertEquals(":" + ids.toString(), ids.getIdsAsString());
     }
 
     @Test
@@ -109,6 +119,7 @@ public class IdentitiesTest {
         ids = new Identities(clientId);
         Assert.assertEquals(clientId, ids.toString());
         Assert.assertEquals(3, ids.getIds().size());
+        Assert.assertEquals(ids.toString(), ids.getIdsAsString());
 
         Assert.assertEquals(Identity.Type.HOST, ids.getIds().get(0).getType());
         Assert.assertEquals("abc123.domain.com", ids.getIds().get(0).getName());
@@ -146,5 +157,12 @@ public class IdentitiesTest {
         Assert.assertEquals(Identity.Type.UNKNOWN_TYPE, ids.getIds().get(3).getType());
         Assert.assertEquals(malformed4, ids.getIds().get(3).getName());
         Assert.assertEquals(":" + malformed4, ids.getIds().get(3).toString());
+
+        Assert.assertNotEquals(ids.toString(), ids.getIdsAsString());
+    }
+
+    @Test public void testNullId() {
+        ids = new Identities(null);
+        Assert.assertEquals(0,ids.getIds().size());
     }
 }
