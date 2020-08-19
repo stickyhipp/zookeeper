@@ -67,10 +67,8 @@ public class QuorumAuthUpgradeTest extends QuorumAuthTestBase {
     }
 
     @After
-    @Override
     public void tearDown() throws Exception {
         shutdownAll();
-        super.tearDown();
     }
 
     @AfterClass

@@ -60,13 +60,11 @@ public class QuorumDigestAuthTest extends QuorumAuthTestBase {
     }
 
     @After
-    @Override
     public void tearDown() throws Exception {
         for (MainThread mainThread : mt) {
             mainThread.shutdown();
             mainThread.deleteBaseDir();
         }
-        super.tearDown();
     }
 
     @AfterClass
