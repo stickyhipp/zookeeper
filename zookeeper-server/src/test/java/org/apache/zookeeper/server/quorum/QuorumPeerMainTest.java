@@ -378,6 +378,7 @@ public class QuorumPeerMainTest extends QuorumPeerTestBase {
                                                                             != null);
 
             // to keep the quorum peer running and force it to go into the looking state, we kill leader election
+            // and close the connection to the leader
             servers.mt[falseLeader].main.quorumPeer.electionAlg.shutdown();
             servers.mt[falseLeader].main.quorumPeer.follower.getSocket().close();
 
@@ -472,7 +473,7 @@ public class QuorumPeerMainTest extends QuorumPeerTestBase {
         LineNumberReader r = new LineNumberReader(new StringReader(os.toString()));
         String line;
         boolean found = false;
-        Pattern p = Pattern.compile(".*None of the addresses .* are reachable for sid 2");
+        Pattern p = Pattern.compile(".*Cannot open channel to .* at election address .*");
         while ((line = r.readLine()) != null) {
             found = p.matcher(line).matches();
             if (found) {

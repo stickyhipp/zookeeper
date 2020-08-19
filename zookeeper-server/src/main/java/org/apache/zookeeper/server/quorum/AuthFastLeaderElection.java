@@ -22,7 +22,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
@@ -713,8 +712,7 @@ public class AuthFastLeaderElection implements Election {
             }
 
             for (QuorumServer server : self.getVotingView().values()) {
-                InetAddress address = server.addr.getReachableOrOne().getAddress();
-                InetSocketAddress saddr = new InetSocketAddress(address, port);
+                InetSocketAddress saddr = new InetSocketAddress(server.addr.getAddress(), port);
                 addrChallengeMap.put(saddr, new ConcurrentHashMap<Long, Long>());
             }
 
@@ -742,7 +740,7 @@ public class AuthFastLeaderElection implements Election {
 
     private void starter(QuorumPeer self) {
         this.self = self;
-        port = self.getVotingView().get(self.getId()).electionAddr.getAllPorts().get(0);
+        port = self.getVotingView().get(self.getId()).electionAddr.getPort();
         proposedLeader = -1;
         proposedZxid = -1;
 
@@ -765,7 +763,6 @@ public class AuthFastLeaderElection implements Election {
     private void sendNotifications() {
         for (QuorumServer server : self.getView().values()) {
 
-            InetSocketAddress address = self.getView().get(server.id).electionAddr.getReachableOrOne();
             ToSend notmsg = new ToSend(
                 ToSend.mType.notification,
                 AuthFastLeaderElection.sequencer++,
@@ -773,7 +770,7 @@ public class AuthFastLeaderElection implements Election {
                 proposedZxid,
                 logicalclock.get(),
                 QuorumPeer.ServerState.LOOKING,
-                address);
+                self.getView().get(server.id).electionAddr);
 
             sendqueue.offer(notmsg);
         }

@@ -18,7 +18,6 @@
 
 package org.apache.zookeeper.server;
 
-import java.net.InetSocketAddress;
 import org.apache.zookeeper.server.quorum.Observer;
 import org.apache.zookeeper.server.quorum.ObserverMXBean;
 import org.apache.zookeeper.server.quorum.QuorumPeer;
@@ -50,11 +49,10 @@ public class ObserverBean extends ZooKeeperServerBean implements ObserverMXBean 
 
     public String getLearnerMaster() {
         QuorumPeer.QuorumServer learnerMaster = observer.getCurrentLearnerMaster();
-        if (learnerMaster == null || learnerMaster.addr.isEmpty()) {
+        if (learnerMaster == null || learnerMaster.addr == null) {
             return "Unknown";
         }
-        InetSocketAddress address = learnerMaster.addr.getReachableOrOne();
-        return address.getAddress().getHostAddress() + ":" + address.getPort();
+        return learnerMaster.addr.getAddress().getHostAddress() + ":" + learnerMaster.addr.getPort();
     }
 
     public void setLearnerMaster(String learnerMaster) {
