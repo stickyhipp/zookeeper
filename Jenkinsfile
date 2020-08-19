@@ -21,11 +21,10 @@ pipeline {
 
     options {
         buildDiscarder(logRotator(daysToKeepStr: '14'))
-        timeout(time: 59, unit: 'MINUTES')
     }
 
     triggers {
-        pollSCM('@hourly')
+        pollSCM 'H/10 * * * *'
         cron('@daily')
     }
 
@@ -69,3 +68,4 @@ pipeline {
         }
     }
 }
+
