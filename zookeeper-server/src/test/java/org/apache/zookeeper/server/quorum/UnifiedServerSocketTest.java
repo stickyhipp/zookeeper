@@ -212,10 +212,6 @@ public class UnifiedServerSocketTest extends BaseX509ParameterizedTestCase {
         synchronized byte[] getDataFromClient(int index) {
             return dataFromClients.get(index);
         }
-
-        synchronized boolean receivedAnyDataFromClient() {
-            return !dataFromClients.isEmpty();
-        }
     }
 
     private SSLSocket connectWithSSL() throws IOException, X509Exception, InterruptedException {
@@ -409,23 +405,13 @@ public class UnifiedServerSocketTest extends BaseX509ParameterizedTestCase {
         socket.getOutputStream().flush();
         byte[] buf = new byte[DATA_TO_CLIENT.length];
         try {
-            int bytesRead = socket.getInputStream().read(buf, 0, buf.length);
-            if(bytesRead == -1) {
-                // Using the NioSocketImpl after JDK 13, the expected behaviour on the client side
-                // is to reach the end of the stream (bytesRead == -1), without a socket exception.
-                return;
-            }
+            socket.getInputStream().read(buf, 0, buf.length);
         } catch (SocketException e) {
-            // Using the old PlainSocketImpl (prior to JDK 13) we expect to get Socket Exception
+            // We expect the other end to hang up the connection
             return;
         } finally {
             forceClose(socket);
             serverThread.shutdown(TIMEOUT);
-
-            // independently of the client socket implementation details, we always make sure the
-            // server didn't receive any data during the test
-            Assert.assertFalse("The strict server accepted connection without SSL.",
-                               serverThread.receivedAnyDataFromClient());
         }
         Assert.fail("Expected server to hang up the connection. Read from server succeeded unexpectedly.");
     }
