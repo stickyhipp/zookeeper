@@ -253,7 +253,7 @@ public class ZKConfig {
         if (propertyValue == null) {
             return defaultValue;
         } else {
-            return Boolean.parseBoolean(propertyValue.trim());
+            return Boolean.parseBoolean(propertyValue);
         }
     }
 
