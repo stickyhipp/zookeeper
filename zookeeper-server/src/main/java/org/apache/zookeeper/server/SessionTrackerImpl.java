@@ -342,8 +342,4 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements Sessi
         return 0;
     }
 
-    @Override
-    public boolean isLocalSessionsEnabled() {
-        return false;
-    }
 }

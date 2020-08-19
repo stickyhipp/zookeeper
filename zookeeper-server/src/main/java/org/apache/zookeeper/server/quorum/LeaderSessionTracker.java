@@ -38,6 +38,7 @@ public class LeaderSessionTracker extends UpgradeableSessionTracker {
 
     private static final Logger LOG = LoggerFactory.getLogger(LeaderSessionTracker.class);
 
+    private final boolean localSessionsEnabled;
     private final SessionTrackerImpl globalSessionTracker;
 
     /**

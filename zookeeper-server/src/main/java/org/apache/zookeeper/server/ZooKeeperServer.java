@@ -148,7 +148,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected String initialConfig;
     private final RequestPathMetricsCollector requestPathMetricsCollector;
 
-    private boolean localSessionEnabled = false;
     protected enum State {
         INITIAL,
         RUNNING,
@@ -599,10 +598,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         registerMetrics();
 
         setState(State.RUNNING);
-
         requestPathMetricsCollector.start();
-
-        localSessionEnabled = sessionTracker.isLocalSessionsEnabled();
         notifyAll();
     }
 
@@ -1216,9 +1212,12 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         return connThrottle.getDropChance();
     }
 
-    @SuppressFBWarnings(value = "IS2_INCONSISTENT_SYNC", justification = "the value won't change after startup")
-    public void processConnectRequest(ServerCnxn cnxn, ByteBuffer incomingBuffer)
-        throws IOException, ClientCnxnLimitException {
+    public void processConnectRequest(ServerCnxn cnxn, ByteBuffer incomingBuffer) throws IOException, ClientCnxnLimitException {
+
+        if (!connThrottle.checkLimit(1)) {
+            throw new ClientCnxnLimitException();
+        }
+        ServerMetrics.getMetrics().CONNECTION_TOKEN_DEFICIT.add(connThrottle.getDeficit());
 
         BinaryInputArchive bia = BinaryInputArchive.getArchive(new ByteBufferInputStream(incomingBuffer));
         ConnectRequest connReq = new ConnectRequest();
@@ -1227,27 +1226,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             LOG.debug("Session establishment request from client " + cnxn.getRemoteSocketAddress()
                       + " client's lastZxid is 0x" + Long.toHexString(connReq.getLastZxidSeen()));
         }
-        long sessionId = connReq.getSessionId();
-        int tokensNeeded = 1;
-        if (connThrottle.isConnectionWeightEnabled()) {
-            if (sessionId == 0) {
-                if (localSessionEnabled) {
-                    tokensNeeded = connThrottle.getRequiredTokensForLocal();
-                } else {
-                    tokensNeeded = connThrottle.getRequiredTokensForGlobal();
-                }
-            } else {
-                tokensNeeded = connThrottle.getRequiredTokensForRenew();
-            }
-        }
-
-        if (!connThrottle.checkLimit(tokensNeeded)) {
-            throw new ClientCnxnLimitException();
-        }
-        ServerMetrics.getMetrics().CONNECTION_TOKEN_DEFICIT.add(connThrottle.getDeficit());
-
         ServerMetrics.getMetrics().CONNECTION_REQUEST_COUNT.add(1);
-
         boolean readOnly = false;
         try {
             readOnly = bia.readBool("readOnly");
@@ -1290,6 +1269,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         // We don't want to receive any packets until we are sure that the
         // session is setup
         cnxn.disableRecv();
+        long sessionId = connReq.getSessionId();
         if (sessionId == 0) {
             long id = createSession(cnxn, passwd, sessionTimeout);
             if (LOG.isDebugEnabled()) {

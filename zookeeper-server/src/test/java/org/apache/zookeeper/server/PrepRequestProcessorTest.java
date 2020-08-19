@@ -278,10 +278,6 @@ public class PrepRequestProcessorTest extends ClientBase {
             return 0;
         }
 
-        @Override
-        public boolean isLocalSessionsEnabled() {
-            return false;
-        }
     }
 
 }
