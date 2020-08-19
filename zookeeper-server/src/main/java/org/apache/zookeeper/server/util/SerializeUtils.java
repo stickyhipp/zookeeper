@@ -34,9 +34,7 @@ import org.apache.zookeeper.ZooDefs.OpCode;
 import org.apache.zookeeper.common.IOUtils;
 import org.apache.zookeeper.server.DataTree;
 import org.apache.zookeeper.server.Request;
-import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.ZooTrace;
-import org.apache.zookeeper.txn.CloseSessionTxn;
 import org.apache.zookeeper.txn.CreateContainerTxn;
 import org.apache.zookeeper.txn.CreateSessionTxn;
 import org.apache.zookeeper.txn.CreateTTLTxn;
@@ -69,9 +67,7 @@ public class SerializeUtils {
             txn = new CreateSessionTxn();
             break;
         case OpCode.closeSession:
-            txn = ZooKeeperServer.isCloseSessionTxnEnabled()
-                    ?  new CloseSessionTxn() : null;
-            break;
+            return null;
         case OpCode.create:
         case OpCode.create2:
             txn = new CreateTxn();
@@ -119,10 +115,6 @@ public class SerializeUtils {
                     create.setAcl(createv0.getAcl());
                     create.setEphemeral(createv0.getEphemeral());
                     create.setParentCVersion(-1);
-                } else if (hdr.getType() == OpCode.closeSession) {
-                    // perhaps this is before CloseSessionTxn was added,
-                    // ignore it and reset txn to null
-                    txn = null;
                 } else {
                     throw e;
                 }
