@@ -555,6 +555,13 @@ public class NIOServerCnxn extends ServerCnxn {
         return true;
     }
 
+    /**
+     * @return true if the server is running, false otherwise.
+     */
+    boolean isZKServerRunning() {
+        return zkServer != null && zkServer.isRunning();
+    }
+
     /*
      * (non-Javadoc)
      *
