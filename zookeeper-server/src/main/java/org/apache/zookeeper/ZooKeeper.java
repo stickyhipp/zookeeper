@@ -24,7 +24,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -1712,11 +1711,6 @@ public class ZooKeeper implements AutoCloseable {
         MultiOperationRecord request,
         MultiCallback cb,
         Object ctx) throws IllegalArgumentException {
-        if (request.size() == 0) {
-            // nothing to do, early exit
-            cnxn.queueCallback(cb, KeeperException.Code.OK.intValue(), null, ctx);
-            return;
-        }
         RequestHeader h = new RequestHeader();
         switch (request.getOpKind()) {
         case TRANSACTION:
@@ -1735,10 +1729,6 @@ public class ZooKeeper implements AutoCloseable {
     protected List<OpResult> multiInternal(
         MultiOperationRecord request) throws InterruptedException, KeeperException, IllegalArgumentException {
         RequestHeader h = new RequestHeader();
-        if (request.size() == 0) {
-            // nothing to do, early exit
-            return Collections.emptyList();
-        }
         switch (request.getOpKind()) {
         case TRANSACTION:
             h.setType(ZooDefs.OpCode.multi);
