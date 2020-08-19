@@ -43,7 +43,7 @@ public class CliWrapperException extends CliException {
             } else if (keeperException instanceof KeeperException.InvalidACLException) {
                 return "Acl is not valid : " + keeperException.getPath();
             } else if (keeperException instanceof KeeperException.NoAuthException) {
-                return "Insufficient permission : " + keeperException.getPath();
+                return "Authentication is not valid : " + keeperException.getPath();
             } else if (keeperException instanceof KeeperException.BadArgumentsException) {
                 return "Arguments are not valid : " + keeperException.getPath();
             } else if (keeperException instanceof KeeperException.BadVersionException) {
