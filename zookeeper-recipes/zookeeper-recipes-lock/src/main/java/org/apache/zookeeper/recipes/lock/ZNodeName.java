@@ -1,4 +1,4 @@
-/*
+/**
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.zookeeper.recipes.lock;
 
 import org.slf4j.Logger;
@@ -23,16 +22,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Represents an ephemeral znode name which has an ordered sequence number
- * and can be sorted in order.
+ * and can be sorted in order
  *
  */
 class ZNodeName implements Comparable<ZNodeName> {
-
     private final String name;
     private String prefix;
     private int sequence = -1;
     private static final Logger LOG = LoggerFactory.getLogger(ZNodeName.class);
-
+    
     public ZNodeName(String name) {
         if (name == null) {
             throw new NullPointerException("id cannot be null");
@@ -49,7 +47,7 @@ class ZNodeName implements Comparable<ZNodeName> {
             } catch (NumberFormatException e) {
                 LOG.info("Number format exception for " + idx, e);
             } catch (ArrayIndexOutOfBoundsException e) {
-                LOG.info("Array out of bounds for " + idx, e);
+               LOG.info("Array out of bounds for " + idx, e);
             }
         }
     }
@@ -61,16 +59,14 @@ class ZNodeName implements Comparable<ZNodeName> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
         ZNodeName sequence = (ZNodeName) o;
 
-        return name.equals(sequence.name);
+        if (!name.equals(sequence.name)) return false;
+
+        return true;
     }
 
     @Override
@@ -79,8 +75,7 @@ class ZNodeName implements Comparable<ZNodeName> {
     }
 
     /**
-     * Compare znodes based on their sequence number.
-     *
+     * Compare znodes based on their sequence number
      * @param that other znode to compare to
      * @return the difference between their sequence numbers: a positive value if this
      *         znode has a larger sequence number, 0 if they have the same sequence number
@@ -95,24 +90,23 @@ class ZNodeName implements Comparable<ZNodeName> {
     }
 
     /**
-     * Returns the name of the znode.
+     * Returns the name of the znode
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Returns the sequence number.
+     * Returns the sequence number
      */
     public int getZNodeName() {
         return sequence;
     }
 
     /**
-     * Returns the text prefix before the sequence number.
+     * Returns the text prefix before the sequence number
      */
     public String getPrefix() {
         return prefix;
     }
-
 }
