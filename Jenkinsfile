@@ -17,15 +17,11 @@
  */
 
 pipeline {
-    agent {
-        label 'Hadoop'
-    }
+   agent none
 
     options {
-        disableConcurrentBuilds()
         buildDiscarder(logRotator(daysToKeepStr: '14'))
-        timeout(time: 2, unit: 'HOURS')
-        timestamps()
+        timeout(time: 59, unit: 'MINUTES')
     }
 
     triggers {
@@ -44,6 +40,7 @@ pipeline {
                 }
 
                 tools {
+                    // Install the Maven version configured as "M3" and add it to the path.
                     maven "Maven (latest)"
                     jdk "${JAVA_VERSION}"
                 }
@@ -51,10 +48,15 @@ pipeline {
                 stages {
                     stage('BuildAndTest') {
                         steps {
+                            // Get some code from a GitHub repository
                             git 'https://github.com/apache/zookeeper'
+
+                            // Run Maven on a Unix agent.
                             sh "mvn verify spotbugs:check checkstyle:check -Pfull-build -Dsurefire-forkcount=4"
                         }
                         post {
+                            // If Maven was able to run the tests, even if some of the test
+                            // failed, record the test results and archive the jar file.
                             always {
                                junit '**/target/surefire-reports/TEST-*.xml'
                                archiveArtifacts '**/target/*.jar'
