@@ -61,8 +61,7 @@ public class DumbWatcher extends ServerCnxn {
     }
 
     @Override
-    public void sendResponse(ReplyHeader h, Record r, String tag,
-                             String cacheKey, Stat stat, int opCode) throws IOException {
+    public void sendResponse(ReplyHeader h, Record r, String tag, String cacheKey, Stat stat) throws IOException {
     }
 
     @Override

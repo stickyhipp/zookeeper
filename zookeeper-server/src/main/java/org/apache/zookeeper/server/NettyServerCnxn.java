@@ -167,14 +167,13 @@ public class NettyServerCnxn extends ServerCnxn {
     }
 
     @Override
-    public void sendResponse(ReplyHeader h, Record r, String tag,
-                             String cacheKey, Stat stat, int opCode) throws IOException {
+    public void sendResponse(ReplyHeader h, Record r, String tag, String cacheKey, Stat stat) throws IOException {
         // cacheKey and stat are used in caching, which is not
         // implemented here. Implementation example can be found in NIOServerCnxn.
         if (closingChannel || !channel.isOpen()) {
             return;
         }
-        sendBuffer(serialize(h, r, tag, cacheKey, stat, opCode));
+        sendBuffer(serialize(h, r, tag, cacheKey, stat));
         decrOutstandingAndCheckThrottle(h);
     }
 
