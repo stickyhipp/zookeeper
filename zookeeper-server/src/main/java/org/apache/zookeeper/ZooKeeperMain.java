@@ -65,7 +65,6 @@ import org.apache.zookeeper.cli.SyncCommand;
 import org.apache.zookeeper.cli.VersionCommand;
 import org.apache.zookeeper.client.ZKClientConfig;
 import org.apache.zookeeper.server.ExitCode;
-import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.util.ServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,7 +130,7 @@ public class ZooKeeperMain {
     }
 
     static void usage() {
-        System.err.println("ZooKeeper -server host:port -client-configuration properties-file cmd args");
+        System.err.println("ZooKeeper -server host:port cmd args");
         List<String> cmdList = new ArrayList<String>(commandMap.keySet());
         Collections.sort(cmdList);
         for (String cmd : cmdList) {
@@ -206,8 +205,6 @@ public class ZooKeeperMain {
                         options.put("timeout", it.next());
                     } else if (opt.equals("-r")) {
                         options.put("readonly", "true");
-                    } else if (opt.equals("-client-configuration")) {
-                        options.put("client-configuration", it.next());
                     }
                 } catch (NoSuchElementException e) {
                     System.err.println("Error: no argument found for option " + opt);
@@ -289,19 +286,7 @@ public class ZooKeeperMain {
             System.setProperty(ZKClientConfig.SECURE_CLIENT, "true");
             System.out.println("Secure connection is enabled");
         }
-
-        ZKClientConfig clientConfig = null;
-
-        if (cl.getOption("client-configuration") != null) {
-            try {
-                clientConfig = new ZKClientConfig(cl.getOption("client-configuration"));
-            } catch (QuorumPeerConfig.ConfigException e) {
-                e.printStackTrace();
-                ServiceUtils.requestSystemExit(ExitCode.INVALID_INVOCATION.getValue());
-            }
-        }
-
-        zk = new ZooKeeperAdmin(host, Integer.parseInt(cl.getOption("timeout")), new MyWatcher(), readOnly, clientConfig);
+        zk = new ZooKeeperAdmin(host, Integer.parseInt(cl.getOption("timeout")), new MyWatcher(), readOnly);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
