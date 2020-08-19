@@ -18,9 +18,7 @@
 
 package org.apache.zookeeper.test;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
@@ -127,7 +125,10 @@ public class TruncateTest extends ZKTestCase {
             assertTrue("Failed to delete log file: " + logs[i].getName(), logs[i].delete());
         }
         try {
-            assertThat("truncateLog() should return false if truncation fails instead of throwing exception", zkdb.truncateLog(1), is(false));
+            zkdb.truncateLog(1);
+            assertTrue("Should not get here", false);
+        } catch (IOException e) {
+            assertTrue("Should have received an IOException", true);
         } catch (NullPointerException npe) {
             fail("This should not throw NPE!");
         }

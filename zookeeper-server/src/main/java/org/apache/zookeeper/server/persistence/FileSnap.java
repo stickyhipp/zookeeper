@@ -260,8 +260,6 @@ public class FileSnap implements SnapShot {
                     Util.getZxidFromName(snapShot.getName(), SNAPSHOT_FILE_PREFIX),
                     snapShot.lastModified() / 1000);
             }
-        } else {
-            throw new IOException("FileSnap has already been closed");
         }
     }
 
