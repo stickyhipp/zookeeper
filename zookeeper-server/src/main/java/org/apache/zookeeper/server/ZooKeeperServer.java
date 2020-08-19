@@ -1431,8 +1431,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     public boolean shouldThrottle(long outStandingCount) {
-        int globalOutstandingLimit = getGlobalOutstandingLimit();
-        if (globalOutstandingLimit < getInflight() || globalOutstandingLimit < getInProcess()) {
+        if (getGlobalOutstandingLimit() < getInflight()) {
             return outStandingCount > 0;
         }
         return false;
