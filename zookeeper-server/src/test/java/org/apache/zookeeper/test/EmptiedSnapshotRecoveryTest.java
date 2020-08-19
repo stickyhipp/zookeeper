@@ -39,7 +39,7 @@ import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.junit.Test;
 
 /** If snapshots are corrupted to the empty file or deleted, Zookeeper should
- *  not proceed to read its transaction log files
+ *  not proceed to read its transactiong log files
  *  Test that zxid == -1 in the presence of emptied/deleted snapshots
  */
 public class EmptiedSnapshotRecoveryTest extends ZKTestCase implements Watcher {
@@ -50,7 +50,7 @@ public class EmptiedSnapshotRecoveryTest extends ZKTestCase implements Watcher {
     private static final int N_TRANSACTIONS = 150;
     private static final int SNAP_COUNT = 100;
 
-    public void runTest(boolean leaveEmptyFile, boolean trustEmptySnap) throws Exception {
+    public void runTest(boolean leaveEmptyFile) throws Exception {
         File tmpSnapDir = ClientBase.createTmpDir();
         File tmpLogDir = ClientBase.createTmpDir();
         ClientBase.setupTestEnv();
@@ -92,28 +92,15 @@ public class EmptiedSnapshotRecoveryTest extends ZKTestCase implements Watcher {
             }
         }
 
-        if (trustEmptySnap) {
-            System.setProperty(FileTxnSnapLog.ZOOKEEPER_SNAPSHOT_TRUST_EMPTY, "true");
-        }
         // start server again with corrupted database
         zks = new ZooKeeperServer(tmpSnapDir, tmpLogDir, 3000);
         try {
             zks.startdata();
             zxid = zks.getZKDatabase().loadDataBase();
-            if (!trustEmptySnap) {
-                fail("Should have gotten exception for corrupted database");
-            }
+            fail("Should have gotten exception for corrupted database");
         } catch (IOException e) {
             // expected behavior
-            if (trustEmptySnap) {
-                fail("Should not get exception for empty database");
-            }
-        } finally {
-            if (trustEmptySnap) {
-                System.clearProperty(FileTxnSnapLog.ZOOKEEPER_SNAPSHOT_TRUST_EMPTY);
-            }
         }
-
         zks.shutdown();
     }
 
@@ -123,7 +110,7 @@ public class EmptiedSnapshotRecoveryTest extends ZKTestCase implements Watcher {
      */
     @Test
     public void testRestoreWithEmptySnapFiles() throws Exception {
-        runTest(true, false);
+        runTest(true);
     }
 
     /**
@@ -132,12 +119,7 @@ public class EmptiedSnapshotRecoveryTest extends ZKTestCase implements Watcher {
      */
     @Test
     public void testRestoreWithNoSnapFiles() throws Exception {
-        runTest(false, false);
-    }
-
-    @Test
-    public void testRestoreWithTrustedEmptySnapFiles() throws Exception {
-        runTest(false, true);
+        runTest(false);
     }
 
     public void process(WatchedEvent event) {
