@@ -18,14 +18,13 @@
 
 package org.apache.zookeeper.recipes.lock;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * test for writelock.
@@ -75,11 +74,11 @@ public class WriteLockTest extends ClientBase {
         dumpNodes(count);
 
         // lets assert that the first election is the leader
-        assertTrue(first.isOwner(), "The first znode should be the leader " + first.getId());
+        Assert.assertTrue("The first znode should be the leader " + first.getId(), first.isOwner());
 
         for (int i = 1; i < count; i++) {
             WriteLock node = nodes[i];
-            assertFalse(node.isOwner(), "Node should not be the leader " + node.getId());
+            Assert.assertFalse("Node should not be the leader " + node.getId(), node.isOwner());
         }
 
         if (count > 1) {
@@ -93,11 +92,11 @@ public class WriteLockTest extends ClientBase {
                 WriteLock second = nodes[1];
                 dumpNodes(count);
                 // lets assert that the first election is the leader
-                assertTrue(second.isOwner(), "The second znode should be the leader " + second.getId());
+                Assert.assertTrue("The second znode should be the leader " + second.getId(), second.isOwner());
 
                 for (int i = 2; i < count; i++) {
                     WriteLock node = nodes[i];
-                    assertFalse(node.isOwner(), "Node should not be the leader " + node.getId());
+                    Assert.assertFalse("Node should not be the leader " + node.getId(), node.isOwner());
                 }
             }
 
@@ -131,7 +130,7 @@ public class WriteLockTest extends ClientBase {
         }
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         if (nodes != null) {
             for (int i = 0; i < nodes.length; i++) {

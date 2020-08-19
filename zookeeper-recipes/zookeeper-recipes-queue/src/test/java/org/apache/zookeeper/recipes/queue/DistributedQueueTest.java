@@ -18,22 +18,20 @@
 
 package org.apache.zookeeper.recipes.queue;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import java.util.NoSuchElementException;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Tests for {@link DistributedQueue}.
  */
 public class DistributedQueueTest extends ClientBase {
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         super.tearDown();
     }
@@ -53,7 +51,7 @@ public class DistributedQueueTest extends ClientBase {
         queueHandles[0].offer(testString.getBytes());
 
         byte[] dequeuedBytes = queueHandles[0].remove();
-        assertEquals(new String(dequeuedBytes), testString);
+        Assert.assertEquals(new String(dequeuedBytes), testString);
     }
 
     @Test
@@ -71,7 +69,7 @@ public class DistributedQueueTest extends ClientBase {
         queueHandles[0].offer(testString.getBytes());
 
         byte[] dequeuedBytes = queueHandles[1].remove();
-        assertEquals(new String(dequeuedBytes), testString);
+        Assert.assertEquals(new String(dequeuedBytes), testString);
     }
 
     @Test
@@ -89,7 +87,7 @@ public class DistributedQueueTest extends ClientBase {
         queueHandles[0].offer(testString.getBytes());
 
         byte[] dequeuedBytes = queueHandles[0].take();
-        assertEquals(new String(dequeuedBytes), testString);
+        Assert.assertEquals(new String(dequeuedBytes), testString);
     }
 
     @Test
@@ -109,7 +107,7 @@ public class DistributedQueueTest extends ClientBase {
             return;
         }
 
-        fail();
+        Assert.fail();
     }
 
     public void createNremoveMtest(String dir, int n, int m) throws Exception {
@@ -132,8 +130,8 @@ public class DistributedQueueTest extends ClientBase {
             data = queueHandles[1].remove();
         }
 
-        assertNotNull(data);
-        assertEquals(new String(data), testString + (m - 1));
+        Assert.assertNotNull(data);
+        Assert.assertEquals(new String(data), testString + (m - 1));
     }
 
     @Test
@@ -163,7 +161,7 @@ public class DistributedQueueTest extends ClientBase {
         for (int i = 0; i < m; i++) {
             queueHandles[1].remove();
         }
-        assertEquals(new String(queueHandles[1].element()), testString + m);
+        Assert.assertEquals(new String(queueHandles[1].element()), testString + m);
     }
 
     @Test
@@ -221,8 +219,8 @@ public class DistributedQueueTest extends ClientBase {
 
         takeThread.join();
 
-        assertNotNull(takeResult[0]);
-        assertEquals(new String(takeResult[0]), testString);
+        Assert.assertNotNull(takeResult[0]);
+        Assert.assertEquals(new String(takeResult[0]), testString);
     }
 
     @Test
@@ -262,8 +260,8 @@ public class DistributedQueueTest extends ClientBase {
 
             takeThread.join();
 
-            assertNotNull(takeResult[0]);
-            assertEquals(new String(takeResult[0]), threadTestString);
+            Assert.assertNotNull(takeResult[0]);
+            Assert.assertEquals(new String(takeResult[0]), threadTestString);
         }
     }
 
