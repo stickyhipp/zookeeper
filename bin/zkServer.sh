@@ -212,7 +212,6 @@ stop)
     else
       $KILL $(cat "$ZOOPIDFILE")
       rm "$ZOOPIDFILE"
-      sleep 1
       echo STOPPED
     fi
     exit 0
