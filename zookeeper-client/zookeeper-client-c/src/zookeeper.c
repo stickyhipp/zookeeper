@@ -4958,10 +4958,8 @@ const char* zerror(int c)
       return "the watcher couldn't be found";
     case ZRECONFIGDISABLED:
       return "attempts to perform a reconfiguration operation when reconfiguration feature is disable";
-    case ZSESSIONCLOSEDREQUIRESASLAUTH:
-      return "session closed by server because client is required to do SASL authentication";
-    case ZTHROTTLEDOP:
-      return "Operation was throttled due to high load";
+   case ZTHROTTLEDOP:
+     return "Operation was throttled due to high load";
     }
     if (c > 0) {
       return strerror(c);
