@@ -32,7 +32,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.UnresolvedAddressException;
@@ -267,33 +266,12 @@ public class QuorumCnxManager {
                 } catch (ArrayIndexOutOfBoundsException e) {
                     throw new InitialMessageException("No port number in: %s", addr);
                 }
-                if (!isWildcardAddress(host_port[0])) {
-                    addresses.add(new InetSocketAddress(host_port[0], port));
-                }
+                addresses.add(new InetSocketAddress(host_port[0], port));
             }
 
             return new InitialMessage(sid, addresses);
         }
 
-        /**
-         * Returns true if the specified hostname is a wildcard address,
-         * like 0.0.0.0 for IPv4 or :: for IPv6
-         *
-         * (the function is package-private to be visible for testing)
-         */
-        static boolean isWildcardAddress(final String hostname) {
-            try {
-                return InetAddress.getByName(hostname).isAnyLocalAddress();
-            } catch (UnknownHostException e) {
-                // if we can not resolve, it can not be a wildcard address
-                return false;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "InitialMessage{sid=" + sid + ", electionAddr=" + electionAddr + '}';
-        }
     }
 
     public QuorumCnxManager(QuorumPeer self, final long mySid, Map<Long, QuorumPeer.QuorumServer> view,
@@ -437,7 +415,6 @@ public class QuorumCnxManager {
     private boolean startConnection(Socket sock, Long sid) throws IOException {
         DataOutputStream dout = null;
         DataInputStream din = null;
-        LOG.debug("startConnection (myId:{} --> sid:{})", self.getId(), sid);
         try {
             // Use BufferedOutputStream to reduce the number of IP packets. This is
             // important for x-DC scenarios.
@@ -482,11 +459,13 @@ public class QuorumCnxManager {
 
         // If lost the challenge, then drop the new connection
         if (sid > self.getId()) {
-            LOG.info("Have smaller server identifier, so dropping the connection: (myId:{} --> sid:{})", self.getId(), sid);
+            LOG.info(
+                "Have smaller server identifier, so dropping the connection: ({}, {})",
+                sid,
+                self.getId());
             closeSocket(sock);
             // Otherwise proceed with the connection
         } else {
-            LOG.debug("Have larger server identifier, so keeping the connection: (myId:{} --> sid:{})", self.getId(), sid);
             SendWorker sw = new SendWorker(sock, sid);
             RecvWorker rw = new RecvWorker(sock, din, sid, sw);
             sw.setRecv(rw);
@@ -522,11 +501,9 @@ public class QuorumCnxManager {
         try {
             din = new DataInputStream(new BufferedInputStream(sock.getInputStream()));
 
-            LOG.debug("Sync handling of connection request received from: {}", sock.getRemoteSocketAddress());
             handleConnection(sock, din);
         } catch (IOException e) {
             LOG.error("Exception handling connection, addr: {}, closing server connection", sock.getRemoteSocketAddress());
-            LOG.debug("Exception details: ", e);
             closeSocket(sock);
         }
     }
@@ -537,12 +514,10 @@ public class QuorumCnxManager {
      */
     public void receiveConnectionAsync(final Socket sock) {
         try {
-            LOG.debug("Async handling of connection request received from: {}", sock.getRemoteSocketAddress());
             connectionExecutor.execute(new QuorumConnectionReceiverThread(sock));
             connectionThreadCnt.incrementAndGet();
         } catch (Throwable e) {
             LOG.error("Exception handling connection, addr: {}, closing server connection", sock.getRemoteSocketAddress());
-            LOG.debug("Exception details: ", e);
             closeSocket(sock);
         }
     }
@@ -577,13 +552,10 @@ public class QuorumCnxManager {
                 try {
                     InitialMessage init = InitialMessage.parse(protocolVersion, din);
                     sid = init.sid;
-                    if (!init.electionAddr.isEmpty()) {
-                        electionAddr = new MultipleAddresses(init.electionAddr,
-                                Duration.ofMillis(self.getMultiAddressReachabilityCheckTimeoutMs()));
-                    }
-                    LOG.debug("Initial message parsed by {}: {}", self.getId(), init.toString());
+                    electionAddr = new MultipleAddresses(init.electionAddr,
+                        Duration.ofMillis(self.getMultiAddressReachabilityCheckTimeoutMs()));
                 } catch (InitialMessage.InitialMessageException ex) {
-                    LOG.error("Initial message parsing error!", ex);
+                    LOG.error(ex.toString());
                     closeSocket(sock);
                     return;
                 }
@@ -629,10 +601,6 @@ public class QuorumCnxManager {
                 connectOne(sid);
             }
 
-        } else if (sid == self.getId()) {
-            // we saw this case in ZOOKEEPER-2164
-            LOG.warn("We got a connection request from a server with our own ID. "
-                     + "This should be either a configuration error, or a bug.");
         } else { // Otherwise start worker threads to receive data.
             SendWorker sw = new SendWorker(sock, sid);
             RecvWorker rw = new RecvWorker(sock, din, sid, sw);
@@ -777,7 +745,6 @@ public class QuorumCnxManager {
             Map<Long, QuorumPeer.QuorumServer> lastProposedView = lastSeenQV.getAllMembers();
             if (lastCommittedView.containsKey(sid)) {
                 knownId = true;
-                LOG.debug("Server {} knows {} already, it is in the lastCommittedView", self.getId(), sid);
                 if (connectOne(sid, lastCommittedView.get(sid).electionAddr)) {
                     return;
                 }
@@ -787,8 +754,6 @@ public class QuorumCnxManager {
                 && (!knownId
                     || (lastProposedView.get(sid).electionAddr != lastCommittedView.get(sid).electionAddr))) {
                 knownId = true;
-                LOG.debug("Server {} knows {} already, it is in the lastProposedView", self.getId(), sid);
-
                 if (connectOne(sid, lastProposedView.get(sid).electionAddr)) {
                     return;
                 }
@@ -856,7 +821,7 @@ public class QuorumCnxManager {
      */
     public void softHalt() {
         for (SendWorker sw : senderWorkerMap.values()) {
-            LOG.debug("Server {} is soft-halting sender towards: {}", self.getId(), sw);
+            LOG.debug("Halting sender: {}", sw);
             sw.finish();
         }
     }
@@ -960,7 +925,6 @@ public class QuorumCnxManager {
         @Override
         public void run() {
             if (!shutdown) {
-                LOG.debug("Listener thread started, myId: {}", self.getId());
                 Set<InetSocketAddress> addresses;
 
                 if (self.getQuorumListenOnAllIPs()) {
@@ -1013,7 +977,7 @@ public class QuorumCnxManager {
          * Halts this listener thread.
          */
         void halt() {
-            LOG.debug("Halt called: Trying to close listeners");
+            LOG.debug("Trying to close listeners");
             if (listenerHandlers != null) {
                 LOG.debug("Closing listener: {}", QuorumCnxManager.this.mySid);
                 for (ListenerHandler handler : listenerHandlers) {
@@ -1080,12 +1044,12 @@ public class QuorumCnxManager {
                 while ((!shutdown) && (portBindMaxRetry == 0 || numRetries < portBindMaxRetry)) {
                     try {
                         serverSocket = createNewServerSocket();
-                        LOG.info("{} is accepting connections now, my election bind port: {}", QuorumCnxManager.this.mySid, address.toString());
+                        LOG.info("My election bind port: {}", address.toString());
                         while (!shutdown) {
                             try {
                                 client = serverSocket.accept();
                                 setSockOpts(client);
-                                LOG.info("Received connection request from {}", client.getRemoteSocketAddress());
+                                LOG.info("Received connection request {}", client.getRemoteSocketAddress());
                                 // Receive and handle the connection request
                                 // asynchronously if the quorum sasl authentication is
                                 // enabled. This is required because sasl server
@@ -1209,7 +1173,7 @@ public class QuorumCnxManager {
         }
 
         synchronized boolean finish() {
-            LOG.debug("Calling SendWorker.finish for {}", sid);
+            LOG.debug("Calling finish for {}", sid);
 
             if (!running) {
                 /*
@@ -1276,7 +1240,6 @@ public class QuorumCnxManager {
                 LOG.error("Failed to send last message. Shutting down thread.", e);
                 this.finish();
             }
-            LOG.debug("SendWorker thread started towards {}. myId: {}", sid, QuorumCnxManager.this.mySid);
 
             try {
                 while (running && !shutdown && sock != null) {
@@ -1374,7 +1337,6 @@ public class QuorumCnxManager {
          * @return boolean  Value of variable running
          */
         synchronized boolean finish() {
-            LOG.debug("RecvWorker.finish called. sid: {}. myId: {}", sid, QuorumCnxManager.this.mySid);
             if (!running) {
                 /*
                  * Avoids running finish() twice.
@@ -1392,7 +1354,6 @@ public class QuorumCnxManager {
         public void run() {
             threadCnt.incrementAndGet();
             try {
-                LOG.debug("RecvWorker thread towards {} started. myId: {}", sid, QuorumCnxManager.this.mySid);
                 while (running && !shutdown && sock != null) {
                     /**
                      * Reads the first int to determine the length of the
@@ -1416,7 +1377,7 @@ public class QuorumCnxManager {
                     QuorumCnxManager.this.mySid,
                     e);
             } finally {
-                LOG.warn("Interrupting SendWorker thread from RecvWorker. sid: {}. myId: {}", sid, QuorumCnxManager.this.mySid);
+                LOG.warn("Interrupting SendWorker");
                 sw.finish();
                 closeSocket(sock);
             }
