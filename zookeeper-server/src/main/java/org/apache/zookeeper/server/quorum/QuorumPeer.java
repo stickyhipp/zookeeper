@@ -1399,6 +1399,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                     }
                     break;
                 }
+                start_fle = Time.currentElapsedTime();
             }
         } finally {
             LOG.warn("QuorumPeer main thread exited");

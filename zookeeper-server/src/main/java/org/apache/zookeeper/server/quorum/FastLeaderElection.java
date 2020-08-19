@@ -911,8 +911,9 @@ public class FastLeaderElection implements Election {
             LOG.warn("Failed to register with JMX", e);
             self.jmxLeaderElectionBean = null;
         }
-
-        self.start_fle = Time.currentElapsedTime();
+        if (self.start_fle == 0) {
+           self.start_fle = Time.currentElapsedTime();
+        }
         try {
             Map<Long, Vote> recvset = new HashMap<Long, Vote>();
 
