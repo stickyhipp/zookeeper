@@ -577,22 +577,7 @@ public class Commands {
         @Override
         public CommandResponse run(ZooKeeperServer zkServer, Map<String, String> kwargs) {
             CommandResponse response = super.run(zkServer, kwargs);
-
-            final Iterable<Map<String, Object>> connections;
-            if (zkServer.getServerCnxnFactory() != null) {
-                connections = zkServer.getServerCnxnFactory().getAllConnectionInfo(true);
-            } else {
-                connections = Collections.emptyList();
-            }
-            response.put("connections", connections);
-
-            final Iterable<Map<String, Object>> secureConnections;
-            if (zkServer.getSecureServerCnxnFactory() != null) {
-                secureConnections = zkServer.getSecureServerCnxnFactory().getAllConnectionInfo(true);
-            } else {
-                secureConnections = Collections.emptyList();
-            }
-            response.put("secure_connections", secureConnections);
+            response.put("connections", zkServer.getServerCnxnFactory().getAllConnectionInfo(true));
             return response;
         }
 
