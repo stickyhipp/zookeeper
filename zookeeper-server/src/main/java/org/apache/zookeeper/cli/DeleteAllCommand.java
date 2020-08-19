@@ -66,6 +66,7 @@ public class DeleteAllCommand extends CliCommand {
 
     @Override
     public boolean exec() throws CliException {
+        printDeprecatedWarning();
         int batchSize;
         try {
             batchSize = cl.hasOption("b") ? Integer.parseInt(cl.getOptionValue("b")) : 1000;
@@ -85,6 +86,12 @@ public class DeleteAllCommand extends CliCommand {
             throw new CliWrapperException(ex);
         }
         return false;
+    }
+
+    private void printDeprecatedWarning() {
+        if ("rmr".equals(args[0])) {
+            err.println("The command 'rmr' has been deprecated. " + "Please use 'deleteall' instead.");
+        }
     }
 
 }
