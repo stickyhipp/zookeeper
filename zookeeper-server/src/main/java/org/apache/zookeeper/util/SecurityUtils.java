@@ -104,12 +104,7 @@ public final class SecurityUtils {
             // unless the system property
             // "zookeeper.server.realm" is set).
             String serverRealm = System.getProperty("zookeeper.server.realm", clientKerberosName.getRealm());
-            String modifiedServerPrincipal = servicePrincipal;
-            // If service principal does not contain realm, then add it
-            if (!modifiedServerPrincipal.contains("@")) {
-                modifiedServerPrincipal = modifiedServerPrincipal + "@" + serverRealm;
-            }
-            KerberosName serviceKerberosName = new KerberosName(modifiedServerPrincipal);
+            KerberosName serviceKerberosName = new KerberosName(servicePrincipal + "@" + serverRealm);
             final String serviceName = serviceKerberosName.getServiceName();
             final String serviceHostname = serviceKerberosName.getHostName();
             final String clientPrincipalName = clientKerberosName.toString();
