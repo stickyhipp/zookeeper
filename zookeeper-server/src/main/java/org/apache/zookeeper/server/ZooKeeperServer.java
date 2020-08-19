@@ -498,9 +498,17 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         }
 
         // Clean up dead sessions
-        zkDb.getSessions().stream()
-                        .filter(session -> zkDb.getSessionWithTimeOuts().get(session) == null)
-                        .forEach(session -> killSession(session, zkDb.getDataTreeLastProcessedZxid()));
+        List<Long> deadSessions = new ArrayList<>();
+        for (Long session : zkDb.getSessions()) {
+            if (zkDb.getSessionWithTimeOuts().get(session) == null) {
+                deadSessions.add(session);
+            }
+        }
+
+        for (long session : deadSessions) {
+            // TODO: Is lastProcessedZxid really the best thing to use?
+            killSession(session, zkDb.getDataTreeLastProcessedZxid());
+        }
 
         // Make a clean snapshot
         takeSnapshot();
@@ -1640,7 +1648,12 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     private boolean hasCnxSASLAuthenticated(ServerCnxn cnxn) {
-        return cnxn.getAuthInfo().stream().anyMatch(id -> id.getScheme().equals(SASL_AUTH_SCHEME));
+        for (Id id : cnxn.getAuthInfo()) {
+            if (id.getScheme().equals(SASL_AUTH_SCHEME)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void processSasl(ByteBuffer incomingBuffer, ServerCnxn cnxn, RequestHeader requestHeader) throws IOException {
