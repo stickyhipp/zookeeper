@@ -109,22 +109,12 @@ public class Request {
      */
     private boolean isLocalSession = false;
 
-    private int largeRequestSize = -1;
-
     public boolean isLocalSession() {
         return isLocalSession;
     }
 
     public void setLocalSession(boolean isLocalSession) {
         this.isLocalSession = isLocalSession;
-    }
-
-    public void setLargeRequestSize(int size) {
-        largeRequestSize = size;
-    }
-
-    public int getLargeRequestSize() {
-        return largeRequestSize;
     }
 
     public Object getOwner() {

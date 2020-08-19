@@ -507,8 +507,6 @@ public class NettyServerCnxn extends ServerCnxn {
                         if (len < 0 || len > BinaryInputArchive.maxBuffer) {
                             throw new IOException("Len error " + len);
                         }
-                        // checkRequestSize will throw IOException if request is rejected
-                        zkServer.checkRequestSizeWhenReceivingMessage(len);
                         bb = ByteBuffer.allocate(len);
                     }
                 }

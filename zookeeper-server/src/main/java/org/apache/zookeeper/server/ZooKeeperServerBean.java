@@ -383,24 +383,4 @@ public class ZooKeeperServerBean implements ZooKeeperServerMXBean, ZKMBeanInfo {
         Request.setStaleConnectionCheck(check);
     }
 
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    public int getLargeRequestMaxBytes() {
-        return zks.getLargeRequestMaxBytes();
-    }
-
-    public void setLargeRequestMaxBytes(int bytes) {
-        zks.setLargeRequestMaxBytes(bytes);
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-
-    public int getLargeRequestThreshold() {
-        return zks.getLargeRequestThreshold();
-    }
-
-    public void setLargeRequestThreshold(int threshold) {
-        zks.setLargeRequestThreshold(threshold);
-    }
 }
