@@ -46,9 +46,8 @@ public class MockServerCnxn extends ServerCnxn {
     }
 
     @Override
-    public int sendResponse(ReplyHeader h, Record r, String tag,
+    public void sendResponse(ReplyHeader h, Record r, String tag,
                              String cacheKey, Stat stat, int opCode) throws IOException {
-        return 0;
     }
 
     @Override

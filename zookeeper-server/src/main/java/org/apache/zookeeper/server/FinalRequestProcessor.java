@@ -171,7 +171,6 @@ public class FinalRequestProcessor implements RequestProcessor {
         Code err = Code.OK;
         Record rsp = null;
         String path = null;
-        int responseSize = 0;
         try {
             if (request.getHdr() != null && request.getHdr().getType() == OpCode.error) {
                 AuditHelper.addAuditLog(request, rc, true);
@@ -214,7 +213,7 @@ public class FinalRequestProcessor implements RequestProcessor {
                 lastOp = "PING";
                 updateStats(request, lastOp, lastZxid);
 
-                responseSize = cnxn.sendResponse(new ReplyHeader(ClientCnxn.PING_XID, lastZxid, 0), null, "response");
+                cnxn.sendResponse(new ReplyHeader(ClientCnxn.PING_XID, lastZxid, 0), null, "response");
                 return;
             }
             case OpCode.createSession: {
@@ -600,7 +599,7 @@ public class FinalRequestProcessor implements RequestProcessor {
 
         try {
             if (path == null || rsp == null) {
-                responseSize = cnxn.sendResponse(hdr, rsp, "response");
+                cnxn.sendResponse(hdr, rsp, "response");
             } else {
                 int opCode = request.type;
                 Stat stat = null;
@@ -611,17 +610,17 @@ public class FinalRequestProcessor implements RequestProcessor {
                     case OpCode.getData : {
                         GetDataResponse getDataResponse = (GetDataResponse) rsp;
                         stat = getDataResponse.getStat();
-                        responseSize = cnxn.sendResponse(hdr, rsp, "response", path, stat, opCode);
+                        cnxn.sendResponse(hdr, rsp, "response", path, stat, opCode);
                         break;
                     }
                     case OpCode.getChildren2 : {
                         GetChildren2Response getChildren2Response = (GetChildren2Response) rsp;
                         stat = getChildren2Response.getStat();
-                        responseSize = cnxn.sendResponse(hdr, rsp, "response", path, stat, opCode);
+                        cnxn.sendResponse(hdr, rsp, "response", path, stat, opCode);
                         break;
                     }
                     default:
-                        responseSize = cnxn.sendResponse(hdr, rsp, "response");
+                        cnxn.sendResponse(hdr, rsp, "response");
                 }
             }
 
@@ -630,8 +629,6 @@ public class FinalRequestProcessor implements RequestProcessor {
             }
         } catch (IOException e) {
             LOG.error("FIXMSG", e);
-        } finally {
-            ServerMetrics.getMetrics().RESPONSE_BYTES.add(responseSize);
         }
     }
 
