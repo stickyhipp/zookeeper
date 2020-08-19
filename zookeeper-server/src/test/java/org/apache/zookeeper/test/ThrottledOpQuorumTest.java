@@ -23,11 +23,11 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.quorum.QuorumPeer;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class ThrottledOpQuorumTest extends QuorumBase {
-    @BeforeAll
+    @BeforeClass
     public static void applyMockUps() {
         ThrottledOpHelper.applyMockUps();
     }

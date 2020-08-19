@@ -25,7 +25,7 @@ import org.apache.jute.BinaryOutputArchive;
 import org.apache.zookeeper.proto.ConnectRequest;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ZooKeeperServerCreationTest {
 

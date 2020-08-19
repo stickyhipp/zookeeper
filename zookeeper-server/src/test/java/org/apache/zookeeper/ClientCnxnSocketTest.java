@@ -18,24 +18,24 @@
 
 package org.apache.zookeeper;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.apache.zookeeper.client.ZKClientConfig;
 import org.apache.zookeeper.common.ZKConfig;
 import org.apache.zookeeper.test.TestByteBufAllocator;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ClientCnxnSocketTest {
 
-    @BeforeEach
+    @Before
     public void setUp() {
         ClientCnxnSocketNetty.setTestAllocator(TestByteBufAllocator.getInstance());
     }
 
-    @AfterEach
+    @After
     public void tearDown() {
         ClientCnxnSocketNetty.clearTestAllocator();
         TestByteBufAllocator.checkForLeaks();

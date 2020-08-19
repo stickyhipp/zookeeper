@@ -18,10 +18,6 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +33,7 @@ import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.server.Request;
 import org.apache.zookeeper.server.RequestThrottler;
 import org.apache.zookeeper.server.ZooKeeperServer;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,15 +74,15 @@ public class ThrottledOpHelper {
                 try {
                     zk.create(nodeName, "".getBytes(), Ids.OPEN_ACL_UNSAFE,
                         (i % 2 == 0) ? CreateMode.PERSISTENT : CreateMode.EPHEMERAL);
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 } catch (KeeperException.ThrottledOpException e) {
                     // anticipated outcome
                     Stat stat = zk.exists(nodeName, null);
-                    assertNull(stat);
+                    Assert.assertNull(stat);
                     zk.create(nodeName, "".getBytes(), Ids.OPEN_ACL_UNSAFE,
                         (i % 2 == 0) ? CreateMode.PERSISTENT : CreateMode.EPHEMERAL);
                 } catch (KeeperException e) {
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 }
                 opCount += 3; // three ops issued
             } else {
@@ -96,12 +93,12 @@ public class ThrottledOpHelper {
             if (opCount % N == N - 1) {
                 try {
                     zk.setData(nodeName, nodeName.getBytes(), -1);
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 } catch (KeeperException.ThrottledOpException e) {
                     // anticipated outcome & retry
                     zk.setData(nodeName, nodeName.getBytes(), -1);
                 } catch (KeeperException e) {
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 }
                 opCount += 2; // two ops issued, one for retry
             } else {
@@ -115,47 +112,47 @@ public class ThrottledOpHelper {
             if (opCount % N == N - 1) {
                 try {
                     zk.exists(nodeName, null);
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 } catch (KeeperException.ThrottledOpException e) {
                     // anticipated outcome & retry
                     Stat stat = zk.exists(nodeName, null);
-                    assertNotNull(stat);
+                    Assert.assertNotNull(stat);
                     opCount += 2; // two ops issued, one is retry
                 } catch (KeeperException e) {
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 }
             } else {
                 Stat stat = zk.exists(nodeName, null);
-                assertNotNull(stat);
+                Assert.assertNotNull(stat);
                 opCount++;
             }
             if (opCount % N == N - 1) {
                 try {
                     zk.getData(nodeName, null, null);
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 } catch (KeeperException.ThrottledOpException e) {
                     // anticipated outcome & retry
                     byte[] data = zk.getData(nodeName, null, null);
-                    assertEquals(nodeName, new String(data));
+                    Assert.assertEquals(nodeName, new String(data));
                     opCount += 2; // two ops issued, one is retry
                 } catch (KeeperException e) {
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 }
             } else {
                 byte[] data = zk.getData(nodeName, null, null);
-                assertEquals(nodeName, new String(data));
+                Assert.assertEquals(nodeName, new String(data));
                 opCount++;
             }
             if (opCount % N == N - 1) {
                 try {
                     // version 0 should not trigger BadVersion exception
                     zk.delete(nodeName, 0);
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 } catch (KeeperException.ThrottledOpException e) {
                     // anticipated outcome & retry
                     zk.delete(nodeName, -1);
                 } catch (KeeperException e) {
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 }
                 opCount += 2; // two ops issues, one for retry
             } else {
@@ -165,18 +162,18 @@ public class ThrottledOpHelper {
             if (opCount % N == N - 1) {
                 try {
                     zk.exists(nodeName, null);
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 } catch (KeeperException.ThrottledOpException e) {
                     // anticipated outcome & retry
                     Stat stat = zk.exists(nodeName, null);
-                    assertNull(stat);
+                    Assert.assertNull(stat);
                     opCount += 2; // two ops issued, one is retry
                 } catch (KeeperException e) {
-                    fail("Should have gotten ThrottledOp exception");
+                    Assert.fail("Should have gotten ThrottledOp exception");
                 }
             } else {
                 Stat stat = zk.exists(nodeName, null);
-                assertNull(stat);
+                Assert.assertNull(stat);
                 opCount++;
             }
         }
@@ -197,7 +194,7 @@ public class ThrottledOpHelper {
         zk.create(path, path.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         zk.addAuthInfo("digest", "pat:test".getBytes());
         List<ACL> defaultAcls = zk.getACL(path, null);
-        assertEquals(1, defaultAcls.size());
+        Assert.assertEquals(1, defaultAcls.size());
 
         RequestThrottleMock.throttleEveryNthOp(2);
 
@@ -206,14 +203,14 @@ public class ThrottledOpHelper {
             CreateMode.PERSISTENT);
         try {
             zk.setACL(path, ACL_PERMS, -1);
-            fail("Should have gotten ThrottledOp exception");
+            Assert.fail("Should have gotten ThrottledOp exception");
         } catch (KeeperException.ThrottledOpException e) {
             // expected
         } catch (KeeperException e) {
-            fail("Should have gotten ThrottledOp exception");
+            Assert.fail("Should have gotten ThrottledOp exception");
         }
         List<ACL> acls = zk.getACL(path, null);
-        assertEquals(1, acls.size());
+        Assert.assertEquals(1, acls.size());
 
         RequestThrottleMock.throttleEveryNthOp(0);
 
@@ -222,6 +219,6 @@ public class ThrottledOpHelper {
             CreateMode.PERSISTENT);
         zk.setACL(path, ACL_PERMS, -1);
         acls = zk.getACL(path, null);
-        assertEquals(3, acls.size());
+        Assert.assertEquals(3, acls.size());
     }
 }

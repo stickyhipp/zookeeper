@@ -17,17 +17,17 @@
  */
 package org.apache.zookeeper.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.auth.ProviderRegistry;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class AuthUtilTest {
 
-    @BeforeAll
+    @BeforeClass
     public static void beforeClassSetUp() {
         ProviderRegistry.reset();
         System.setProperty("zookeeper.authProvider.sasl",
@@ -36,7 +36,7 @@ public class AuthUtilTest {
                 "org.apache.zookeeper.server.auth.X509AuthenticationProvider");
     }
 
-    @AfterAll
+    @AfterClass
     public static void afterClassTearDown() {
         System.clearProperty("zookeeper.authProvider.sasl");
         System.clearProperty("zookeeper.authProvider.x509");

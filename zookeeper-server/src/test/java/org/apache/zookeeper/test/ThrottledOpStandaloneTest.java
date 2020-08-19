@@ -22,12 +22,12 @@ import java.io.IOException;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.server.ZooKeeperServer;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class ThrottledOpStandaloneTest extends ClientBase {
 
-    @BeforeAll
+    @BeforeClass
     public static void applyMockUps() {
         ThrottledOpHelper.applyMockUps();
     }

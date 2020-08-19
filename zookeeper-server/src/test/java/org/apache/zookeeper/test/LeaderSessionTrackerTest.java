@@ -18,8 +18,8 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -34,9 +34,9 @@ import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.proto.CreateRequest;
 import org.apache.zookeeper.server.Request;
 import org.apache.zookeeper.server.quorum.QuorumPeer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,12 +51,12 @@ public class LeaderSessionTrackerTest extends ZKTestCase {
 
     QuorumUtil qu;
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         qu = new QuorumUtil(1);
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         qu.shutdownAll();
     }
@@ -109,7 +109,7 @@ public class LeaderSessionTrackerTest extends ZKTestCase {
         zk.create("/ok", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
         Stat stat = zk.exists("/impossible", null);
-        assertEquals(null, stat, "Node from fake session get created");
+        assertEquals("Node from fake session get created", null, stat);
 
     }
 
@@ -147,7 +147,7 @@ public class LeaderSessionTrackerTest extends ZKTestCase {
         zk.create("/ok", new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 
         Stat stat = zk.exists("/success", null);
-        assertTrue(stat != null, "Request from local sesson failed");
+        assertTrue("Request from local sesson failed", stat != null);
 
     }
 

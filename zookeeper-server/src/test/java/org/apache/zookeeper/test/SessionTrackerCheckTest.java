@@ -18,7 +18,7 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.zookeeper.KeeperException.SessionExpiredException;
 import org.apache.zookeeper.ZKTestCase;
@@ -27,9 +27,9 @@ import org.apache.zookeeper.server.SessionTracker.SessionExpirer;
 import org.apache.zookeeper.server.ZooKeeperServerListener;
 import org.apache.zookeeper.server.quorum.LeaderSessionTracker;
 import org.apache.zookeeper.server.quorum.LearnerSessionTracker;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,12 +62,12 @@ public class SessionTrackerCheckTest extends ZKTestCase {
 
     }
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         sessionsWithTimeouts.clear();
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
     }
 

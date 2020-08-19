@@ -18,10 +18,10 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,9 +29,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.common.AtomicFileOutputStream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class AtomicFileOutputStreamTest extends ZKTestCase {
 
@@ -41,12 +41,12 @@ public class AtomicFileOutputStreamTest extends ZKTestCase {
     private File testDir;
     private File dstFile;
 
-    @BeforeEach
+    @Before
     public void setupTestDir() throws IOException {
         testDir = ClientBase.createEmptyTestDir();
         dstFile = new File(testDir, "test.txt");
     }
-    @AfterEach
+    @After
     public void cleanupTestDir() throws IOException {
         ClientBase.recursiveDelete(testDir);
     }
@@ -73,11 +73,11 @@ public class AtomicFileOutputStreamTest extends ZKTestCase {
      */
     @Test
     public void testOverwriteFile() throws IOException {
-        assertTrue(dstFile.createNewFile(), "Creating empty dst file");
+        assertTrue("Creating empty dst file", dstFile.createNewFile());
 
         OutputStream fos = new AtomicFileOutputStream(dstFile);
 
-        assertTrue(dstFile.exists(), "Empty file still exists");
+        assertTrue("Empty file still exists", dstFile.exists());
         fos.write(TEST_STRING.getBytes());
         fos.flush();
 
@@ -114,7 +114,7 @@ public class AtomicFileOutputStreamTest extends ZKTestCase {
         // Should not have touched original file
         assertEquals(TEST_STRING_2, ClientBase.readFile(dstFile));
 
-        assertEquals(dstFile.getName(), ClientBase.join(",", testDir.list()), "Temporary file should have been cleaned up");
+        assertEquals("Temporary file should have been cleaned up", dstFile.getName(), ClientBase.join(",", testDir.list()));
     }
 
     /**

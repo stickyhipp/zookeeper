@@ -18,10 +18,6 @@
 
 package org.apache.zookeeper.server;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,9 +32,11 @@ import org.apache.zookeeper.server.metric.SimpleCounter;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.SSLAuthTest;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class NettyServerCnxnFactoryTest extends ClientBase {
 
@@ -80,14 +78,14 @@ public class NettyServerCnxnFactoryTest extends ClientBase {
         NettyServerCnxnFactory factory = new NettyServerCnxnFactory();
         factory.configure(addr, 100, -1, false);
         factory.start();
-        assertTrue(factory.getParentChannel().isActive());
+        Assert.assertTrue(factory.getParentChannel().isActive());
 
         factory.reconfigure(addr);
 
         // wait the state change
         Thread.sleep(100);
 
-        assertTrue(factory.getParentChannel().isActive());
+        Assert.assertTrue(factory.getParentChannel().isActive());
     }
 
     @Test
@@ -97,14 +95,14 @@ public class NettyServerCnxnFactoryTest extends ClientBase {
         NettyServerCnxnFactory factory = new NettyServerCnxnFactory();
         factory.configure(addr, 100, -1, false);
         factory.start();
-        assertTrue(factory.getParentChannel().isActive());
+        Assert.assertTrue(factory.getParentChannel().isActive());
 
         factory.reconfigure(new InetSocketAddress("[0:0:0:0:0:0:0:0]", randomPort));
 
         // wait the state change
         Thread.sleep(100);
 
-        assertTrue(factory.getParentChannel().isActive());
+        Assert.assertTrue(factory.getParentChannel().isActive());
     }
 
     /*
@@ -126,7 +124,7 @@ public class NettyServerCnxnFactoryTest extends ClientBase {
         // initializing the statistics
         SimpleCounter tlsHandshakeExceeded = (SimpleCounter) ServerMetrics.getMetrics().TLS_HANDSHAKE_EXCEEDED;
         tlsHandshakeExceeded.reset();
-        assertEquals(tlsHandshakeExceeded.get(), 0);
+        Assert.assertEquals(tlsHandshakeExceeded.get(), 0);
 
         // setting the HandshakeLimit to 3, so only 3 SSL handshakes can happen in parallel
         NettyServerCnxnFactory factory = (NettyServerCnxnFactory) serverFactory;
@@ -152,20 +150,20 @@ public class NettyServerCnxnFactoryTest extends ClientBase {
         int actualConnections = cnxnCreated.get();
         LOG.info("created {} connections", actualConnections);
         if (!allConnectionsCreatedInTime) {
-            fail(String.format("Only %d out of %d connections created!", actualConnections, cnxnLimit));
+          Assert.fail(String.format("Only %d out of %d connections created!", actualConnections, cnxnLimit));
         }
 
         // Assert the server refused some of the connections because the handshake limit was reached
         // (throttling should be greater than 0)
         long handshakeThrottledNum = tlsHandshakeExceeded.get();
         LOG.info("TLS_HANDSHAKE_EXCEEDED: {}", handshakeThrottledNum);
-        assertThat("The number of handshake throttled should be "
+        Assert.assertThat("The number of handshake throttled should be "
                 + "greater than 0", handshakeThrottledNum, Matchers.greaterThan(0L));
 
         // Assert there is no outstanding handshake anymore, all the clients connected in the end
         int outstandingHandshakeNum = factory.getOutstandingHandshakeNum();
         LOG.info("outstanding handshake is {}", outstandingHandshakeNum);
-        assertThat("The outstanding handshake number should be 0 "
+        Assert.assertThat("The outstanding handshake number should be 0 "
                 + "after all cnxns established", outstandingHandshakeNum, Matchers.is(0));
     }
 

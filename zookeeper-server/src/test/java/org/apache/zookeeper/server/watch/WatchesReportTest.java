@@ -17,23 +17,23 @@
 
 package org.apache.zookeeper.server.watch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.zookeeper.ZKTestCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 public class WatchesReportTest extends ZKTestCase {
 
     private Map<Long, Set<String>> m;
     private WatchesReport r;
-    @BeforeEach
+    @Before
     public void setUp() {
         m = new HashMap<Long, Set<String>>();
         Set<String> s = new HashSet<String>();

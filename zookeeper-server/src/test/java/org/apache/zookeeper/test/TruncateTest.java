@@ -19,10 +19,10 @@
 package org.apache.zookeeper.test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -47,9 +47,9 @@ import org.apache.zookeeper.server.quorum.QuorumPeer;
 import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
 import org.apache.zookeeper.txn.SetDataTxn;
 import org.apache.zookeeper.txn.TxnHeader;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,14 +58,14 @@ public class TruncateTest extends ZKTestCase {
     private static final Logger LOG = LoggerFactory.getLogger(TruncateTest.class);
     File dataDir1, dataDir2, dataDir3;
 
-    @BeforeEach
+    @Before
     public void setUp() throws IOException {
         dataDir1 = ClientBase.createTmpDir();
         dataDir2 = ClientBase.createTmpDir();
         dataDir3 = ClientBase.createTmpDir();
     }
 
-    @AfterEach
+    @After
     public void tearDown() {
         ClientBase.recursiveDelete(dataDir1);
         ClientBase.recursiveDelete(dataDir2);
@@ -124,7 +124,7 @@ public class TruncateTest extends ZKTestCase {
         File[] logs = snaplog.getDataDir().listFiles();
         for (int i = 0; i < logs.length; i++) {
             LOG.debug("Deleting: {}", logs[i].getName());
-            assertTrue(logs[i].delete(), "Failed to delete log file: " + logs[i].getName());
+            assertTrue("Failed to delete log file: " + logs[i].getName(), logs[i].delete());
         }
         try {
             assertThat("truncateLog() should return false if truncation fails instead of throwing exception", zkdb.truncateLog(1), is(false));

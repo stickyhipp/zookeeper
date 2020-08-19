@@ -18,7 +18,7 @@
 package org.apache.zookeeper.test;
 
 import org.apache.zookeeper.server.quorum.QuorumPeer;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ObserverHierarchicalQuorumTest extends HierarchicalQuorumTest {
 

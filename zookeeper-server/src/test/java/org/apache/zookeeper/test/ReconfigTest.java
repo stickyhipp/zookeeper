@@ -22,10 +22,10 @@ import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.net.InetAddress.getLoopbackAddress;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -58,9 +58,9 @@ import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.apache.zookeeper.server.quorum.flexible.QuorumHierarchical;
 import org.apache.zookeeper.server.quorum.flexible.QuorumMaj;
 import org.apache.zookeeper.server.quorum.flexible.QuorumVerifier;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,13 +72,13 @@ public class ReconfigTest extends ZKTestCase implements DataCallback {
     private ZooKeeper[] zkArr;
     private ZooKeeperAdmin[] zkAdminArr;
 
-    @BeforeEach
+    @Before
     public void setup() {
         System.setProperty("zookeeper.DigestAuthenticationProvider.superDigest", "super:D/InIHSb7yEEbrWz8b9l71RjZJU="/* password is 'test'*/);
         QuorumPeerConfig.setReconfigEnabled(true);
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         closeAllHandles(zkArr, zkAdminArr);
         if (qu != null) {
@@ -123,13 +123,13 @@ public class ReconfigTest extends ZKTestCase implements DataCallback {
                 ServerConfigLine joinerServerConfigLine = new ServerConfigLine(joiner);
 
                 String errorMessage = format("expected joiner config \"%s\" not found in current config:\n%s", joiner, configStr);
-                assertTrue(currentServerConfigs.stream().anyMatch(c -> c.equals(joinerServerConfigLine)), errorMessage);
+                assertTrue(errorMessage, currentServerConfigs.stream().anyMatch(c -> c.equals(joinerServerConfigLine)));
             }
         }
         if (leavingServers != null) {
             for (String leaving : leavingServers) {
                 String errorMessage = format("leaving server \"%s\" not removed from config: \n%s", leaving, configStr);
-                assertFalse(configStr.contains(format("server.%s=", leaving)), errorMessage);
+                assertFalse(errorMessage, configStr.contains(format("server.%s=", leaving)));
             }
         }
 
@@ -167,12 +167,12 @@ public class ReconfigTest extends ZKTestCase implements DataCallback {
         String configStr = new String(config);
         if (joiningServers != null) {
             for (String joiner : joiningServers) {
-                assertTrue(configStr.contains(joiner), "Config:<" + configStr + ">\n" + joiner);
+                assertTrue("Config:<" + configStr + ">\n" + joiner, configStr.contains(joiner));
             }
         }
         if (leavingServers != null) {
             for (String leaving : leavingServers) {
-                assertFalse(configStr.contains("server.".concat(leaving)), "Config:<" + configStr + ">\n" + leaving);
+                assertFalse("Config:<" + configStr + ">\n" + leaving, configStr.contains("server.".concat(leaving)));
             }
         }
 
@@ -1123,10 +1123,10 @@ public class ReconfigTest extends ZKTestCase implements DataCallback {
         // restart the three servers, one-by-one, now with reconfig enabled
         // test if we can write / read in the cluster after each rolling restart step
         for (int i = 1; i < 4; i++) {
-            assertFalse(qu.getPeer(i).peer.isReconfigEnabled(), "dynamic reconfig was not disabled before stopping server " + i);
+            assertFalse("dynamic reconfig was not disabled before stopping server " + i, qu.getPeer(i).peer.isReconfigEnabled());
             qu.shutdown(i);
             qu.restart(i);
-            assertTrue(qu.getPeer(i).peer.isReconfigEnabled(), "dynamic reconfig is not enabled for the restarted server " + i);
+            assertTrue("dynamic reconfig is not enabled for the restarted server " + i, qu.getPeer(i).peer.isReconfigEnabled());
             testNormalOperation(zkArr[i], zkArr[(i % 3) + 1], false);
         }
 
@@ -1164,18 +1164,30 @@ public class ReconfigTest extends ZKTestCase implements DataCallback {
         QuorumPeer qp,
         String beanName,
         Boolean isPartOfEnsemble) throws Exception {
-        assertEquals(qp.getLearnerType().name(), JMXEnv.ensureBeanAttribute(beanName, "LearnerType"),
-                "Mismatches LearnerType!");
-        assertEquals(qp.getClientAddress().getHostString() + ":" + qp.getClientAddress().getPort(), JMXEnv.ensureBeanAttribute(beanName, "ClientAddress"),
-                "Mismatches ClientAddress!");
-        assertEquals(qp.getElectionAddress().getOne().getHostString() + ":" + qp.getElectionAddress().getOne().getPort(), JMXEnv.ensureBeanAttribute(beanName, "ElectionAddress"),
-                "Mismatches LearnerType!");
-        assertEquals(isPartOfEnsemble, JMXEnv.ensureBeanAttribute(beanName, "PartOfEnsemble"),
-                "Mismatches PartOfEnsemble!");
-        assertEquals(qp.getQuorumVerifier().getVersion(), JMXEnv.ensureBeanAttribute(beanName, "ConfigVersion"),
-                "Mismatches ConfigVersion!");
-        assertEquals(qp.getQuorumVerifier().toString(), JMXEnv.ensureBeanAttribute(beanName, "QuorumSystemInfo"),
-                "Mismatches QuorumSystemInfo!");
+        assertEquals(
+            "Mismatches LearnerType!",
+            qp.getLearnerType().name(),
+            JMXEnv.ensureBeanAttribute(beanName, "LearnerType"));
+        assertEquals(
+            "Mismatches ClientAddress!",
+            qp.getClientAddress().getHostString() + ":" + qp.getClientAddress().getPort(),
+            JMXEnv.ensureBeanAttribute(beanName, "ClientAddress"));
+        assertEquals(
+            "Mismatches LearnerType!",
+            qp.getElectionAddress().getOne().getHostString() + ":" + qp.getElectionAddress().getOne().getPort(),
+            JMXEnv.ensureBeanAttribute(beanName, "ElectionAddress"));
+        assertEquals(
+            "Mismatches PartOfEnsemble!",
+            isPartOfEnsemble,
+            JMXEnv.ensureBeanAttribute(beanName, "PartOfEnsemble"));
+        assertEquals(
+            "Mismatches ConfigVersion!",
+            qp.getQuorumVerifier().getVersion(),
+            JMXEnv.ensureBeanAttribute(beanName, "ConfigVersion"));
+        assertEquals(
+            "Mismatches QuorumSystemInfo!",
+            qp.getQuorumVerifier().toString(),
+            JMXEnv.ensureBeanAttribute(beanName, "QuorumSystemInfo"));
     }
 
     String getAddrPortFromBean(String beanName, String attribute) throws Exception {
@@ -1196,17 +1208,22 @@ public class ReconfigTest extends ZKTestCase implements DataCallback {
     }
 
     private void assertRemotePeerMXBeanAttributes(QuorumServer qs, String beanName) throws Exception {
-        assertEquals(qs.type.name(), JMXEnv.ensureBeanAttribute(beanName, "LearnerType"),
-                "Mismatches LearnerType!");
-        assertEquals(getNumericalAddrPort(qs.clientAddr.getHostString() + ":" + qs.clientAddr.getPort()),
-                getAddrPortFromBean(beanName, "ClientAddress"),
-                "Mismatches ClientAddress!");
-        assertEquals(getNumericalAddrPort(qs.electionAddr.getOne().getHostString() + ":" + qs.electionAddr.getOne().getPort()),
-                getAddrPortFromBean(beanName, "ElectionAddress"),
-                "Mismatches ElectionAddress!");
-        assertEquals(getNumericalAddrPort(qs.addr.getOne().getHostString() + ":" + qs.addr.getOne().getPort()),
-                getAddrPortFromBean(beanName, "QuorumAddress"),
-                "Mismatches QuorumAddress!");
+        assertEquals(
+            "Mismatches LearnerType!",
+            qs.type.name(),
+            JMXEnv.ensureBeanAttribute(beanName, "LearnerType"));
+        assertEquals(
+            "Mismatches ClientAddress!",
+            getNumericalAddrPort(qs.clientAddr.getHostString() + ":" + qs.clientAddr.getPort()),
+            getAddrPortFromBean(beanName, "ClientAddress"));
+        assertEquals(
+            "Mismatches ElectionAddress!",
+            getNumericalAddrPort(qs.electionAddr.getOne().getHostString() + ":" + qs.electionAddr.getOne().getPort()),
+            getAddrPortFromBean(beanName, "ElectionAddress"));
+        assertEquals(
+            "Mismatches QuorumAddress!",
+            getNumericalAddrPort(qs.addr.getOne().getHostString() + ":" + qs.addr.getOne().getPort()),
+            getAddrPortFromBean(beanName, "QuorumAddress"));
     }
 
 

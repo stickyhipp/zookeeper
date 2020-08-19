@@ -49,10 +49,10 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -68,7 +68,7 @@ public class ZKTrustManagerTest extends ZKTestCase {
     private InetAddress mockInetAddress;
     private Socket mockSocket;
 
-    @BeforeAll
+    @BeforeClass
     public static void createKeyPair() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
@@ -76,12 +76,12 @@ public class ZKTrustManagerTest extends ZKTestCase {
         keyPair = keyPairGenerator.genKeyPair();
     }
 
-    @AfterAll
+    @AfterClass
     public static void removeBouncyCastleProvider() throws Exception {
         Security.removeProvider("BC");
     }
 
-    @BeforeEach
+    @Before
     public void setup() throws Exception {
         mockX509ExtendedTrustManager = mock(X509ExtendedTrustManager.class);
 

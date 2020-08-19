@@ -18,15 +18,14 @@
 
 package org.apache.zookeeper.server;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.nio.charset.StandardCharsets;
@@ -46,10 +45,7 @@ import org.apache.zookeeper.server.quorum.BufferStats;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.SSLAuthTest;
 import org.apache.zookeeper.test.TestByteBufAllocator;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +57,6 @@ public class NettyServerCnxnTest extends ClientBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(NettyServerCnxnTest.class);
 
-    @BeforeEach
     @Override
     public void setUp() throws Exception {
         System.setProperty(ServerCnxnFactory.ZOOKEEPER_SERVER_CNXN_FACTORY, "org.apache.zookeeper.server.NettyServerCnxnFactory");
@@ -71,7 +66,6 @@ public class NettyServerCnxnTest extends ClientBase {
         super.setUp();
     }
 
-    @AfterEach
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
@@ -87,10 +81,9 @@ public class NettyServerCnxnTest extends ClientBase {
      *
      * @see <a href="https://issues.jboss.org/browse/NETTY-412">NETTY-412</a>
      */
-    @Test
-    @Timeout(value = 40)
+    @Test(timeout = 40000)
     public void testSendCloseSession() throws Exception {
-        assertTrue(serverFactory instanceof NettyServerCnxnFactory, "Didn't instantiate ServerCnxnFactory with NettyServerCnxnFactory!");
+        assertTrue("Didn't instantiate ServerCnxnFactory with NettyServerCnxnFactory!", serverFactory instanceof NettyServerCnxnFactory);
 
         final ZooKeeper zk = createClient();
         final ZooKeeperServer zkServer = serverFactory.getZooKeeperServer();
@@ -99,10 +92,10 @@ public class NettyServerCnxnTest extends ClientBase {
             // make sure zkclient works
             zk.create(path, "test".getBytes(StandardCharsets.UTF_8), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             // set on watch
-            assertNotNull(zk.exists(path, true), "Didn't create znode:" + path);
+            assertNotNull("Didn't create znode:" + path, zk.exists(path, true));
             assertEquals(1, zkServer.getZKDatabase().getDataTree().getWatchCount());
             Iterable<ServerCnxn> connections = serverFactory.getConnections();
-            assertEquals(1, serverFactory.getNumAliveConnections(), "Mismatch in number of live connections!");
+            assertEquals("Mismatch in number of live connections!", 1, serverFactory.getNumAliveConnections());
             for (ServerCnxn serverCnxn : connections) {
                 serverCnxn.sendCloseSession();
             }
@@ -127,14 +120,12 @@ public class NettyServerCnxnTest extends ClientBase {
      * is set to 1. This tests that if more than one connection is attempted, the
      * connection fails.
      */
-    @Test
-    @Timeout(value = 40)
-    public void testMaxConnectionPerIpSurpased() {
-        assertTrue(serverFactory instanceof NettyServerCnxnFactory, "Did not instantiate ServerCnxnFactory with NettyServerCnxnFactory!");
-        assertThrows(ProtocolException.class, () -> {
-            try (final ZooKeeper zk1 = createClient(); final ZooKeeper zk2 = createClient()) {
-            }
-        });
+    @Test(timeout = 40000, expected = ProtocolException.class)
+    public void testMaxConnectionPerIpSurpased() throws Exception {
+        assertTrue("Did not instantiate ServerCnxnFactory with NettyServerCnxnFactory!", serverFactory instanceof NettyServerCnxnFactory);
+
+        try (final ZooKeeper zk1 = createClient(); final ZooKeeper zk2 = createClient()) {
+        }
     }
 
     @Test
@@ -148,7 +139,7 @@ public class NettyServerCnxnTest extends ClientBase {
             assertThat("Last client response size should be greater than 0 after client request was performed", clientResponseStats.getLastBufferSize(), greaterThan(0));
 
             byte[] contents = zk.getData("/a", null, null);
-            assertArrayEquals("test".getBytes(StandardCharsets.UTF_8), contents, "unexpected data");
+            assertArrayEquals("unexpected data", "test".getBytes(StandardCharsets.UTF_8), contents);
         }
     }
 
@@ -184,7 +175,7 @@ public class NettyServerCnxnTest extends ClientBase {
             }
 
             byte[] contents = zk.getData("/a", null, null);
-            assertArrayEquals("test".getBytes(StandardCharsets.UTF_8), contents, "unexpected data");
+            assertArrayEquals("unexpected data", "test".getBytes(StandardCharsets.UTF_8), contents);
 
             // As above, but don't do the throttled read. Make the request bytes wait in the socket
             // input buffer until after throttling is turned off. Need to make sure both modes work.
@@ -202,7 +193,7 @@ public class NettyServerCnxnTest extends ClientBase {
             }
 
             contents = zk.getData("/a", null, null);
-            assertArrayEquals("test".getBytes(StandardCharsets.UTF_8), contents, "unexpected data");
+            assertArrayEquals("unexpected data", "test".getBytes(StandardCharsets.UTF_8), contents);
         }
     }
 

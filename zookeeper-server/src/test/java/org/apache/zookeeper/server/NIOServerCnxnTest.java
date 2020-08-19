@@ -18,12 +18,12 @@
 
 package org.apache.zookeeper.server;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -31,8 +31,7 @@ import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.server.quorum.BufferStats;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +42,7 @@ public class NIOServerCnxnTest extends ClientBase {
     /**
      * Test operations on ServerCnxn after socket closure.
      */
-    @Test
-    @Timeout(value = 60)
+    @Test(timeout = 60000)
     public void testOperationsAfterCnxnClose() throws IOException, InterruptedException, KeeperException {
         final ZooKeeper zk = createClient();
 
@@ -52,11 +50,10 @@ public class NIOServerCnxnTest extends ClientBase {
         try {
             // make sure zkclient works
             zk.create(path, "test".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-            assertNotNull(zk.exists(path, false), "Didn't create znode:" + path);
+            assertNotNull("Didn't create znode:" + path, zk.exists(path, false));
             // Defaults ServerCnxnFactory would be instantiated with
             // NIOServerCnxnFactory
-            assertTrue(serverFactory instanceof NIOServerCnxnFactory,
-                "Didn't instantiate ServerCnxnFactory with NIOServerCnxnFactory!");
+            assertTrue("Didn't instantiate ServerCnxnFactory with NIOServerCnxnFactory!", serverFactory instanceof NIOServerCnxnFactory);
             Iterable<ServerCnxn> connections = serverFactory.getConnections();
             for (ServerCnxn serverCnxn : connections) {
                 serverCnxn.close(ServerCnxn.DisconnectReason.CHANNEL_CLOSED_EXCEPTION);
@@ -70,6 +67,7 @@ public class NIOServerCnxnTest extends ClientBase {
         } finally {
             zk.close();
         }
+
     }
 
     @Test

@@ -18,10 +18,8 @@
 
 package org.apache.zookeeper.server;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,10 +42,11 @@ import org.apache.zookeeper.server.quorum.QuorumPeerMainTest;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.txn.TxnDigest;
 import org.apache.zookeeper.txn.TxnHeader;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,14 +58,14 @@ public class TxnLogDigestTest extends ClientBase {
     private ZooKeeper zk;
     private ZooKeeperServer server;
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         server = serverFactory.getZooKeeperServer();
         zk = createClient();
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         // server will be closed in super.tearDown
         super.tearDown();
@@ -87,7 +86,7 @@ public class TxnLogDigestTest extends ClientBase {
         ZooKeeperServer.setDigestEnabled(false);
     }
 
-    @BeforeAll
+    @BeforeClass
     public static void applyMockUps() {
         new MockedFileTxnLog();
     }
@@ -106,12 +105,12 @@ public class TxnLogDigestTest extends ClientBase {
         performOperations(createClient(), "/digestFromTxnLogsMatchesTree");
 
         // make sure there is no digest mismatch
-        assertEquals(0, digestMistachesCount.get());
+        Assert.assertEquals(0, digestMistachesCount.get());
 
         // verify that the digest is wrote to disk with txn
         TxnDigest lastDigest = getLastTxnLogDigest();
-        assertNotNull(lastDigest);
-        assertEquals(server.getZKDatabase().getDataTree().getTreeDigest(),
+        Assert.assertNotNull(lastDigest);
+        Assert.assertEquals(server.getZKDatabase().getDataTree().getTreeDigest(),
                 lastDigest.getTreeDigest());
     }
 
@@ -145,7 +144,7 @@ public class TxnLogDigestTest extends ClientBase {
         Map<String, String> expectedNodes1 = performOperations(createClient(), "/p2");
 
         // make sure there is no digest mismatch
-        assertEquals(0, digestMistachesCount.get());
+        Assert.assertEquals(0, digestMistachesCount.get());
 
         // 3. disable the digest again and make sure everything is fine
         restartServerWithDigestFlag(false);
@@ -180,7 +179,7 @@ public class TxnLogDigestTest extends ClientBase {
         restartServerWithDigestFlag(false);
 
         // check that no digest mismatch is reported
-        assertEquals(0, digestMistachesCount.get());
+        Assert.assertEquals(0, digestMistachesCount.get());
     }
 
     private void restartServerWithDigestFlag(boolean digestEnabled)
@@ -250,7 +249,7 @@ public class TxnLogDigestTest extends ClientBase {
         ZooKeeper client = createClient();
         try {
             for (Map.Entry<String, String> entry: expectedNodes.entrySet()) {
-                assertEquals(entry.getValue(),
+                Assert.assertEquals(entry.getValue(),
                         new String(client.getData(entry.getKey(), false, null)));
             }
         } finally {

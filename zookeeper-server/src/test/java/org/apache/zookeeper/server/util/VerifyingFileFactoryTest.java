@@ -18,12 +18,11 @@
 
 package org.apache.zookeeper.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import org.apache.zookeeper.ZKTestCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public class VerifyingFileFactoryTest extends ZKTestCase {
 
     private Logger log;
 
-    @BeforeEach
+    @Before
     public void setUp() {
         log = LoggerFactory.getLogger("TODO: Mock Logging");
     }
@@ -50,12 +49,10 @@ public class VerifyingFileFactoryTest extends ZKTestCase {
         // assertFalse(log.hasWarned);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testForFailForNonExistingPath() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            VerifyingFileFactory vff = new VerifyingFileFactory.Builder(log).failForNonExistingPath().build();
-            vff.create("/I/H0p3/this/path/d035/n0t/ex15t");
-        });
+        VerifyingFileFactory vff = new VerifyingFileFactory.Builder(log).failForNonExistingPath().build();
+        vff.create("/I/H0p3/this/path/d035/n0t/ex15t");
     }
 
     @Test

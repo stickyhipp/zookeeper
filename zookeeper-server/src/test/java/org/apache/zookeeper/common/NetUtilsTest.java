@@ -20,12 +20,11 @@ package org.apache.zookeeper.common;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import java.net.InetSocketAddress;
 import org.apache.zookeeper.ZKTestCase;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class NetUtilsTest extends ZKTestCase {
 
@@ -70,32 +69,24 @@ public class NetUtilsTest extends ZKTestCase {
         assertEquals("doesnt.exist.com:1234", NetUtils.formatInetAddr(isa));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void tetGetIPV6HostAndPort_WhenHostDoesNotEndWithBracket() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            NetUtils.getIPV6HostAndPort("[2001:0db8:85a3:0000:0000:8a2e:0370:7334:443");
-        });
+        NetUtils.getIPV6HostAndPort("[2001:0db8:85a3:0000:0000:8a2e:0370:7334:443");
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void tetGetIPV6HostAndPort_WhenNoPortAfterColon() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            NetUtils.getIPV6HostAndPort("[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:");
-        });
+        NetUtils.getIPV6HostAndPort("[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:");
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void tetGetIPV6HostAndPort_WhenPortIsNotSeparatedProperly() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            NetUtils.getIPV6HostAndPort("[2001:0db8:85a3:0000:0000:8a2e:0370:7334]2181");
-        });
+        NetUtils.getIPV6HostAndPort("[2001:0db8:85a3:0000:0000:8a2e:0370:7334]2181");
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void tetGetIPV6HostAndPort_WhenHostIsEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            NetUtils.getIPV6HostAndPort("[]:2181");
-        });
+        NetUtils.getIPV6HostAndPort("[]:2181");
     }
 
     @Test

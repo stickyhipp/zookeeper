@@ -18,10 +18,9 @@
 
 package org.apache.zookeeper.common;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 import org.apache.zookeeper.ZKTestCase;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class FileKeyStoreLoaderBuilderProviderTest extends ZKTestCase {
 
@@ -43,11 +42,9 @@ public class FileKeyStoreLoaderBuilderProviderTest extends ZKTestCase {
         assertTrue(builder instanceof PKCS12FileLoader.Builder);
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testGetBuilderForNullFileType() {
-        assertThrows(NullPointerException.class, () -> {
-            FileKeyStoreLoaderBuilderProvider.getBuilderForKeyStoreFileType(null);
-        });
+        FileKeyStoreLoaderBuilderProvider.getBuilderForKeyStoreFileType(null);
     }
 
 }

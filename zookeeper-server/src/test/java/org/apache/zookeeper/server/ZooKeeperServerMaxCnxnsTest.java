@@ -17,9 +17,8 @@
  */
 package org.apache.zookeeper.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 import org.apache.zookeeper.CreateMode;
@@ -31,9 +30,9 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.server.quorum.QuorumPeerTestBase;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.ClientBase.CountdownWatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,15 +50,13 @@ public class ZooKeeperServerMaxCnxnsTest extends QuorumPeerTestBase {
      * </pre>
      */
 
-    @Test
-    @Timeout(value = 120)
+    @Test(timeout = 120000)
     public void testMaxZooKeeperClientsWithNIOServerCnxnFactory() throws Exception {
         String serverCnxnFactory = "org.apache.zookeeper.server.NIOServerCnxnFactory";
         testMaxZooKeeperClients(serverCnxnFactory);
     }
 
-    @Test
-    @Timeout(value = 120)
+    @Test(timeout = 120000)
     public void testMaxZooKeeperClientsWithNettyServerCnxnFactory() throws Exception {
         String serverCnxnFactory = "org.apache.zookeeper.server.NettyServerCnxnFactory";
         testMaxZooKeeperClients(serverCnxnFactory);
@@ -90,8 +87,8 @@ public class ZooKeeperServerMaxCnxnsTest extends QuorumPeerTestBase {
 
         // ensure all servers started
         for (int i = 0; i < SERVER_COUNT; i++) {
-            assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i], ClientBase.CONNECTION_TIMEOUT),
-                    "waiting for server " + i + " being up");
+            Assert.assertTrue("waiting for server " + i + " being up", ClientBase
+                    .waitForServerUp("127.0.0.1:" + clientPorts[i], ClientBase.CONNECTION_TIMEOUT));
         }
 
         int maxAllowedConnection = maxCnxns * SERVER_COUNT;
@@ -154,7 +151,7 @@ public class ZooKeeperServerMaxCnxnsTest extends QuorumPeerTestBase {
         return builder.toString();
     }
 
-    @AfterEach
+    @After
     public void tearDown() {
         // stop all clients
         if (clients != null) {

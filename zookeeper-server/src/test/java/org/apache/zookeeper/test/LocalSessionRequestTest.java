@@ -18,7 +18,7 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.Assert.assertFalse;
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.server.Request;
@@ -26,9 +26,9 @@ import org.apache.zookeeper.server.ZKDatabase;
 import org.apache.zookeeper.server.quorum.Leader.Proposal;
 import org.apache.zookeeper.server.quorum.QuorumPeer;
 import org.apache.zookeeper.test.ClientBase.CountdownWatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ public class LocalSessionRequestTest extends ZKTestCase {
 
     private final QuorumBase qb = new QuorumBase();
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         LOG.info("STARTING quorum {}", getClass().getName());
         qb.localSessionsEnabled = true;
@@ -54,7 +54,7 @@ public class LocalSessionRequestTest extends ZKTestCase {
         ClientBase.waitForServerUp(qb.hostPort, 10000);
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         LOG.info("STOPPING quorum {}", getClass().getName());
         qb.tearDown();
@@ -82,9 +82,12 @@ public class LocalSessionRequestTest extends ZKTestCase {
         QuorumPeer peer = qb.getPeerList().get(peerId);
         ZKDatabase db = peer.getActiveServer().getZKDatabase();
         for (Proposal p : db.getCommittedLog()) {
-            assertFalse(p.request.sessionId == sessionId,
-                    "Should not see " + Request.op2String(p.request.type)
-                            + " request from local session 0x" + session + " on the " + peerType);
+            assertFalse("Should not see "
+                                       + Request.op2String(p.request.type)
+                                       + " request from local session 0x"
+                                       + session
+                                       + " on the "
+                                       + peerType, p.request.sessionId == sessionId);
         }
     }
 
@@ -95,7 +98,7 @@ public class LocalSessionRequestTest extends ZKTestCase {
      */
     public void testOpenCloseSession(boolean onLeader) throws Exception {
         int leaderIdx = qb.getLeaderIndex();
-        assertFalse(leaderIdx == -1, "No leader in quorum?");
+        assertFalse("No leader in quorum?", leaderIdx == -1);
         int followerIdx = (leaderIdx + 1) % 5;
         int testPeerIdx = onLeader ? leaderIdx : followerIdx;
         int verifyPeerIdx = onLeader ? followerIdx : leaderIdx;

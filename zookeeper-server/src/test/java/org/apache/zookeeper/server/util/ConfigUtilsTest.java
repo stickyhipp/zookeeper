@@ -18,10 +18,9 @@
 
 package org.apache.zookeeper.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ConfigUtilsTest {
 
@@ -49,18 +48,14 @@ public class ConfigUtilsTest {
         assertEquals(nsa[2], "3888");
     }
 
-    @Test
-    public void testGetHostAndPortWithoutBracket() {
-        assertThrows(ConfigException.class, () -> {
-            String[] nsa = ConfigUtils.getHostAndPort("[2001:db8:85a3:8d3:1319:8a2e:370:7348");
-        });
+    @Test(expected = ConfigException.class)
+    public void testGetHostAndPortWithoutBracket() throws ConfigException {
+        String[] nsa = ConfigUtils.getHostAndPort("[2001:db8:85a3:8d3:1319:8a2e:370:7348");
     }
 
-    @Test
-    public void testGetHostAndPortWithoutPortAfterColon() {
-        assertThrows(ConfigException.class, () -> {
-            String[] nsa = ConfigUtils.getHostAndPort("[2001:db8:1::242:ac11:2]:");
-        });
+    @Test(expected = ConfigException.class)
+    public void testGetHostAndPortWithoutPortAfterColon() throws ConfigException {
+        String[] nsa = ConfigUtils.getHostAndPort("[2001:db8:1::242:ac11:2]:");
     }
 
     @Test

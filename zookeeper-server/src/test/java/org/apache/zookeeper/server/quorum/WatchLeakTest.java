@@ -17,7 +17,7 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -36,6 +36,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -43,6 +45,7 @@ import org.apache.jute.InputArchive;
 import org.apache.jute.OutputArchive;
 import org.apache.zookeeper.ClientCnxn;
 import org.apache.zookeeper.MockPacket;
+import org.apache.zookeeper.ZKParameterized;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.proto.ConnectRequest;
 import org.apache.zookeeper.proto.ReplyHeader;
@@ -54,9 +57,11 @@ import org.apache.zookeeper.server.NIOServerCnxn;
 import org.apache.zookeeper.server.NIOServerCnxnFactory;
 import org.apache.zookeeper.server.ZKDatabase;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
@@ -65,24 +70,36 @@ import org.slf4j.LoggerFactory;
 /**
  * Demonstrate ZOOKEEPER-1382 : Watches leak on expired session
  */
+@RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(ZKParameterized.RunnerFactory.class)
 public class WatchLeakTest {
 
     protected static final Logger LOG = LoggerFactory.getLogger(WatchLeakTest.class);
 
     final long SESSION_ID = 0xBABEL;
 
-    @BeforeEach
+    private final boolean sessionTimedout;
+
+    @Before
     public void setUp() {
         System.setProperty("zookeeper.admin.enableServer", "false");
+    }
+
+    public WatchLeakTest(boolean sessionTimedout) {
+        this.sessionTimedout = sessionTimedout;
+    }
+
+    @Parameters
+    public static Collection<Object[]> configs() {
+        return Arrays.asList(new Object[][]{{false}, {true}});
     }
 
     /**
      * Check that if session has expired then no watch can be set
      */
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    public void testWatchesLeak(boolean sessionTimedout) throws Exception {
+    @Test
+    public void testWatchesLeak() throws Exception {
 
         NIOServerCnxnFactory serverCnxnFactory = mock(NIOServerCnxnFactory.class);
         final SelectionKey sk = new FakeSK();
@@ -136,11 +153,11 @@ public class WatchLeakTest {
             if (sessionTimedout) {
                 // Session has not been re-validated !
                 LOG.info("session is not valid, watches = {}", watchCount);
-                assertEquals(0, watchCount, "Session is not valid so there should be no watches");
+                assertEquals("Session is not valid so there should be no watches", 0, watchCount);
             } else {
                 // Session has been re-validated
                 LOG.info("session is valid, watches = {}", watchCount);
-                assertEquals(1, watchCount, "Session is valid so the watch should be there");
+                assertEquals("Session is valid so the watch should be there", 1, watchCount);
             }
         } finally {
             if (fzks != null) {

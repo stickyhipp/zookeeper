@@ -18,13 +18,12 @@
 
 package org.apache.zookeeper.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class TestCircularBlockingQueue {
 
@@ -37,18 +36,17 @@ public class TestCircularBlockingQueue {
     testQueue.offer(2);
     testQueue.offer(3);
 
-    assertEquals(2, testQueue.size());
+    Assert.assertEquals(2, testQueue.size());
 
-    assertEquals(2, testQueue.take().intValue());
-    assertEquals(3, testQueue.take().intValue());
+    Assert.assertEquals(2, testQueue.take().intValue());
+    Assert.assertEquals(3, testQueue.take().intValue());
 
-    assertEquals(1L, testQueue.getDroppedCount());
-    assertEquals(0, testQueue.size());
-    assertEquals(true, testQueue.isEmpty());
+    Assert.assertEquals(1L, testQueue.getDroppedCount());
+    Assert.assertEquals(0, testQueue.size());
+    Assert.assertEquals(true, testQueue.isEmpty());
   }
 
-  @Test
-  @Timeout(value = 10)
+  @Test(timeout = 10000L)
   public void testCircularBlockingQueueTakeBlock()
       throws InterruptedException, ExecutionException {
 
@@ -69,7 +67,7 @@ public class TestCircularBlockingQueue {
       testQueue.offer(10);
 
       Integer result = testTake.get();
-      assertEquals(10, result.intValue());
+      Assert.assertEquals(10, result.intValue());
     } finally {
       executor.shutdown();
     }

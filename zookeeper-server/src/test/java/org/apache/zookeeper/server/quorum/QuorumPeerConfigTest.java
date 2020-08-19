@@ -18,11 +18,10 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -30,7 +29,7 @@ import java.util.Properties;
 import org.apache.zookeeper.common.ClientX509Util;
 import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class QuorumPeerConfigTest {
 
@@ -106,14 +105,12 @@ public class QuorumPeerConfigTest {
     /**
      * Test case for https://issues.apache.org/jira/browse/ZOOKEEPER-2873
      */
-    @Test
-    public void testSamePortConfiguredForClientAndElection() {
-        assertThrows(ConfigException.class, () -> {
-            QuorumPeerConfig quorumPeerConfig = new QuorumPeerConfig();
-            Properties zkProp = getDefaultZKProperties();
-            zkProp.setProperty("server.1", "localhost:2888:2888");
-            quorumPeerConfig.parseProperties(zkProp);
-        });
+    @Test(expected = ConfigException.class)
+    public void testSamePortConfiguredForClientAndElection() throws IOException, ConfigException {
+        QuorumPeerConfig quorumPeerConfig = new QuorumPeerConfig();
+        Properties zkProp = getDefaultZKProperties();
+        zkProp.setProperty("server.1", "localhost:2888:2888");
+        quorumPeerConfig.parseProperties(zkProp);
     }
 
     /**

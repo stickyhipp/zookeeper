@@ -18,9 +18,6 @@
 package org.apache.zookeeper.server.quorum;
 
 import static org.apache.zookeeper.test.ClientBase.CONNECTION_TIMEOUT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -30,9 +27,9 @@ import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.ClientBase.CountdownWatcher;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class EpochWriteFailureTest extends QuorumPeerTestBase {
     private static int SERVER_COUNT = 3;
@@ -46,8 +43,7 @@ public class EpochWriteFailureTest extends QuorumPeerTestBase {
      * fails, it should not complete leader election, also it should not update
      * run time values of acceptedEpoch,
      */
-    @Test
-    @Timeout(value = 120)
+    @Test(timeout = 120000)
     public void testAcceptedEpochWriteFailure() throws Exception {
         StringBuilder sb = new StringBuilder();
         sb.append("admin.enableServer=false");
@@ -68,8 +64,8 @@ public class EpochWriteFailureTest extends QuorumPeerTestBase {
 
         // ensure two servers started
         for (int i = 0; i < SERVER_COUNT - 1; i++) {
-            assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i], CONNECTION_TIMEOUT),
-                    "waiting for server " + i + " being up");
+            Assert.assertTrue("waiting for server " + i + " being up",
+                    ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i], CONNECTION_TIMEOUT));
         }
 
         CountdownWatcher watch1 = new CountdownWatcher();
@@ -97,13 +93,15 @@ public class EpochWriteFailureTest extends QuorumPeerTestBase {
          * failure is injected and it keeps on trying to join the quorum
          */
 
-        assertFalse(ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[2], CONNECTION_TIMEOUT / 2),
-                "verify server 2 not started");
+        Assert.assertFalse("verify server 2 not started",
+                ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[2], CONNECTION_TIMEOUT / 2));
 
         QuorumPeer quorumPeer = mt[2].getQuorumPeer();
 
-        assertEquals(0, quorumPeer.getAcceptedEpoch(), "acceptedEpoch must not have changed");
-        assertEquals(0, quorumPeer.getCurrentEpoch(), "currentEpoch must not have changed");
+        Assert.assertEquals("acceptedEpoch must not have changed", 0,
+                quorumPeer.getAcceptedEpoch());
+        Assert.assertEquals("currentEpoch must not have changed", 0,
+                quorumPeer.getCurrentEpoch());
     }
 
     static class CustomQuorumPeer extends QuorumPeer {
@@ -140,7 +138,7 @@ public class EpochWriteFailureTest extends QuorumPeerTestBase {
         }
     }
 
-    @AfterAll
+    @AfterClass
     public static void tearDownAfterClass() throws InterruptedException {
         for (int i = 0; i < SERVER_COUNT; i++) {
             if (mt[i] != null) {

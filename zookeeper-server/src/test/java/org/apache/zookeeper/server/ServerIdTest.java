@@ -18,66 +18,80 @@
 
 package org.apache.zookeeper.server;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.TestableZooKeeper;
+import org.apache.zookeeper.ZKParameterized;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+@RunWith(Parameterized.class)
+@Parameterized.UseParametersRunnerFactory(ZKParameterized.RunnerFactory.class)
 public class ServerIdTest extends ClientBase {
 
-    public static Stream<Arguments> data() throws Exception {
-        List<Arguments> testTypes = new ArrayList<>();
-        for (boolean ttlsEnabled : new boolean[]{true, false}) {
-            for (int serverId = 0; serverId <= 255; ++serverId) {
-                testTypes.add(Arguments.of(ttlsEnabled, serverId));
-            }
+    private final TestType testType;
+
+    private static class TestType {
+
+        final boolean ttlsEnabled;
+        final int serverId;
+
+        TestType(boolean ttlsEnabled, int serverId) {
+            this.ttlsEnabled = ttlsEnabled;
+            this.serverId = serverId;
         }
-        return testTypes.stream();
+
     }
 
-    @AfterEach
+    @Parameterized.Parameters
+    public static List<TestType> data() {
+        List<TestType> testTypes = new ArrayList<>();
+        for (boolean ttlsEnabled : new boolean[]{true, false}) {
+            for (int serverId = 0; serverId <= 255; ++serverId) {
+                testTypes.add(new TestType(ttlsEnabled, serverId));
+            }
+        }
+        return testTypes;
+    }
+
+    @After
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
         System.clearProperty("zookeeper.extendedTypesEnabled");
     }
 
-    @BeforeEach
-    @Override
-    public void setUp() throws Exception {
-        //since parameterized test methods need a parameterized setUp method
-        //the inherited method has to be overridden with an empty function body
+    public ServerIdTest(TestType testType) {
+        this.testType = testType;
     }
 
-    public void setUp(boolean ttlsEnabled, int serverId) throws Exception {
-        System.setProperty("zookeeper.extendedTypesEnabled", Boolean.toString(ttlsEnabled));
-        LOG.info("ttlsEnabled: {} - ServerId: {}", ttlsEnabled, serverId);
+    @Before
+    @Override
+    public void setUp() throws Exception {
+        System.setProperty("zookeeper.extendedTypesEnabled", Boolean.toString(testType.ttlsEnabled));
+        LOG.info("ttlsEnabled: {} - ServerId: {}", testType.ttlsEnabled, testType.serverId);
         try {
-            super.setUpWithServerId(serverId);
+            super.setUpWithServerId(testType.serverId);
         } catch (RuntimeException e) {
-            if (ttlsEnabled && (serverId >= EphemeralType.MAX_EXTENDED_SERVER_ID)) {
+            if (testType.ttlsEnabled && (testType.serverId >= EphemeralType.MAX_EXTENDED_SERVER_ID)) {
                 return; // expected
             }
             throw e;
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("data")
-    public void doTest(boolean ttlsEnabled, int serverId) throws Exception {
-        setUp(ttlsEnabled, serverId);
-        if (ttlsEnabled && (serverId >= EphemeralType.MAX_EXTENDED_SERVER_ID)) {
+    @Test
+    public void doTest() throws Exception {
+        if (testType.ttlsEnabled && (testType.serverId >= EphemeralType.MAX_EXTENDED_SERVER_ID)) {
             return;
         }
 
@@ -88,7 +102,7 @@ public class ServerIdTest extends ClientBase {
             zk.create("/foo", new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
             zk.delete("/foo", -1);
 
-            if (ttlsEnabled) {
+            if (testType.ttlsEnabled) {
                 zk.create("/foo", new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_WITH_TTL, new Stat(), 1000);  // should work
             } else {
                 try {

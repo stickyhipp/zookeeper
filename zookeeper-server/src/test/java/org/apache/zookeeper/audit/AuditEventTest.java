@@ -17,9 +17,9 @@
  */
 package org.apache.zookeeper.audit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import org.apache.zookeeper.audit.AuditEvent.Result;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class AuditEventTest {
 

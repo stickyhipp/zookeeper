@@ -18,12 +18,8 @@
 
 package org.apache.zookeeper.server.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class CircularBufferTest {
 
@@ -32,109 +28,109 @@ public class CircularBufferTest {
         final int capacity = 3;
         CircularBuffer<String> buffer = new CircularBuffer<>(String.class, capacity);
 
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         // write to the buffer
         buffer.write("A");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         buffer.write("B");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         buffer.write("C");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         // Buffer is full.
         // Read from buffer
-        assertEquals("A", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("A", buffer.take());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
-        assertEquals("B", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("B", buffer.take());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
-        assertEquals("C", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("C", buffer.take());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         // write to the buffer
         buffer.write("1");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         buffer.write("2");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         buffer.write("3");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         buffer.write("4"); // 4 overwrites 1
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         // Buffer if full
         // Read from buffer
-        assertEquals("2", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("2", buffer.take());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
-        assertEquals("3", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("3", buffer.take());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
-        assertEquals("4", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("4", buffer.take());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         // write to the buffer
         buffer.write("a");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         buffer.write("b");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         buffer.write("c");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         buffer.write("d"); // d overwrites a
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         buffer.write("e"); // e overwrites b
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         buffer.write("f"); // f overwrites c
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         buffer.write("g"); // g overwrites d
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         // Buffer is full.
         // Read from buffer
-        assertEquals("e", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("e", buffer.take());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
-        assertEquals("f", buffer.take());
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("f", buffer.take());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
-        assertEquals("g", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("g", buffer.take());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
     }
 
     @Test
@@ -142,23 +138,23 @@ public class CircularBufferTest {
         final int capacity = 1;
         CircularBuffer<String> buffer = new CircularBuffer<>(String.class, capacity);
 
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         // write to the buffer
         buffer.write("A");
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         buffer.write("B"); // B overwrite A
-        assertFalse(buffer.isEmpty());
-        assertTrue(buffer.isFull());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertTrue(buffer.isFull());
 
         // Buffer is full.
         // Read from buffer
-        assertEquals("B", buffer.take());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertEquals("B", buffer.take());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
     }
 
     @Test
@@ -166,37 +162,37 @@ public class CircularBufferTest {
         final int capacity = 3;
         CircularBuffer<String> buffer = new CircularBuffer<>(String.class, capacity);
 
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
 
         // write to the buffer
         buffer.write("A");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-        assertEquals(1, buffer.size());
-        assertEquals("A", buffer.peek());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
+        Assert.assertEquals(1, buffer.size());
+        Assert.assertEquals("A", buffer.peek());
 
         buffer.write("B");
-        assertFalse(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-        assertEquals(2, buffer.size());
-        assertEquals("A", buffer.peek());
+        Assert.assertFalse(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
+        Assert.assertEquals(2, buffer.size());
+        Assert.assertEquals("A", buffer.peek());
 
         // reset
         buffer.reset();
-        assertNull(buffer.peek());
-        assertTrue(buffer.isEmpty());
-        assertFalse(buffer.isFull());
-        assertEquals(0, buffer.size());
+        Assert.assertNull(buffer.peek());
+        Assert.assertTrue(buffer.isEmpty());
+        Assert.assertFalse(buffer.isFull());
+        Assert.assertEquals(0, buffer.size());
     }
 
     @Test
     public void testCircularBufferIllegalCapacity() {
         try {
             CircularBuffer<String> buffer = new CircularBuffer<>(String.class, 0);
-            fail();
+            Assert.fail();
         } catch (IllegalArgumentException e) {
-            assertEquals("CircularBuffer capacity should be greater than 0", e.getMessage());
+            Assert.assertEquals("CircularBuffer capacity should be greater than 0", e.getMessage());
         }
     }
 }

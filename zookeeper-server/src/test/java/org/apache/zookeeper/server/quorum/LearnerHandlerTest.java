@@ -18,9 +18,9 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.BufferedInputStream;
@@ -38,8 +38,8 @@ import org.apache.zookeeper.server.ZKDatabase;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.apache.zookeeper.server.quorum.Leader.Proposal;
 import org.apache.zookeeper.server.util.ZxidUtils;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -131,7 +131,7 @@ public class LearnerHandlerTest extends ZKTestCase {
     // Member variables for mocking ZkDatabase
     private MockZKDatabase db;
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         db = new MockZKDatabase(null);
         sock = mock(Socket.class);
@@ -194,7 +194,10 @@ public class LearnerHandlerTest extends ZKTestCase {
     }
 
     void assertZxidEquals(long expected, long value) {
-        assertEquals(expected, value, "Expected 0x" + Long.toHexString(expected) + " but was 0x" + Long.toHexString(value));
+        assertEquals("Expected 0x"
+                             + Long.toHexString(expected)
+                             + " but was 0x"
+                             + Long.toHexString(value), expected, value);
     }
 
     /**
@@ -341,7 +344,7 @@ public class LearnerHandlerTest extends ZKTestCase {
 
         // Peer zxid
         peerZxid = 4;
-        assertTrue(learnerHandler.syncFollower(peerZxid, leader), "Couldn't identify snapshot transfer!");
+        assertTrue("Couldn't identify snapshot transfer!", learnerHandler.syncFollower(peerZxid, leader));
         reset();
     }
 

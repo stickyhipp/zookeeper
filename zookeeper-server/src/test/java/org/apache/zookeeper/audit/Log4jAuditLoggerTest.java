@@ -18,7 +18,7 @@
 package org.apache.zookeeper.audit;
 
 import static org.apache.zookeeper.test.ClientBase.CONNECTION_TIMEOUT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -48,11 +48,11 @@ import org.apache.zookeeper.server.ServerCnxn;
 import org.apache.zookeeper.server.quorum.QuorumPeerTestBase;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.ClientBase.CountdownWatcher;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 
 public class Log4jAuditLoggerTest extends QuorumPeerTestBase {
@@ -64,7 +64,7 @@ public class Log4jAuditLoggerTest extends QuorumPeerTestBase {
     private static WriterAppender appender;
     private static ByteArrayOutputStream os;
 
-    @BeforeAll
+    @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         System.setProperty(ZKAuditProvider.AUDIT_ENABLE, "true");
         // setup the logger to capture all logs
@@ -83,7 +83,7 @@ public class Log4jAuditLoggerTest extends QuorumPeerTestBase {
         verifyLogs(expectedAuditLog, logs);
     }
 
-    @BeforeEach
+    @Before
     public void setUp() {
         os.reset();
     }
@@ -357,9 +357,10 @@ public class Log4jAuditLoggerTest extends QuorumPeerTestBase {
             logs.add(line);
         }
         os.reset();
-        assertEquals(numberOfLogEntry, logs.size(),
+        assertEquals(
                 "Expected number of log entries are not generated. Logs are "
-                        + logs);
+                        + logs,
+                numberOfLogEntry, logs.size());
         return logs;
 
     }
@@ -392,8 +393,9 @@ public class Log4jAuditLoggerTest extends QuorumPeerTestBase {
 
         // ensure all servers started
         for (int i = 0; i < SERVER_COUNT; i++) {
-            Assertions.assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i],
-                    CONNECTION_TIMEOUT), "waiting for server " + i + " being up");
+            Assert.assertTrue("waiting for server " + i + " being up",
+                    ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i],
+                            CONNECTION_TIMEOUT));
         }
         return mt;
     }
@@ -408,15 +410,16 @@ public class Log4jAuditLoggerTest extends QuorumPeerTestBase {
             try {
                 Thread.sleep(waitInterval);
             } catch (InterruptedException e) {
-                Assertions.fail("CurrentEpoch update failed");
+                Assert.fail("CurrentEpoch update failed");
             }
             elapsedTime = elapsedTime + waitInterval;
             exists = zooKeeper.exists(path, false);
         }
-        Assertions.assertNull(exists, "Node " + path + " not deleted in " + timeout + " ms");
+        Assert.assertNull("Node " + path + " not deleted in " + timeout + " ms",
+                exists);
     }
 
-    @AfterAll
+    @AfterClass
     public static void tearDownAfterClass() {
         System.clearProperty(ZKAuditProvider.AUDIT_ENABLE);
         for (int i = 0; i < SERVER_COUNT; i++) {

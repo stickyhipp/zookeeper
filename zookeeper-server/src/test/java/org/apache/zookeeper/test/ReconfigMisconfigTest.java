@@ -18,8 +18,8 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,9 @@ import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.admin.ZooKeeperAdmin;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,7 @@ public class ReconfigMisconfigTest extends ZKTestCase {
     private static String errorMsg = "Reconfig should fail without configuring the super "
                                      + "user's password on server side first.";
 
-    @BeforeEach
+    @Before
     public void setup() throws InterruptedException {
         QuorumPeerConfig.setReconfigEnabled(true);
         // Get a three server quorum.
@@ -60,7 +59,7 @@ public class ReconfigMisconfigTest extends ZKTestCase {
         instantiateZKAdmin();
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         try {
             if (qu != null) {
@@ -74,8 +73,7 @@ public class ReconfigMisconfigTest extends ZKTestCase {
         }
     }
 
-    @Test
-    @Timeout(value = 10)
+    @Test(timeout = 10000)
     public void testReconfigFailWithoutSuperuserPasswordConfiguredOnServer() throws InterruptedException {
         // This tests the case where ZK ensemble does not have the super user's password configured.
         // Reconfig should fail as the super user has to be explicitly configured via

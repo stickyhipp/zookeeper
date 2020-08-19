@@ -18,10 +18,10 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.common.StringUtils;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class StringUtilTest extends ZKTestCase {
 

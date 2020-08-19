@@ -17,11 +17,12 @@
 
 package org.apache.zookeeper.server.watch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.ZKTestCase;
@@ -37,14 +37,14 @@ import org.apache.zookeeper.metrics.MetricsUtils;
 import org.apache.zookeeper.server.DumbWatcher;
 import org.apache.zookeeper.server.ServerCnxn;
 import org.apache.zookeeper.server.ServerMetrics;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RunWith(Parameterized.class)
 public class WatchManagerTest extends ZKTestCase {
 
     protected static final Logger LOG = LoggerFactory.getLogger(WatchManagerTest.class);
@@ -53,21 +53,25 @@ public class WatchManagerTest extends ZKTestCase {
 
     private ConcurrentHashMap<Integer, DumbWatcher> watchers;
     private Random r;
+    private String className;
 
-    public static Stream<Arguments> data() {
-        return Stream.of(
-            Arguments.of(WatchManager.class.getName()),
-            Arguments.of(WatchManagerOptimized.class.getName()));
+    public WatchManagerTest(String className) {
+        this.className = className;
     }
 
-    @BeforeEach
+    @Parameterized.Parameters
+    public static List<Object[]> data() {
+        return Arrays.asList(new Object[][]{{WatchManager.class.getName()}, {WatchManagerOptimized.class.getName()}});
+    }
+
+    @Before
     public void setUp() {
         ServerMetrics.getMetrics().resetAll();
-        watchers = new ConcurrentHashMap<>();
+        watchers = new ConcurrentHashMap<Integer, DumbWatcher>();
         r = new Random(System.nanoTime());
     }
 
-    public IWatchManager getWatchManager(String className) throws IOException {
+    public IWatchManager getWatchManager() throws IOException {
         System.setProperty(WatchManagerFactory.ZOOKEEPER_WATCH_MANAGER_NAME, className);
         return WatchManagerFactory.createWatchManager();
     }
@@ -225,11 +229,9 @@ public class WatchManagerTest extends ZKTestCase {
      * Concurrently add and trigger watch, make sure the watches triggered
      * are the same as the number added.
      */
-    @ParameterizedTest
-    @MethodSource("data")
-    @Timeout(value = 90)
-    public void testAddAndTriggerWatcher(String className) throws IOException {
-        IWatchManager manager = getWatchManager(className);
+    @Test(timeout = 90000)
+    public void testAddAndTriggerWatcher() throws IOException {
+        IWatchManager manager = getWatchManager();
         int paths = 1;
         int watchers = 10000;
 
@@ -286,11 +288,9 @@ public class WatchManagerTest extends ZKTestCase {
      * Concurrently add and remove watch, make sure the watches left +
      * the watches removed are equal to the total added watches.
      */
-    @ParameterizedTest
-    @MethodSource("data")
-    @Timeout(value = 90)
-    public void testRemoveWatcherOnPath(String className) throws IOException {
-        IWatchManager manager = getWatchManager(className);
+    @Test(timeout = 90000)
+    public void testRemoveWatcherOnPath() throws IOException {
+        IWatchManager manager = getWatchManager();
         int paths = 10;
         int watchers = 10000;
 
@@ -346,14 +346,12 @@ public class WatchManagerTest extends ZKTestCase {
      * Concurrently add watch while close the watcher to simulate the
      * client connections closed on prod.
      */
-    @ParameterizedTest
-    @MethodSource("data")
-    @Timeout(value = 90)
-    public void testDeadWatchers(String className) throws IOException {
+    @Test(timeout = 90000)
+    public void testDeadWatchers() throws IOException {
         System.setProperty("zookeeper.watcherCleanThreshold", "10");
         System.setProperty("zookeeper.watcherCleanIntervalInSeconds", "1");
 
-        IWatchManager manager = getWatchManager(className);
+        IWatchManager manager = getWatchManager();
         int paths = 1;
         int watchers = 100000;
 
@@ -416,10 +414,9 @@ public class WatchManagerTest extends ZKTestCase {
         assertEquals(sum, values.get("sum_" + metricName));
     }
 
-    @ParameterizedTest
-    @MethodSource("data")
-    public void testWatcherMetrics(String className) throws IOException {
-        IWatchManager manager = getWatchManager(className);
+    @Test
+    public void testWatcherMetrics() throws IOException {
+        IWatchManager manager = getWatchManager();
         ServerMetrics.getMetrics().resetAll();
 
         DumbWatcher watcher1 = new DumbWatcher(1);

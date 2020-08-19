@@ -18,15 +18,12 @@
 
 package org.apache.zookeeper.test;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.platform.suite.api.SelectClasses;
-import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 /**
  * Run tests with: Netty Client against Netty server
  */
-@RunWith(JUnitPlatform.class)
-@SelectClasses({ACLTest.class, AsyncOpsTest.class, ChrootClientTest.class, ClientTest.class, FourLetterWordsTest.class, NullDataTest.class, ReconfigTest.class, SessionTest.class, WatcherTest.class})
+@Suite.SuiteClasses({ACLTest.class, AsyncOpsTest.class, ChrootClientTest.class, ClientTest.class, FourLetterWordsTest.class, NullDataTest.class, ReconfigTest.class, SessionTest.class, WatcherTest.class})
 public class NettyNettySuiteTest extends NettyNettySuiteBase {
 
 }

@@ -18,23 +18,20 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import java.io.IOException;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class StatTest extends ClientBase {
 
     private ZooKeeper zk;
 
-    @BeforeEach
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -42,7 +39,6 @@ public class StatTest extends ClientBase {
         zk = createClient();
     }
 
-    @AfterEach
     @Override
     public void tearDown() throws Exception {
         super.tearDown();

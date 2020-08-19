@@ -18,9 +18,9 @@
 
 package org.apache.zookeeper.common;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,14 +31,14 @@ import java.nio.charset.StandardCharsets;
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.common.AtomicFileWritingIdiom.OutputStreamStatement;
 import org.apache.zookeeper.common.AtomicFileWritingIdiom.WriterStatement;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class AtomicFileWritingIdiomTest extends ZKTestCase {
 
     private static File tmpdir;
 
-    @BeforeAll
+    @BeforeClass
     public static void createTmpDir() {
         tmpdir = new File("build/test/tmp");
         tmpdir.mkdirs();
@@ -54,10 +54,10 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
             @Override
             public void write(OutputStream os) throws IOException {
                 os.write("after".getBytes(StandardCharsets.US_ASCII));
-                assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
             }
         });
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
+        assertFalse("tmp file should have been deleted", tmp.exists());
         // content changed
         assertEquals("after", getContent(target));
         target.delete();
@@ -73,10 +73,10 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
             @Override
             public void write(Writer os) throws IOException {
                 os.write("after");
-                assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
             }
         });
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
+        assertFalse("tmp file should have been deleted", tmp.exists());
         // content changed
         assertEquals("after", getContent(target));
         target.delete();
@@ -95,15 +95,15 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(OutputStream os) throws IOException {
                     os.write("after".getBytes(StandardCharsets.US_ASCII));
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new RuntimeException();
                 }
             });
         } catch (RuntimeException ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // content preserved
         assertEquals("before", getContent(target));
         target.delete();
@@ -122,15 +122,15 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(Writer os) throws IOException {
                     os.write("after");
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new RuntimeException();
                 }
             });
         } catch (RuntimeException ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // content preserved
         assertEquals("before", getContent(target));
         target.delete();
@@ -149,15 +149,15 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(OutputStream os) throws IOException {
                     os.write("after".getBytes(StandardCharsets.US_ASCII));
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new IOException();
                 }
             });
         } catch (IOException ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // content preserved
         assertEquals("before", getContent(target));
         target.delete();
@@ -176,15 +176,15 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(Writer os) throws IOException {
                     os.write("after");
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new IOException();
                 }
             });
         } catch (IOException ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // content preserved
         assertEquals("before", getContent(target));
         target.delete();
@@ -203,15 +203,15 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(OutputStream os) throws IOException {
                     os.write("after".getBytes(StandardCharsets.US_ASCII));
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new Error();
                 }
             });
         } catch (Error ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // content preserved
         assertEquals("before", getContent(target));
         target.delete();
@@ -230,15 +230,15 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(Writer os) throws IOException {
                     os.write("after");
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new Error();
                 }
             });
         } catch (Error ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // content preserved
         assertEquals("before", getContent(target));
         target.delete();
@@ -251,12 +251,12 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
         File target = new File(tmpdir, "target.txt");
         final File tmp = new File(tmpdir, "target.txt.tmp");
         target.delete();
-        assertFalse(target.exists(), "file should not exist");
+        assertFalse("file should not exist", target.exists());
         new AtomicFileWritingIdiom(target, new OutputStreamStatement() {
             @Override
             public void write(OutputStream os) throws IOException {
                 os.write("after".getBytes(StandardCharsets.US_ASCII));
-                assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
             }
         });
         // content changed
@@ -269,15 +269,15 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
         File target = new File(tmpdir, "target.txt");
         final File tmp = new File(tmpdir, "target.txt.tmp");
         target.delete();
-        assertFalse(target.exists(), "file should not exist");
+        assertFalse("file should not exist", target.exists());
         new AtomicFileWritingIdiom(target, new WriterStatement() {
             @Override
             public void write(Writer os) throws IOException {
                 os.write("after");
-                assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
             }
         });
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
+        assertFalse("tmp file should have been deleted", tmp.exists());
         // content changed
         assertEquals("after", getContent(target));
         target.delete();
@@ -288,7 +288,7 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
         File target = new File(tmpdir, "target.txt");
         final File tmp = new File(tmpdir, "target.txt.tmp");
         target.delete();
-        assertFalse(target.exists(), "file should not exist");
+        assertFalse("file should not exist", target.exists());
         boolean exception = false;
         try {
             new AtomicFileWritingIdiom(target, new OutputStreamStatement() {
@@ -296,17 +296,17 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(OutputStream os) throws IOException {
                     os.write("after".getBytes(StandardCharsets.US_ASCII));
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new RuntimeException();
                 }
             });
         } catch (RuntimeException ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // file should not exist
-        assertFalse(target.exists(), "file should not exist");
+        assertFalse("file should not exist", target.exists());
     }
 
     @Test
@@ -314,7 +314,7 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
         File target = new File(tmpdir, "target.txt");
         final File tmp = new File(tmpdir, "target.txt.tmp");
         target.delete();
-        assertFalse(target.exists(), "file should not exist");
+        assertFalse("file should not exist", target.exists());
         boolean exception = false;
         try {
             new AtomicFileWritingIdiom(target, new WriterStatement() {
@@ -322,17 +322,17 @@ public class AtomicFileWritingIdiomTest extends ZKTestCase {
                 public void write(Writer os) throws IOException {
                     os.write("after");
                     os.flush();
-                    assertTrue(tmp.exists(), "implementation of AtomicFileOutputStream has changed, update the test");
+                    assertTrue("implementation of AtomicFileOutputStream has changed, update the test", tmp.exists());
                     throw new RuntimeException();
                 }
             });
         } catch (RuntimeException ex) {
             exception = true;
         }
-        assertFalse(tmp.exists(), "tmp file should have been deleted");
-        assertTrue(exception, "should have raised an exception");
+        assertFalse("tmp file should have been deleted", tmp.exists());
+        assertTrue("should have raised an exception", exception);
         // file should not exist
-        assertFalse(target.exists(), "file should not exist");
+        assertFalse("file should not exist", target.exists());
     }
 
     private String getContent(File file, String encoding) throws IOException {

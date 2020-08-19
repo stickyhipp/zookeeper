@@ -17,7 +17,6 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -31,9 +30,9 @@ import org.apache.zookeeper.server.watch.WatcherOrBitSet;
 import org.apache.zookeeper.server.watch.WatchesPathReport;
 import org.apache.zookeeper.server.watch.WatchesReport;
 import org.apache.zookeeper.server.watch.WatchesSummary;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class UnsupportedAddWatcherTest extends ClientBase {
 
@@ -99,13 +98,13 @@ public class UnsupportedAddWatcherTest extends ClientBase {
         }
     }
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         System.setProperty(WatchManagerFactory.ZOOKEEPER_WATCH_MANAGER_NAME, StubbedWatchManager.class.getName());
         super.setUp();
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         try {
             super.tearDown();
@@ -114,15 +113,12 @@ public class UnsupportedAddWatcherTest extends ClientBase {
         }
     }
 
-    @Test
+    @Test(expected = KeeperException.MarshallingErrorException.class)
     public void testBehavior() throws IOException, InterruptedException, KeeperException {
-        assertThrows(KeeperException.MarshallingErrorException.class, () -> {
-            try (ZooKeeper zk = createClient(hostPort)) {
-                // the server will generate an exception as our custom watch manager doesn't implement
-                // the new version of addWatch()
-                zk.addWatch("/foo", event -> {
-                }, AddWatchMode.PERSISTENT_RECURSIVE);
-            }
-        });
+        try (ZooKeeper zk = createClient(hostPort)) {
+            // the server will generate an exception as our custom watch manager doesn't implement
+            // the new version of addWatch()
+            zk.addWatch("/foo", event -> {}, AddWatchMode.PERSISTENT_RECURSIVE);
+        }
     }
 }

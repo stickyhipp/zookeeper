@@ -18,23 +18,22 @@
 
 package org.apache.zookeeper.server;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import org.apache.zookeeper.ZKTestCase;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class ByteBufferInputStreamTest extends ZKTestCase {
 
     private static final byte[] DATA_BYTES_0 = "Apache ZooKeeper".getBytes(StandardCharsets.UTF_8);
 
     private static byte[] DATA_BYTES;
-    @BeforeAll
+    @BeforeClass
     public static void setUpClass() {
         int len = DATA_BYTES_0.length + 2;
         DATA_BYTES = new byte[len];
@@ -46,7 +45,7 @@ public class ByteBufferInputStreamTest extends ZKTestCase {
     private ByteBuffer bb;
     private ByteBufferInputStream in;
     private byte[] bs;
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         bb = ByteBuffer.wrap(DATA_BYTES);
         in = new ByteBufferInputStream(bb);
@@ -67,11 +66,9 @@ public class ByteBufferInputStreamTest extends ZKTestCase {
         byte[] expected = new byte[]{(byte) 1, (byte) 2, DATA_BYTES[0], (byte) 4};
         assertArrayEquals(expected, bs);
     }
-    @Test
+    @Test(expected = IndexOutOfBoundsException.class)
     public void testReadArrayOffsetLength_LengthTooLarge() throws Exception {
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            in.read(bs, 2, 3);
-        });
+        in.read(bs, 2, 3);
     }
     @Test
     public void testReadArrayOffsetLength_HitEndOfStream() throws Exception {

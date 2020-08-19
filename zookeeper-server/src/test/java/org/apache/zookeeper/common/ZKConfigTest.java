@@ -18,23 +18,30 @@
 
 package org.apache.zookeeper.common;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+
+import static org.junit.Assert.assertEquals;
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.Timeout;
+
+
 
 public class ZKConfigTest {
 
     X509Util x509Util = new ClientX509Util();
 
-    @AfterEach
+    @Rule
+    public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
+
+    @After
     public void tearDown() throws Exception {
         System.clearProperty(x509Util.getSslProtocolProperty());
     }
 
     // property is not set we should get the default value
     @Test
-    @Timeout(value = 10)
     public void testBooleanRetrievalFromPropertyDefault() {
         ZKConfig conf = new ZKConfig();
         String prop = "UnSetProperty" + System.currentTimeMillis();
@@ -45,7 +52,6 @@ public class ZKConfigTest {
 
     // property is set to an valid boolean, we should get the set value
     @Test
-    @Timeout(value = 10)
     public void testBooleanRetrievalFromProperty() {
         boolean value = true;
         boolean defaultValue = false;
@@ -57,7 +63,6 @@ public class ZKConfigTest {
 
     // property is set but with white spaces in the beginning
     @Test
-    @Timeout(value = 10)
     public void testBooleanRetrievalFromPropertyWithWhitespacesInBeginning() {
         boolean value = true;
         boolean defaultValue = false;
@@ -69,7 +74,6 @@ public class ZKConfigTest {
 
     // property is set but with white spaces at the end
     @Test
-    @Timeout(value = 10)
     public void testBooleanRetrievalFromPropertyWithWhitespacesAtEnd() {
         boolean value = true;
         boolean defaultValue = false;
@@ -81,7 +85,6 @@ public class ZKConfigTest {
 
     // property is set but with white spaces at the beginning and the end
     @Test
-    @Timeout(value = 10)
     public void testBooleanRetrievalFromPropertyWithWhitespacesAtBeginningAndEnd() {
         boolean value = true;
         boolean defaultValue = false;

@@ -18,7 +18,7 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,15 +41,22 @@ public class SaslTestUtil extends ClientBase {
             File jaasFile = new File(tmpDir, fileName);
             FileWriter fwriter = new FileWriter(jaasFile);
             fwriter.write(""
-                    + "Server {\n"
-                    + "          " + digestLoginModule + " required\n"
-                    + "          user_super=\"test\";\n"
-                    + "};\n"
-                    + "Client {\n"
-                    + "       " + digestLoginModule + " required\n"
-                    + "       username=\"super\"\n"
-                    + "       password=\"" + password + "\";\n"
-                    + "};" + "\n");
+                                  + "Server {\n"
+                                  + "          "
+                                  + digestLoginModule
+                                  + " required\n"
+                                  + "          user_super=\"test\";\n"
+                                  + "};\n"
+                                  + "Client {\n"
+                                  + "       "
+                                  + digestLoginModule
+                                  + " required\n"
+                                  + "       username=\"super\"\n"
+                                  + "       password=\""
+                                  + password
+                                  + "\";\n"
+                                  + "};"
+                                  + "\n");
             fwriter.close();
             ret = jaasFile.getAbsolutePath();
         } catch (IOException e) {

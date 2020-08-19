@@ -18,9 +18,9 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -32,7 +32,7 @@ import org.apache.zookeeper.cli.MalformedPathException;
 import org.apache.zookeeper.cli.SetQuotaCommand;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.server.ZooKeeperServer;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ZooKeeperQuotaTest extends ClientBase {
 
@@ -55,14 +55,14 @@ public class ZooKeeperQuotaTest extends ClientBase {
         String absolutePath = Quotas.quotaZookeeper + path + "/" + Quotas.limitNode;
         byte[] data = zk.getData(absolutePath, false, new Stat());
         StatsTrack st = new StatsTrack(new String(data));
-        assertTrue(st.getBytes() == 5L, "bytes are set");
-        assertTrue(st.getCount() == 10, "num count is set");
+        assertTrue("bytes are set", st.getBytes() == 5L);
+        assertTrue("num count is set", st.getCount() == 10);
 
         String statPath = Quotas.quotaZookeeper + path + "/" + Quotas.statNode;
         byte[] qdata = zk.getData(statPath, false, new Stat());
         StatsTrack qst = new StatsTrack(new String(qdata));
-        assertTrue(qst.getBytes() == 8L, "bytes are set");
-        assertTrue(qst.getCount() == 2, "count is set");
+        assertTrue("bytes are set", qst.getBytes() == 8L);
+        assertTrue("count is set", qst.getCount() == 2);
 
         //force server to restart and load from snapshot, not txn log
         stopServer();
@@ -70,7 +70,8 @@ public class ZooKeeperQuotaTest extends ClientBase {
         stopServer();
         startServer();
         ZooKeeperServer server = serverFactory.getZooKeeperServer();
-        assertNotNull(server.getZKDatabase().getDataTree().getMaxPrefixWithQuota(path) != null, "Quota is still set");
+        assertNotNull("Quota is still set", server.getZKDatabase().getDataTree().getMaxPrefixWithQuota(path)
+                                                           != null);
     }
 
     @Test

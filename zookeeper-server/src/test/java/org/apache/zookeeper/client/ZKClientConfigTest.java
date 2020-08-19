@@ -25,10 +25,10 @@ import static org.apache.zookeeper.client.ZKClientConfig.SECURE_CLIENT;
 import static org.apache.zookeeper.client.ZKClientConfig.ZK_SASL_CLIENT_USERNAME;
 import static org.apache.zookeeper.client.ZKClientConfig.ZOOKEEPER_CLIENT_CNXN_SOCKET;
 import static org.apache.zookeeper.client.ZKClientConfig.ZOOKEEPER_SERVER_REALM;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,17 +36,21 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import org.apache.zookeeper.common.ZKConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.Timeout;
 
 public class ZKClientConfigTest {
 
     private static final File testData = new File(System.getProperty("test.data.dir", "src/test/resources/data"));
+    @Rule
+    public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
 
-    @BeforeAll
+    @BeforeClass
     public static void init() {
         if (!testData.exists()) {
             testData.mkdirs();
@@ -54,7 +58,6 @@ public class ZKClientConfigTest {
     }
 
     @Test
-    @Timeout(value = 10)
     public void testDefaultConfiguration() {
         Map<String, String> properties = new HashMap<>();
         properties.put(ZK_SASL_CLIENT_USERNAME, "zookeeper1");
@@ -93,7 +96,6 @@ public class ZKClientConfigTest {
     }
 
     @Test
-    @Timeout(value = 10)
     public void testSystemPropertyValue() {
         String clientName = "zookeeper1";
         System.setProperty(ZK_SASL_CLIENT_USERNAME, clientName);
@@ -108,7 +110,6 @@ public class ZKClientConfigTest {
     }
 
     @Test
-    @Timeout(value = 10)
     public void testReadConfigurationFile() throws IOException, ConfigException {
         File file = File.createTempFile("clientConfig", ".conf", testData);
         file.deleteOnExit();
@@ -136,10 +137,10 @@ public class ZKClientConfigTest {
         // try to delete it now as we have done with the created file, why to
         // wait for deleteOnExit() deletion
         file.delete();
+
     }
 
     @Test
-    @Timeout(value = 10)
     public void testSetConfiguration() {
         ZKClientConfig conf = new ZKClientConfig();
         String defaultValue = conf.getProperty(ZKClientConfig.ENABLE_CLIENT_SASL_KEY, ZKClientConfig.ENABLE_CLIENT_SASL_DEFAULT);
@@ -152,7 +153,6 @@ public class ZKClientConfigTest {
     }
 
     @Test
-    @Timeout(value = 10)
     public void testIntegerRetrievalFromProperty() {
         ZKClientConfig conf = new ZKClientConfig();
         String prop = "UnSetProperty" + System.currentTimeMillis();
@@ -186,7 +186,6 @@ public class ZKClientConfigTest {
     }
 
     @Test
-    @Timeout(value = 10)
     public void testIntegerRetrievalFromHexadecimalProperty() {
         int hexaValue = 0x3000000;
         String wrongValue = "0xwel";

@@ -19,10 +19,10 @@
 package org.apache.zookeeper.test;
 
 import static org.apache.zookeeper.client.FourLetterWordMain.send4LetterWord;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -60,8 +60,8 @@ import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.persistence.FilePadding;
 import org.apache.zookeeper.server.quorum.QuorumPeer;
 import org.apache.zookeeper.server.util.OSMXBean;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.After;
+import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -338,7 +338,7 @@ public abstract class ClientBase extends ZKTestCase {
         thread.join(millis);
         if (thread.isAlive()) {
             LOG.error("Thread {} : {}", thread.getName(), Arrays.toString(thread.getStackTrace()));
-            assertFalse(true, "thread " + thread.getName() + " still alive after join");
+            assertFalse("thread " + thread.getName() + " still alive after join", true);
         }
     }
 
@@ -397,8 +397,8 @@ public abstract class ClientBase extends ZKTestCase {
         zks.setCreateSessionTrackerServerId(serverId);
         factory.startup(zks);
         assertTrue(
-                ClientBase.waitForServerUp("127.0.0.1:" + port, CONNECTION_TIMEOUT, factory.isSecure()),
-                "waiting for server up");
+                "waiting for server up",
+                ClientBase.waitForServerUp("127.0.0.1:" + port, CONNECTION_TIMEOUT, factory.isSecure()));
     }
 
     /**
@@ -447,8 +447,8 @@ public abstract class ClientBase extends ZKTestCase {
             final int PORT = getPort(hostPort);
 
             assertTrue(
-                    ClientBase.waitForServerDown("127.0.0.1:" + PORT, CONNECTION_TIMEOUT, factory.isSecure()),
-                    "waiting for server down");
+                    "waiting for server down",
+                    ClientBase.waitForServerDown("127.0.0.1:" + PORT, CONNECTION_TIMEOUT, factory.isSecure()));
         }
     }
 
@@ -469,7 +469,7 @@ public abstract class ClientBase extends ZKTestCase {
         allClientsSetup = true;
     }
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         setUpWithServerId(1);
     }
@@ -539,7 +539,7 @@ public abstract class ClientBase extends ZKTestCase {
         for (ObjectName bean : children) {
             LOG.info("unexpected:{}", bean.toString());
         }
-        assertEquals(0, children.size(), "Unexpected bean exists!");
+        assertEquals("Unexpected bean exists!", 0, children.size());
     }
 
     /**
@@ -578,7 +578,7 @@ public abstract class ClientBase extends ZKTestCase {
         }
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         LOG.info("tearDown starting");
 
@@ -587,7 +587,7 @@ public abstract class ClientBase extends ZKTestCase {
         stopServer();
 
         if (tmpDir != null) {
-            assertTrue(recursiveDelete(tmpDir), "delete " + tmpDir.toString());
+            assertTrue("delete " + tmpDir.toString(), recursiveDelete(tmpDir));
         }
 
         // This has to be set to null when the same instance of this class is reused between test cases

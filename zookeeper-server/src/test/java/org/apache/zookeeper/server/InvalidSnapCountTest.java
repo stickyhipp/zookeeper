@@ -19,8 +19,8 @@
 package org.apache.zookeeper.server;
 
 import static org.apache.zookeeper.test.ClientBase.CONNECTION_TIMEOUT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.common.PathUtils;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,8 +109,9 @@ public class InvalidSnapCountTest extends ZKTestCase implements Watcher {
         MainThread main = new MainThread(CLIENT_PORT);
         main.start();
 
-        assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT, CONNECTION_TIMEOUT),
-                "waiting for server being up");
+        assertTrue(
+                "waiting for server being up",
+                ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT, CONNECTION_TIMEOUT));
 
         assertEquals(SyncRequestProcessor.getSnapCount(), 2);
 

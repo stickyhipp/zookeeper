@@ -18,11 +18,11 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -43,9 +43,9 @@ import org.apache.zookeeper.server.ByteBufferInputStream;
 import org.apache.zookeeper.server.Request;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class SessionUpgradeQuorumTest extends QuorumPeerTestBase {
     private int[] clientPorts;
     private TestQPMainDropSessionUpgrading[] qpMain;
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception {
         LOG.info("STARTING quorum {}", getClass().getName());
         // setup the env with RetainDB and local session upgrading
@@ -91,11 +91,11 @@ public class SessionUpgradeQuorumTest extends QuorumPeerTestBase {
         }
 
         for (int i = 0; i < SERVER_COUNT; i++) {
-            assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i], CONNECTION_TIMEOUT), "waiting for server " + i + " being up");
+            assertTrue("waiting for server " + i + " being up", ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i], CONNECTION_TIMEOUT));
         }
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         LOG.info("STOPPING quorum {}", getClass().getName());
         for (int i = 0; i < SERVER_COUNT; i++) {
@@ -161,14 +161,15 @@ public class SessionUpgradeQuorumTest extends QuorumPeerTestBase {
         }
 
         for (int i = 0; i < SERVER_COUNT; i++) {
-            assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i], CONNECTION_TIMEOUT), "waiting for server " + i + " being up");
+            assertTrue("waiting for server " + i + " being up", ClientBase.waitForServerUp("127.0.0.1:" + clientPorts[i], CONNECTION_TIMEOUT));
         }
 
         // check global session not exist on follower A
         for (int i = 0; i < SERVER_COUNT; i++) {
             ConcurrentHashMap<Long, Integer> sessions = mt[i].main.quorumPeer.getZkDb().getSessionWithTimeOuts();
-            assertFalse(sessions.containsKey(sessionId),
-                    "server " + i + " should not have global " + "session " + sessionId);
+            assertFalse(
+                "server " + i + " should not have global " + "session " + sessionId,
+                sessions.containsKey(sessionId));
         }
 
         zk.close();
@@ -188,8 +189,8 @@ public class SessionUpgradeQuorumTest extends QuorumPeerTestBase {
         Request create1 = createEphemeralRequest("/data-1", sessionId);
         Request create2 = createEphemeralRequest("/data-2", sessionId);
 
-        assertNotNull(server.checkUpgradeSession(create1), "failed to upgrade on a ephemeral create");
-        assertNull(server.checkUpgradeSession(create2), "tried to upgrade again");
+        assertNotNull("failed to upgrade on a ephemeral create", server.checkUpgradeSession(create1));
+        assertNull("tried to upgrade again", server.checkUpgradeSession(create2));
 
         // clean al the setups and close the zk
         zk.close();

@@ -20,9 +20,9 @@ package org.apache.zookeeper.server;
 
 import static org.apache.zookeeper.client.FourLetterWordMain.send4LetterWord;
 import static org.apache.zookeeper.server.command.AbstractFourLetterCommand.ZK_NOT_SERVING;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -33,9 +33,8 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.common.X509Exception.SSLContextException;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.ClientBase.CountdownWatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,7 @@ public class ZooKeeperServerStartupTest extends ZKTestCase {
     private File tmpDir;
     private CountDownLatch startupDelayLatch = new CountDownLatch(1);
 
-    @AfterEach
+    @After
     public void teardown() throws Exception {
         // count down to avoid infinite blocking call due to this latch, if
         // any.
@@ -76,29 +75,26 @@ public class ZooKeeperServerStartupTest extends ZKTestCase {
      * Test case for
      * https://issues.apache.org/jira/browse/ZOOKEEPER-2383
      */
-    @Test
-    @Timeout(value = 30)
+    @Test(timeout = 30000)
     public void testClientConnectionRequestDuringStartupWithNIOServerCnxn() throws Exception {
         tmpDir = ClientBase.createTmpDir();
         ClientBase.setupTestEnv();
 
         startSimpleZKServer(startupDelayLatch);
         SimpleZooKeeperServer simplezks = (SimpleZooKeeperServer) zks;
-        assertTrue(simplezks.waitForStartupInvocation(10), "Failed to invoke zks#startup() method during server startup");
+        assertTrue("Failed to invoke zks#startup() method during server startup", simplezks.waitForStartupInvocation(10));
 
         CountdownWatcher watcher = new CountdownWatcher();
         ZooKeeper zkClient = new ZooKeeper(HOSTPORT, ClientBase.CONNECTION_TIMEOUT, watcher);
 
-        assertFalse(simplezks.waitForSessionCreation(5),
-            "Since server is not fully started, zks#createSession() shouldn't be invoked");
+        assertFalse("Since server is not fully started, zks#createSession() shouldn't be invoked", simplezks.waitForSessionCreation(5));
 
         LOG.info("Decrements the count of the latch, so that server will proceed with startup");
         startupDelayLatch.countDown();
 
-        assertTrue(ClientBase.waitForServerUp(HOSTPORT, ClientBase.CONNECTION_TIMEOUT), "waiting for server being up ");
+        assertTrue("waiting for server being up ", ClientBase.waitForServerUp(HOSTPORT, ClientBase.CONNECTION_TIMEOUT));
 
-        assertTrue(simplezks.waitForSessionCreation(5),
-            "Failed to invoke zks#createSession() method during client session creation");
+        assertTrue("Failed to invoke zks#createSession() method during client session creation", simplezks.waitForSessionCreation(5));
         watcher.waitForConnected(ClientBase.CONNECTION_TIMEOUT);
         zkClient.close();
     }
@@ -107,8 +103,7 @@ public class ZooKeeperServerStartupTest extends ZKTestCase {
      * Test case for
      * https://issues.apache.org/jira/browse/ZOOKEEPER-2383
      */
-    @Test
-    @Timeout(value = 30)
+    @Test(timeout = 30000)
     public void testClientConnectionRequestDuringStartupWithNettyServerCnxn() throws Exception {
         tmpDir = ClientBase.createTmpDir();
         ClientBase.setupTestEnv();
@@ -118,19 +113,19 @@ public class ZooKeeperServerStartupTest extends ZKTestCase {
             System.setProperty(ServerCnxnFactory.ZOOKEEPER_SERVER_CNXN_FACTORY, NettyServerCnxnFactory.class.getName());
             startSimpleZKServer(startupDelayLatch);
             SimpleZooKeeperServer simplezks = (SimpleZooKeeperServer) zks;
-            assertTrue(simplezks.waitForStartupInvocation(10), "Failed to invoke zks#startup() method during server startup");
+            assertTrue("Failed to invoke zks#startup() method during server startup", simplezks.waitForStartupInvocation(10));
 
             CountdownWatcher watcher = new CountdownWatcher();
             ZooKeeper zkClient = new ZooKeeper(HOSTPORT, ClientBase.CONNECTION_TIMEOUT, watcher);
 
-            assertFalse(simplezks.waitForSessionCreation(5), "Since server is not fully started, zks#createSession() shouldn't be invoked");
+            assertFalse("Since server is not fully started, zks#createSession() shouldn't be invoked", simplezks.waitForSessionCreation(5));
 
             LOG.info("Decrements the count of the latch, so that server will proceed with startup");
             startupDelayLatch.countDown();
 
-            assertTrue(ClientBase.waitForServerUp(HOSTPORT, ClientBase.CONNECTION_TIMEOUT), "waiting for server being up ");
+            assertTrue("waiting for server being up ", ClientBase.waitForServerUp(HOSTPORT, ClientBase.CONNECTION_TIMEOUT));
 
-            assertTrue(simplezks.waitForSessionCreation(5), "Failed to invoke zks#createSession() method during client session creation");
+            assertTrue("Failed to invoke zks#createSession() method during client session creation", simplezks.waitForSessionCreation(5));
             watcher.waitForConnected(ClientBase.CONNECTION_TIMEOUT);
             zkClient.close();
         } finally {
@@ -147,8 +142,7 @@ public class ZooKeeperServerStartupTest extends ZKTestCase {
      * Test case for
      * https://issues.apache.org/jira/browse/ZOOKEEPER-2383
      */
-    @Test
-    @Timeout(value = 30)
+    @Test(timeout = 30000)
     public void testFourLetterWords() throws Exception {
         startSimpleZKServer(startupDelayLatch);
         verify("conf", ZK_NOT_SERVING);
@@ -168,7 +162,7 @@ public class ZooKeeperServerStartupTest extends ZKTestCase {
     private void verify(String cmd, String expected) throws IOException, SSLContextException {
         String resp = sendRequest(cmd);
         LOG.info("cmd {} expected {} got {}", cmd, expected, resp);
-        assertTrue(resp.contains(expected), "Unexpected response");
+        assertTrue("Unexpected response", resp.contains(expected));
     }
 
     private String sendRequest(String cmd) throws IOException, SSLContextException {

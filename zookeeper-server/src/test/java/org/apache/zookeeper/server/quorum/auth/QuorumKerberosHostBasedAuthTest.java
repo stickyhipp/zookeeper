@@ -18,7 +18,7 @@
 
 package org.apache.zookeeper.server.quorum.auth;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,11 +32,10 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.server.quorum.QuorumPeerTestBase.MainThread;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.ClientBase.CountdownWatcher;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class QuorumKerberosHostBasedAuthTest extends KerberosSecurityTestcase {
 
@@ -97,7 +96,7 @@ public class QuorumKerberosHostBasedAuthTest extends KerberosSecurityTestcase {
         setupJaasConfig(jaasEntries);
     }
 
-    @BeforeAll
+    @BeforeClass
     public static void setUp() throws Exception {
         // create keytab
         keytabFile = new File(KerberosTestUtils.getKeytabFile());
@@ -113,7 +112,7 @@ public class QuorumKerberosHostBasedAuthTest extends KerberosSecurityTestcase {
         getKdc().createPrincipal(keytabFile, learnerPrincipal, learnerPrincipal2, serverPrincipal);
     }
 
-    @AfterEach
+    @After
     @Override
     public void tearDown() throws Exception {
         for (MainThread mainThread : mt) {
@@ -123,7 +122,7 @@ public class QuorumKerberosHostBasedAuthTest extends KerberosSecurityTestcase {
         super.tearDown();
     }
 
-    @AfterAll
+    @AfterClass
     public static void cleanup() {
         if (keytabFile != null) {
             FileUtils.deleteQuietly(keytabFile);
@@ -134,8 +133,7 @@ public class QuorumKerberosHostBasedAuthTest extends KerberosSecurityTestcase {
     /**
      * Test to verify that server is able to start with valid credentials
      */
-    @Test
-    @Timeout(value = 120)
+    @Test(timeout = 120000)
     public void testValidCredentials() throws Exception {
         String serverPrincipal = hostServerPrincipal.substring(0, hostServerPrincipal.lastIndexOf("@"));
         Map<String, String> authConfigs = new HashMap<String, String>();
@@ -157,8 +155,7 @@ public class QuorumKerberosHostBasedAuthTest extends KerberosSecurityTestcase {
      * Test to verify that server is able to start with valid credentials
      * when using multiple Quorum / Election addresses
      */
-    @Test
-    @Timeout(value = 120)
+    @Test(timeout = 120000)
     public void testValidCredentialsWithMultiAddresses() throws Exception {
         String serverPrincipal = hostServerPrincipal.substring(0, hostServerPrincipal.lastIndexOf("@"));
         Map<String, String> authConfigs = new HashMap<String, String>();
@@ -179,8 +176,7 @@ public class QuorumKerberosHostBasedAuthTest extends KerberosSecurityTestcase {
     /**
      * Test to verify that the bad server connection to the quorum should be rejected.
      */
-    @Test
-    @Timeout(value = 120)
+    @Test(timeout = 120000)
     public void testConnectBadServer() throws Exception {
         String serverPrincipal = hostServerPrincipal.substring(0, hostServerPrincipal.lastIndexOf("@"));
         Map<String, String> authConfigs = new HashMap<String, String>();

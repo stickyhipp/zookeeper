@@ -18,9 +18,9 @@
 
 package org.apache.zookeeper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.test.ClientBase;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class GetEphemeralsTest extends ClientBase {
 
@@ -41,7 +39,6 @@ public class GetEphemeralsTest extends ClientBase {
     private String[] expected;
     private ZooKeeper zk;
 
-    @BeforeEach
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -50,7 +47,6 @@ public class GetEphemeralsTest extends ClientBase {
         expected = generatePaths(PERSISTENT_CNT, EPHEMERAL_CNT);
     }
 
-    @AfterEach
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
@@ -61,10 +57,10 @@ public class GetEphemeralsTest extends ClientBase {
     @Test
     public void testGetEphemeralsSync() throws KeeperException, InterruptedException {
         List<String> actual = zk.getEphemerals();
-        assertEquals(actual.size(), expected.length, "Expected ephemeral count for allPaths");
+        assertEquals("Expected ephemeral count for allPaths", actual.size(), expected.length);
         for (int i = 0; i < expected.length; i++) {
             String path = expected[i];
-            assertTrue(actual.contains(path), String.format("Path=%s exists in get All Ephemerals list ", path));
+            assertTrue(String.format("Path=%s exists in get All Ephemerals list ", path), actual.contains(path));
         }
     }
 
@@ -72,10 +68,10 @@ public class GetEphemeralsTest extends ClientBase {
     public void testGetEphemeralsSyncByPath() throws KeeperException, InterruptedException {
         final String prefixPath = BASE + 0;
         List<String> actual = zk.getEphemerals(prefixPath);
-        assertEquals(actual.size(), EPHEMERAL_CNT, "Expected ephemeral count for allPaths");
+        assertEquals("Expected ephemeral count for allPaths", actual.size(), EPHEMERAL_CNT);
         for (int i = 0; i < EPHEMERAL_CNT; i++) {
             String path = expected[i];
-            assertTrue(actual.contains(path), String.format("Path=%s exists in getEphemerals(%s) list ", path, prefixPath));
+            assertTrue(String.format("Path=%s exists in getEphemerals(%s) list ", path, prefixPath), actual.contains(path));
         }
     }
 

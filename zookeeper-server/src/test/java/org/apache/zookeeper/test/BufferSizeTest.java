@@ -18,8 +18,8 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import org.apache.jute.BinaryInputArchive;
@@ -27,8 +27,8 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 public class BufferSizeTest extends ClientBase {
 
@@ -37,10 +37,10 @@ public class BufferSizeTest extends ClientBase {
 
     private ZooKeeper zk;
 
-    @BeforeEach
+    @Before
     public void setMaxBuffer() throws IOException, InterruptedException {
         System.setProperty("jute.maxbuffer", "" + TEST_MAXBUFFER);
-        assertEquals(TEST_MAXBUFFER, BinaryInputArchive.maxBuffer, "Can't set jute.maxbuffer!");
+        assertEquals("Can't set jute.maxbuffer!", TEST_MAXBUFFER, BinaryInputArchive.maxBuffer);
         zk = createClient();
     }
 

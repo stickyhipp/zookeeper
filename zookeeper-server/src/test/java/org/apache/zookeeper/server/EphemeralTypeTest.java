@@ -19,23 +19,22 @@
 package org.apache.zookeeper.server;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import org.apache.zookeeper.CreateMode;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class EphemeralTypeTest {
 
-    @BeforeEach
+    @Before
     public void setUp() {
         System.setProperty(EphemeralType.EXTENDED_TYPES_ENABLED_PROPERTY, "true");
     }
 
-    @AfterEach
+    @After
     public void tearDown() {
         System.clearProperty(EphemeralType.EXTENDED_TYPES_ENABLED_PROPERTY);
     }
@@ -93,13 +92,11 @@ public class EphemeralTypeTest {
         assertThat(EphemeralType.get(0xff00000000000000L), equalTo(EphemeralType.TTL));
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testEphemeralOwner_extendedFeature_extendedTypeUnsupported() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            // 0xff = Extended feature is ON
-            // 0x0001 = Unsupported extended type id (1)
-            EphemeralType.get(0xff00010000000000L);
-        });
+        // 0xff = Extended feature is ON
+        // 0x0001 = Unsupported extended type id (1)
+        EphemeralType.get(0xff00010000000000L);
     }
 
 }

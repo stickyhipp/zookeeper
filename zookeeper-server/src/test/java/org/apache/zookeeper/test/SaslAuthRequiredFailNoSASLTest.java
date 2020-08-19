@@ -18,24 +18,24 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class SaslAuthRequiredFailNoSASLTest extends ClientBase {
 
-    @BeforeEach
+    @Before
     public void setup() {
         System.setProperty(SaslTestUtil.requireSASLAuthProperty, "true");
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception {
         System.clearProperty(SaslTestUtil.requireSASLAuthProperty);
     }

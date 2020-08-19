@@ -18,8 +18,8 @@
 
 package org.apache.zookeeper.server.admin;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -46,9 +46,9 @@ import org.apache.zookeeper.server.admin.AdminServer.AdminServerException;
 import org.apache.zookeeper.server.quorum.QuorumPeerTestBase;
 import org.apache.zookeeper.test.ClientBase;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,14 +60,14 @@ public class JettyAdminServerTest extends ZKTestCase {
     private static final String HTTPS_URL_FORMAT = "https://localhost:%d/commands";
     private static final int jettyAdminPort = PortAssignment.unique();
 
-    @BeforeEach
+    @Before
     public void enableServer() {
         // Override setting in ZKTestCase
         System.setProperty("zookeeper.admin.enableServer", "true");
         System.setProperty("zookeeper.admin.serverPort", "" + jettyAdminPort);
     }
 
-    @BeforeEach
+    @Before
     public void setupEncryption() {
         Security.addProvider(new BouncyCastleProvider());
         File tmpDir = null;
@@ -129,7 +129,7 @@ public class JettyAdminServerTest extends ZKTestCase {
         HttpsURLConnection.setDefaultHostnameVerifier(allValid);
     }
 
-    @AfterEach
+    @After
     public void cleanUp() {
         Security.removeProvider("BC");
 
@@ -172,15 +172,17 @@ public class JettyAdminServerTest extends ZKTestCase {
         ZooKeeperServerMainTest.MainThread main = new ZooKeeperServerMainTest.MainThread(CLIENT_PORT, false, null);
         main.start();
 
-        assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT, ClientBase.CONNECTION_TIMEOUT),
-                "waiting for server being up");
+        assertTrue(
+            "waiting for server being up",
+            ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT, ClientBase.CONNECTION_TIMEOUT));
 
         queryAdminServer(jettyAdminPort);
 
         main.shutdown();
 
-        assertTrue(ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT, ClientBase.CONNECTION_TIMEOUT),
-                "waiting for server down");
+        assertTrue(
+            "waiting for server down",
+            ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT, ClientBase.CONNECTION_TIMEOUT));
     }
 
     /**
@@ -217,10 +219,12 @@ public class JettyAdminServerTest extends ZKTestCase {
 
         Thread.sleep(500);
 
-        assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP1, ClientBase.CONNECTION_TIMEOUT),
-                "waiting for server 1 being up");
-        assertTrue(ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP2, ClientBase.CONNECTION_TIMEOUT),
-                "waiting for server 2 being up");
+        assertTrue(
+            "waiting for server 1 being up",
+            ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP1, ClientBase.CONNECTION_TIMEOUT));
+        assertTrue(
+            "waiting for server 2 being up",
+            ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP2, ClientBase.CONNECTION_TIMEOUT));
 
         queryAdminServer(ADMIN_SERVER_PORT1);
         queryAdminServer(ADMIN_SERVER_PORT2);
@@ -228,10 +232,12 @@ public class JettyAdminServerTest extends ZKTestCase {
         q1.shutdown();
         q2.shutdown();
 
-        assertTrue(ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP1, ClientBase.CONNECTION_TIMEOUT),
-                "waiting for server 1 down");
-        assertTrue(ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP2, ClientBase.CONNECTION_TIMEOUT),
-                "waiting for server 2 down");
+        assertTrue(
+            "waiting for server 1 down",
+            ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP1, ClientBase.CONNECTION_TIMEOUT));
+        assertTrue(
+            "waiting for server 2 down",
+            ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP2, ClientBase.CONNECTION_TIMEOUT));
     }
 
     /**
