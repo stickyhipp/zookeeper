@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Random;
 import org.apache.jute.InputArchive;
 import org.apache.jute.OutputArchive;
-import org.apache.zookeeper.ClientCnxn;
 import org.apache.zookeeper.MockPacket;
 import org.apache.zookeeper.ZKParameterized;
 import org.apache.zookeeper.ZooDefs;
@@ -252,7 +251,7 @@ public class WatchLeakTest {
         SetWatches sw = new SetWatches(1L, dataWatches, existWatches, childWatches);
         RequestHeader h = new RequestHeader();
         h.setType(ZooDefs.OpCode.setWatches);
-        h.setXid(ClientCnxn.SET_WATCHES_XID);
+        h.setXid(-8);
         MockPacket p = new MockPacket(h, new ReplyHeader(), sw, null, null);
         return p.createAndReturnBB();
     }
