@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,14 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.zookeeper.cli;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Parser;
-import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.*;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Stat;
 
@@ -32,7 +27,7 @@ import org.apache.zookeeper.data.Stat;
 public class GetCommand extends CliCommand {
 
     private static Options options = new Options();
-    private String[] args;
+    private String args[];
     private CommandLine cl;
 
     static {
@@ -68,7 +63,8 @@ public class GetCommand extends CliCommand {
         if (args.length > 2) {
             // rewrite to option
             cmdArgs[2] = "-w";
-            err.println("'get path [watch]' has been deprecated. " + "Please use 'get [-s] [-w] path' instead.");
+            err.println("'get path [watch]' has been deprecated. "
+                    + "Please use 'get [-s] [-w] path' instead.");
             Parser parser = new PosixParser();
             try {
                 cl = parser.parse(options, cmdArgs);
@@ -84,12 +80,12 @@ public class GetCommand extends CliCommand {
         boolean watch = cl.hasOption("w");
         String path = args[1];
         Stat stat = new Stat();
-        byte[] data;
+        byte data[];
         try {
             data = zk.getData(path, watch, stat);
         } catch (IllegalArgumentException ex) {
             throw new MalformedPathException(ex.getMessage());
-        } catch (KeeperException | InterruptedException ex) {
+        } catch (KeeperException|InterruptedException ex) {
             throw new CliException(ex);
         }
         data = (data == null) ? "null".getBytes() : data;
@@ -99,5 +95,4 @@ public class GetCommand extends CliCommand {
         }
         return watch;
     }
-
 }

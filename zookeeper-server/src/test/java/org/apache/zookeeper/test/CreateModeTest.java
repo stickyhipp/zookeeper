@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,59 +18,57 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.util.EnumSet;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZKTestCase;
+import org.apache.zookeeper.KeeperException.Code;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class CreateModeTest extends ZKTestCase {
-
+    
     @Test
     public void testBasicCreateMode() {
         CreateMode cm = CreateMode.PERSISTENT;
-        assertEquals(cm.toFlag(), 0);
-        assertFalse(cm.isEphemeral());
-        assertFalse(cm.isSequential());
-        assertFalse(cm.isContainer());
+        Assert.assertEquals(cm.toFlag(), 0);
+        Assert.assertFalse(cm.isEphemeral());
+        Assert.assertFalse(cm.isSequential());
+        Assert.assertFalse(cm.isContainer());
 
         cm = CreateMode.EPHEMERAL;
-        assertEquals(cm.toFlag(), 1);
-        assertTrue(cm.isEphemeral());
-        assertFalse(cm.isSequential());
-        assertFalse(cm.isContainer());
+        Assert.assertEquals(cm.toFlag(), 1);
+        Assert.assertTrue(cm.isEphemeral());
+        Assert.assertFalse(cm.isSequential());
+        Assert.assertFalse(cm.isContainer());
 
         cm = CreateMode.PERSISTENT_SEQUENTIAL;
-        assertEquals(cm.toFlag(), 2);
-        assertFalse(cm.isEphemeral());
-        assertTrue(cm.isSequential());
-        assertFalse(cm.isContainer());
+        Assert.assertEquals(cm.toFlag(), 2);
+        Assert.assertFalse(cm.isEphemeral());
+        Assert.assertTrue(cm.isSequential());
+        Assert.assertFalse(cm.isContainer());
 
         cm = CreateMode.EPHEMERAL_SEQUENTIAL;
-        assertEquals(cm.toFlag(), 3);
-        assertTrue(cm.isEphemeral());
-        assertTrue(cm.isSequential());
-        assertFalse(cm.isContainer());
+        Assert.assertEquals(cm.toFlag(), 3);
+        Assert.assertTrue(cm.isEphemeral());
+        Assert.assertTrue(cm.isSequential());
+        Assert.assertFalse(cm.isContainer());
 
         cm = CreateMode.CONTAINER;
-        assertEquals(cm.toFlag(), 4);
-        assertFalse(cm.isEphemeral());
-        assertFalse(cm.isSequential());
-        assertTrue(cm.isContainer());
+        Assert.assertEquals(cm.toFlag(), 4);
+        Assert.assertFalse(cm.isEphemeral());
+        Assert.assertFalse(cm.isSequential());
+        Assert.assertTrue(cm.isContainer());
     }
-
+    
     @Test
     public void testFlagConversion() throws KeeperException {
         // Ensure we get the same value back after round trip conversion
         EnumSet<CreateMode> allModes = EnumSet.allOf(CreateMode.class);
 
-        for (CreateMode cm : allModes) {
-            assertEquals(cm, CreateMode.fromFlag(cm.toFlag()));
+        for(CreateMode cm : allModes) {
+            Assert.assertEquals(cm, CreateMode.fromFlag( cm.toFlag() ) );
         }
     }
 
@@ -78,17 +76,16 @@ public class CreateModeTest extends ZKTestCase {
     public void testInvalidFlagConversion() throws KeeperException {
         try {
             CreateMode.fromFlag(99);
-            fail("Shouldn't be able to convert 99 to a CreateMode.");
-        } catch (KeeperException ke) {
-            assertEquals(Code.BADARGUMENTS, ke.code());
+            Assert.fail("Shouldn't be able to convert 99 to a CreateMode.");
+        } catch(KeeperException ke) {
+            Assert.assertEquals(Code.BADARGUMENTS, ke.code());
         }
 
         try {
             CreateMode.fromFlag(-1);
-            fail("Shouldn't be able to convert -1 to a CreateMode.");
-        } catch (KeeperException ke) {
-            assertEquals(Code.BADARGUMENTS, ke.code());
+            Assert.fail("Shouldn't be able to convert -1 to a CreateMode.");
+        } catch(KeeperException ke) {
+            Assert.assertEquals(Code.BADARGUMENTS, ke.code());
         }
     }
-
 }

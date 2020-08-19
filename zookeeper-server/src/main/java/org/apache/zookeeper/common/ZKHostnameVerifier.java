@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,6 +18,20 @@
 
 package org.apache.zookeeper.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.naming.InvalidNameException;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import javax.security.auth.x500.X500Principal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.cert.Certificate;
@@ -31,19 +45,6 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import javax.naming.InvalidNameException;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
-import javax.security.auth.x500.X500Principal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Note: copied from Apache httpclient with some modifications. We want host verification, but depending
@@ -56,7 +57,6 @@ final class ZKHostnameVerifier implements HostnameVerifier {
      * on the httpclient jar caused unexplained performance regressions (even when the code was not used).
      */
     private static final class SubjectName {
-
         static final int DNS = 2;
         static final int IP = 7;
 
@@ -91,7 +91,6 @@ final class ZKHostnameVerifier implements HostnameVerifier {
         public String toString() {
             return value;
         }
-
     }
 
     /**
@@ -99,15 +98,16 @@ final class ZKHostnameVerifier implements HostnameVerifier {
      * httpclient jar caused unexplained performance regressions (even when the code was not used).
      */
     private static class InetAddressUtils {
+        private InetAddressUtils() {}
 
-        private InetAddressUtils() {
-        }
+        private static final Pattern IPV4_PATTERN = Pattern.compile(
+                "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
 
-        private static final Pattern IPV4_PATTERN = Pattern.compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
+        private static final Pattern IPV6_STD_PATTERN = Pattern.compile(
+                "^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$");
 
-        private static final Pattern IPV6_STD_PATTERN = Pattern.compile("^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$");
-
-        private static final Pattern IPV6_HEX_COMPRESSED_PATTERN = Pattern.compile("^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$");
+        private static final Pattern IPV6_HEX_COMPRESSED_PATTERN = Pattern.compile(
+                "^((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)::((?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4})*)?)$");
 
         static boolean isIPv4Address(final String input) {
             return IPV4_PATTERN.matcher(input).matches();
@@ -124,14 +124,11 @@ final class ZKHostnameVerifier implements HostnameVerifier {
         static boolean isIPv6Address(final String input) {
             return isIPv6StdAddress(input) || isIPv6HexCompressedAddress(input);
         }
-
     }
 
     enum HostNameType {
 
-        IPv4(7),
-        IPv6(7),
-        DNS(2);
+        IPv4(7), IPv6(7), DNS(2);
 
         final int subjectType;
 
@@ -163,14 +160,14 @@ final class ZKHostnameVerifier implements HostnameVerifier {
         final List<SubjectName> subjectAlts = getSubjectAltNames(cert);
         if (subjectAlts != null && !subjectAlts.isEmpty()) {
             switch (hostType) {
-            case IPv4:
-                matchIPAddress(host, subjectAlts);
-                break;
-            case IPv6:
-                matchIPv6Address(host, subjectAlts);
-                break;
-            default:
-                matchDNSName(host, subjectAlts);
+                case IPv4:
+                    matchIPAddress(host, subjectAlts);
+                    break;
+                case IPv6:
+                    matchIPv6Address(host, subjectAlts);
+                    break;
+                default:
+                    matchDNSName(host, subjectAlts);
             }
         } else {
             // CN matching has been deprecated by rfc2818 and can be used
@@ -178,10 +175,8 @@ final class ZKHostnameVerifier implements HostnameVerifier {
             final X500Principal subjectPrincipal = cert.getSubjectX500Principal();
             final String cn = extractCN(subjectPrincipal.getName(X500Principal.RFC2253));
             if (cn == null) {
-                throw new SSLException("Certificate subject for <"
-                                       + host
-                                       + "> doesn't contain "
-                                       + "a common name and does not have alternative names");
+                throw new SSLException("Certificate subject for <" + host + "> doesn't contain " +
+                        "a common name and does not have alternative names");
             }
             matchCN(host, cn);
         }
@@ -196,8 +191,8 @@ final class ZKHostnameVerifier implements HostnameVerifier {
                 }
             }
         }
-        throw new SSLPeerUnverifiedException("Certificate for <" + host + "> doesn't match any "
-                                             + "of the subject alternative names: " + subjectAlts);
+        throw new SSLPeerUnverifiedException("Certificate for <" + host + "> doesn't match any " +
+                "of the subject alternative names: " + subjectAlts);
     }
 
     private static void matchIPv6Address(final String host, final List<SubjectName> subjectAlts) throws SSLException {
@@ -211,11 +206,8 @@ final class ZKHostnameVerifier implements HostnameVerifier {
                 }
             }
         }
-        throw new SSLPeerUnverifiedException("Certificate for <"
-                                             + host
-                                             + "> doesn't match any "
-                                             + "of the subject alternative names: "
-                                             + subjectAlts);
+        throw new SSLPeerUnverifiedException("Certificate for <" + host + "> doesn't match any " +
+                "of the subject alternative names: " + subjectAlts);
     }
 
     private static void matchDNSName(final String host, final List<SubjectName> subjectAlts) throws SSLException {
@@ -229,20 +221,21 @@ final class ZKHostnameVerifier implements HostnameVerifier {
                 }
             }
         }
-        throw new SSLPeerUnverifiedException("Certificate for <" + host + "> doesn't match any "
-                                             + "of the subject alternative names: " + subjectAlts);
+        throw new SSLPeerUnverifiedException("Certificate for <" + host + "> doesn't match any " +
+                "of the subject alternative names: " + subjectAlts);
     }
 
     private static void matchCN(final String host, final String cn) throws SSLException {
         final String normalizedHost = host.toLowerCase(Locale.ROOT);
         final String normalizedCn = cn.toLowerCase(Locale.ROOT);
         if (!matchIdentityStrict(normalizedHost, normalizedCn)) {
-            throw new SSLPeerUnverifiedException("Certificate for <" + host + "> doesn't match "
-                                                 + "common name of the certificate subject: " + cn);
+            throw new SSLPeerUnverifiedException("Certificate for <" + host + "> doesn't match " +
+                    "common name of the certificate subject: " + cn);
         }
     }
 
-    private static boolean matchIdentity(final String host, final String identity, final boolean strict) {
+    private static boolean matchIdentity(final String host, final String identity,
+                                         final boolean strict) {
         // RFC 2818, 3.1. Server Identity
         // "...Names may contain the wildcard
         // character * which is considered to match any single domain name
@@ -260,8 +253,11 @@ final class ZKHostnameVerifier implements HostnameVerifier {
             }
             // Additional sanity checks on content selected by wildcard can be done here
             if (strict) {
-                final String remainder = host.substring(prefix.length(), host.length() - suffix.length());
-                return !remainder.contains(".");
+                final String remainder = host.substring(
+                        prefix.length(), host.length() - suffix.length());
+                if (remainder.contains(".")) {
+                    return false;
+                }
             }
             return true;
         }
@@ -323,7 +319,7 @@ final class ZKHostnameVerifier implements HostnameVerifier {
                 return Collections.emptyList();
             }
             final List<SubjectName> result = new ArrayList<SubjectName>();
-            for (List<?> entry : entries) {
+            for (List<?> entry: entries) {
                 final Integer type = entry.size() >= 2 ? (Integer) entry.get(0) : null;
                 if (type != null) {
                     final String s = (String) entry.get(1);
@@ -350,5 +346,4 @@ final class ZKHostnameVerifier implements HostnameVerifier {
             return hostname;
         }
     }
-
 }

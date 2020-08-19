@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.zookeeper.common;
 
 @SuppressWarnings("serial")
 public class X509Exception extends Exception {
-
     public X509Exception(String message) {
         super(message);
     }
@@ -34,7 +32,6 @@ public class X509Exception extends Exception {
     }
 
     public static class KeyManagerException extends X509Exception {
-
         public KeyManagerException(String message) {
             super(message);
         }
@@ -42,11 +39,9 @@ public class X509Exception extends Exception {
         public KeyManagerException(Throwable cause) {
             super(cause);
         }
-
     }
 
     public static class TrustManagerException extends X509Exception {
-
         public TrustManagerException(String message) {
             super(message);
         }
@@ -54,11 +49,9 @@ public class X509Exception extends Exception {
         public TrustManagerException(Throwable cause) {
             super(cause);
         }
-
     }
 
     public static class SSLContextException extends X509Exception {
-
         public SSLContextException(String message) {
             super(message);
         }
@@ -70,7 +63,5 @@ public class X509Exception extends Exception {
         public SSLContextException(String message, Throwable cause) {
             super(message, cause);
         }
-
     }
-
 }

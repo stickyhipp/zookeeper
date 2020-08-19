@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,8 +18,6 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,11 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.security.sasl.SaslException;
+
 import org.apache.jute.OutputArchive;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.KeeperException.NodeExistsException;
 import org.apache.zookeeper.Op;
+
 import org.apache.zookeeper.PortAssignment;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
@@ -44,6 +45,8 @@ import org.apache.zookeeper.server.ZKDatabase;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.apache.zookeeper.test.ClientBase;
+
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,8 +76,9 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
 
         for (int i = 0; i < ENSEMBLE_SERVERS; i++) {
             clientPorts[i] = PortAssignment.unique();
-            server = "server." + i + "=127.0.0.1:" + PortAssignment.unique() + ":" + PortAssignment.unique()
-                     + ":participant;127.0.0.1:" + clientPorts[i];
+            server = "server." + i + "=127.0.0.1:" + PortAssignment.unique()
+                    + ":" + PortAssignment.unique() + ":participant;127.0.0.1:"
+                    + clientPorts[i];
             sb.append(server + "\n");
         }
         String currentQuorumCfgSection = sb.toString();
@@ -83,14 +87,16 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         mt = new MainThread[ENSEMBLE_SERVERS];
         zk = new ZooKeeper[ENSEMBLE_SERVERS];
         for (int i = 0; i < ENSEMBLE_SERVERS; i++) {
-            mt[i] = new MainThread(i, clientPorts[i], currentQuorumCfgSection, false) {
+            mt[i] = new MainThread(i, clientPorts[i], currentQuorumCfgSection,
+                    false) {
                 @Override
                 public TestQPMain getTestQPMain() {
                     return new CustomizedQPMain();
                 }
             };
             mt[i].start();
-            zk[i] = new ZooKeeper("127.0.0.1:" + clientPorts[i], ClientBase.CONNECTION_TIMEOUT, this);
+            zk[i] = new ZooKeeper("127.0.0.1:" + clientPorts[i],
+                    ClientBase.CONNECTION_TIMEOUT, this);
         }
         QuorumPeerMainTest.waitForAll(zk, States.CONNECTED);
         LOG.info("all servers started");
@@ -109,13 +115,13 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
     @After
     public void tearDown() throws Exception {
         if (mt != null) {
-            for (MainThread t : mt) {
+            for (MainThread t: mt) {
                 t.shutdown();
             }
         }
 
         if (zk != null) {
-            for (ZooKeeper z : zk) {
+            for (ZooKeeper z: zk) {
                 z.close();
             }
         }
@@ -128,7 +134,8 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         createEmptyNode(zk[followerA], path);
 
         LOG.info("Hook to catch the 2nd sub create node txn in multi-op");
-        CustomDataTree dt = (CustomDataTree) mt[followerA].main.quorumPeer.getZkDb().getDataTree();
+        CustomDataTree dt =
+                (CustomDataTree) mt[followerA].main.quorumPeer.getZkDb().getDataTree();
 
         final ZooKeeperServer zkServer = mt[followerA].main.quorumPeer.getActiveServer();
 
@@ -145,8 +152,11 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
 
         LOG.info("Issue a multi op to create 2 nodes");
         zk[followerA].multi(Arrays.asList(
-                Op.create(node1, node1.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT),
-                Op.create(node2, node2.getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)));
+            Op.create(node1, node1.getBytes(),
+                    Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT),
+            Op.create(node2, node2.getBytes(),
+                    Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT))
+        );
 
         LOG.info("Restart the server");
         mt[followerA].shutdown();
@@ -156,8 +166,7 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         QuorumPeerMainTest.waitForOne(zk[followerA], States.CONNECTED);
 
         LOG.info("Make sure the node consistent with leader");
-        assertEquals(
-                new String(zk[leaderId].getData(node2, null, null)),
+        Assert.assertEquals(new String(zk[leaderId].getData(node2, null, null)),
                 new String(zk[followerA].getData(node2, null, null)));
     }
 
@@ -189,7 +198,8 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         mt[followerA].start();
         QuorumPeerMainTest.waitForOne(zk[followerA], States.CONNECTED);
 
-        LOG.info("Check and make sure the pzxid of the parent is the same " + "on leader and follower A");
+        LOG.info("Check and make sure the pzxid of the parent is the same " +
+                "on leader and follower A");
         compareStat(parent, leaderId, followerA);
     }
 
@@ -221,13 +231,15 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         mt[followerA].start();
         QuorumPeerMainTest.waitForOne(zk[followerA], States.CONNECTED);
 
-        LOG.info("Check and make sure the pzxid of the parent is the same " + "on leader and follower A");
+        LOG.info("Check and make sure the pzxid of the parent is the same " +
+                "on leader and follower A");
         compareStat(parent, leaderId, followerA);
     }
 
     private void addSerializeListener(int sid, String parent, String child) {
         final ZooKeeper zkClient = zk[followerA];
-        CustomDataTree dt = (CustomDataTree) mt[sid].main.quorumPeer.getZkDb().getDataTree();
+        CustomDataTree dt =
+                (CustomDataTree) mt[sid].main.quorumPeer.getZkDb().getDataTree();
         dt.addListener(parent, new NodeSerializeListener() {
             @Override
             public void nodeSerialized(String path) {
@@ -241,14 +253,14 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         });
     }
 
-    private void compareStat(String path, int sid, int compareWithSid) throws Exception {
+    private void compareStat(String path, int sid, int compareWithSid) throws Exception{
         Stat stat1 = new Stat();
         zk[sid].getData(path, null, stat1);
 
         Stat stat2 = new Stat();
         zk[compareWithSid].getData(path, null, stat2);
 
-        assertEquals(stat1, stat2);
+        Assert.assertEquals(stat1, stat2);
     }
 
     @Test
@@ -272,8 +284,7 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         LOG.info("Create a global session");
         ZooKeeper globalClient = new ZooKeeper(
                 "127.0.0.1:" + clientPorts[followerA],
-                ClientBase.CONNECTION_TIMEOUT,
-                this);
+                ClientBase.CONNECTION_TIMEOUT, this);
         QuorumPeerMainTest.waitForOne(globalClient, States.CONNECTED);
 
         LOG.info("Restart followerA to load the data from disk");
@@ -285,35 +296,40 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
 
         LOG.info("Make sure the global sessions are consistent with leader");
 
-        Map<Long, Integer> globalSessionsOnLeader = mt[leaderId].main.quorumPeer.getZkDb().getSessionWithTimeOuts();
+        Map<Long, Integer> globalSessionsOnLeader =
+                mt[leaderId].main.quorumPeer.getZkDb().getSessionWithTimeOuts();
         if (mt[followerA].main.quorumPeer == null) {
             LOG.info("quorumPeer is null");
         }
         if (mt[followerA].main.quorumPeer.getZkDb() == null) {
             LOG.info("zkDb is null");
         }
-        Map<Long, Integer> globalSessionsOnFollowerA = mt[followerA].main.quorumPeer.getZkDb().getSessionWithTimeOuts();
-        LOG.info("sessions are {}, {}", globalSessionsOnLeader.keySet(), globalSessionsOnFollowerA.keySet());
-        assertTrue(globalSessionsOnFollowerA.keySet().containsAll(globalSessionsOnLeader.keySet()));
+        Map<Long, Integer> globalSessionsOnFollowerA =
+                mt[followerA].main.quorumPeer.getZkDb().getSessionWithTimeOuts();
+        LOG.info("sessions are {}, {}", globalSessionsOnLeader.keySet(),
+                globalSessionsOnFollowerA.keySet());
+        Assert.assertTrue(globalSessionsOnFollowerA.keySet().containsAll(
+                  globalSessionsOnLeader.keySet()));
     }
 
     private void createEmptyNode(ZooKeeper zk, String path) throws Exception {
         zk.create(path, new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     }
 
-    interface NodeCreateListener {
-
-        void process(String path);
+    static interface NodeCreateListener {
+        public void process(String path);
 
     }
 
     static class CustomDataTree extends DataTree {
-
-        Map<String, NodeCreateListener> nodeCreateListeners = new HashMap<String, NodeCreateListener>();
-        Map<String, NodeSerializeListener> listeners = new HashMap<String, NodeSerializeListener>();
+        Map<String, NodeCreateListener> nodeCreateListeners =
+                new HashMap<String, NodeCreateListener>();
+        Map<String, NodeSerializeListener> listeners =
+                new HashMap<String, NodeSerializeListener>();
 
         @Override
-        public void serializeNodeData(OutputArchive oa, String path, DataNode node) throws IOException {
+        public void serializeNodeData(OutputArchive oa, String path,
+                DataNode node) throws IOException {
             super.serializeNodeData(oa, path, node);
             NodeSerializeListener listener = listeners.get(path);
             if (listener != null) {
@@ -326,42 +342,32 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
         }
 
         @Override
-        public void createNode(
-                final String path,
-                byte[] data,
-                List<ACL> acl,
-                long ephemeralOwner,
-                int parentCVersion,
-                long zxid,
-                long time,
-                Stat outputStat) throws NoNodeException, NodeExistsException {
+        public void createNode(final String path, byte data[], List<ACL> acl,
+                           long ephemeralOwner, int parentCVersion, long zxid,
+                           long time, Stat outputStat)
+                throws NoNodeException, NodeExistsException {
             NodeCreateListener listener = nodeCreateListeners.get(path);
             if (listener != null) {
                 listener.process(path);
             }
-            super.createNode(path, data, acl, ephemeralOwner, parentCVersion, zxid, time, outputStat);
+            super.createNode(path, data, acl, ephemeralOwner, parentCVersion,
+                    zxid, time, outputStat);
         }
 
         public void addNodeCreateListener(String path, NodeCreateListener listener) {
             nodeCreateListeners.put(path, listener);
         }
-
     }
 
-    interface NodeSerializeListener {
-
-        void nodeSerialized(String path);
-
+    static interface NodeSerializeListener {
+        public void nodeSerialized(String path);
     }
 
-    interface CommitSessionListener {
-
-        void process(long sessionId);
-
+    static interface CommitSessionListener {
+        public void process(long sessionId);
     }
 
     static class CustomizedQPMain extends TestQPMain {
-
         CommitSessionListener commitSessionListener;
 
         public void setCommitSessionListener(CommitSessionListener listener) {
@@ -382,15 +388,15 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
                 }
 
                 @Override
-                protected Follower makeFollower(FileTxnSnapLog logFactory) throws IOException {
-                    return new Follower(this, new FollowerZooKeeperServer(logFactory, this, this.getZkDb()) {
+                protected Follower makeFollower(FileTxnSnapLog logFactory)
+                        throws IOException {
+                    return new Follower(this, new FollowerZooKeeperServer(
+                            logFactory, this, this.getZkDb()) {
                         @Override
                         public void createSessionTracker() {
                             sessionTracker = new LearnerSessionTracker(
-                                    this,
-                                    getZKDatabase().getSessionWithTimeOuts(),
-                                    this.tickTime,
-                                    self.getId(),
+                                    this, getZKDatabase().getSessionWithTimeOuts(),
+                                    this.tickTime, self.getId(),
                                     self.areLocalSessionsEnabled(),
                                     getZooKeeperServerListener()) {
 
@@ -407,7 +413,5 @@ public class FuzzySnapshotRelatedTest extends QuorumPeerTestBase {
                 }
             };
         }
-
     }
-
 }

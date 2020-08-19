@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,27 +25,25 @@ import org.apache.zookeeper.server.ZooKeeperServerMXBean;
  *
  */
 public interface ObserverMXBean extends ZooKeeperServerMXBean {
-
     /**
      * @return count of pending revalidations
      */
-    int getPendingRevalidationCount();
-
+    public int getPendingRevalidationCount();
+    
     /**
      * @return socket address
      */
-    String getQuorumAddress();
+    public String getQuorumAddress();
 
     /**
      * @return address of the current learner master
      */
-    String getLearnerMaster();
+    public String getLearnerMaster();
 
     /**
      * requests the Observer switch to a new learner master
      *
      * @param learnerMaster address of the desired learner master
      */
-    void setLearnerMaster(String learnerMaster);
-
+    public void setLearnerMaster(String learnerMaster);
 }

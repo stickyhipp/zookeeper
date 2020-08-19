@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -21,8 +21,9 @@ package org.apache.zookeeper.server;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.zookeeper.server.util.AdHash;
+
 import org.apache.zookeeper.server.util.DigestCalculator;
+import org.apache.zookeeper.server.util.AdHash;
 
 /**
  * a simple wrapper to ConcurrentHashMap that recalculates a digest after
@@ -30,7 +31,8 @@ import org.apache.zookeeper.server.util.DigestCalculator;
  */
 public class NodeHashMapImpl implements NodeHashMap {
 
-    private final ConcurrentHashMap<String, DataNode> nodes = new ConcurrentHashMap<String, DataNode>();
+    private final ConcurrentHashMap<String, DataNode> nodes = 
+            new ConcurrentHashMap<String, DataNode>();
 
     private AdHash hash = new AdHash();
 
@@ -113,5 +115,4 @@ public class NodeHashMapImpl implements NodeHashMap {
     public long getDigest() {
         return hash.getHash();
     }
-
 }

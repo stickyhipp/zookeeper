@@ -24,7 +24,6 @@ import java.util.Map;
  * Configuration data for a {@link ZooKeeperServer}. This class is immutable.
  */
 public class ZooKeeperServerConf {
-
     /**
      * The key in the map returned by {@link #toMap()} for the client port.
      */
@@ -65,7 +64,8 @@ public class ZooKeeperServerConf {
      * The key in the map returned by {@link #toMap()} for the server socket
      * listen backlog.
      */
-    public static final String KEY_CLIENT_PORT_LISTEN_BACKLOG = "client_port_listen_backlog";
+    public static final String KEY_CLIENT_PORT_LISTEN_BACKLOG
+            = "client_port_listen_backlog";
 
     private final int clientPort;
     private final String dataDir;
@@ -89,7 +89,10 @@ public class ZooKeeperServerConf {
      * @param maxSessionTimeout maximum session timeout
      * @param serverId server ID
      */
-    ZooKeeperServerConf(int clientPort, String dataDir, String dataLogDir, int tickTime, int maxClientCnxnsPerHost, int minSessionTimeout, int maxSessionTimeout, long serverId, int clientPortListenBacklog) {
+    ZooKeeperServerConf(int clientPort, String dataDir, String dataLogDir,
+                        int tickTime, int maxClientCnxnsPerHost,
+                        int minSessionTimeout, int maxSessionTimeout,
+                        long serverId, int clientPortListenBacklog) {
         this.clientPort = clientPort;
         this.dataDir = dataDir;
         this.dataLogDir = dataLogDir;
@@ -199,5 +202,4 @@ public class ZooKeeperServerConf {
         conf.put(KEY_CLIENT_PORT_LISTEN_BACKLOG, clientPortListenBacklog);
         return conf;
     }
-
 }

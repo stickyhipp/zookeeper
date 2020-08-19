@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,9 +18,10 @@
 
 package org.apache.zookeeper.test;
 
-import io.netty.buffer.ByteBufAllocator;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import io.netty.buffer.ByteBufAllocator;
 import org.apache.zookeeper.ClientCnxnSocketNetty;
 import org.apache.zookeeper.server.NettyServerCnxnFactory;
 
@@ -29,8 +30,8 @@ import org.apache.zookeeper.server.NettyServerCnxnFactory;
  * to set/clear the test ByteBufAllocator.
  */
 public class TestByteBufAllocatorTestHelper {
-
-    public static void setTestAllocator(ByteBufAllocator allocator) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public static void setTestAllocator(ByteBufAllocator allocator)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Method m1 = NettyServerCnxnFactory.class.getDeclaredMethod("setTestAllocator", ByteBufAllocator.class);
         m1.setAccessible(true);
         m1.invoke(null, allocator);
@@ -39,7 +40,8 @@ public class TestByteBufAllocatorTestHelper {
         m2.invoke(null, allocator);
     }
 
-    public static void clearTestAllocator() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public static void clearTestAllocator()
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Method m1 = NettyServerCnxnFactory.class.getDeclaredMethod("clearTestAllocator");
         m1.setAccessible(true);
         m1.invoke(null);
@@ -47,5 +49,4 @@ public class TestByteBufAllocatorTestHelper {
         m2.setAccessible(true);
         m2.invoke(null);
     }
-
 }

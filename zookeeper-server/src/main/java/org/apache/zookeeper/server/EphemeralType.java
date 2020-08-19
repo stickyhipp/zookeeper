@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,10 +19,11 @@
 package org.apache.zookeeper.server;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.zookeeper.CreateMode;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.zookeeper.CreateMode;
 
 /**
  * <p>
@@ -50,7 +51,7 @@ import org.apache.zookeeper.CreateMode;
  * </p>
  * <p>
  * <p>
- * To add new extended features: a) Add a new name to the enum, b) define a constant EXTENDED_BIT_xxxx that's next
+ * To add new extended features: a) Add a new name to the enum, b) define a constant EXTENDED_BIT_XXXX that's next
  * in line (after TTLs, that would be <code>0x0001</code>), c) add a mapping to the extendedFeatureMap via the static
  * initializer
  * </p>
@@ -89,9 +90,7 @@ public enum EphemeralType {
                 throw new IllegalArgumentException("ttl must be positive and cannot be larger than: " + TTL.maxValue());
             }
             //noinspection PointlessBitwiseExpression
-            return EXTENDED_MASK
-                   | EXTENDED_BIT_TTL
-                   | ttl;  // TTL_RESERVED_BIT is actually zero - but it serves to document that the proper extended bit needs to be set
+            return EXTENDED_MASK | EXTENDED_BIT_TTL | ttl;  // TTL_RESERVED_BIT is actually zero - but it serves to document that the proper extended bit needs to be set
         }
 
         @Override
@@ -200,9 +199,7 @@ public enum EphemeralType {
 
         if (extendedEphemeralTypesEnabled()) {
             if (serverId > EphemeralType.MAX_EXTENDED_SERVER_ID) {
-                throw new RuntimeException(
-                    "extendedTypesEnabled is true but Server ID is too large. Cannot be larger than "
-                    + EphemeralType.MAX_EXTENDED_SERVER_ID);
+                throw new RuntimeException("extendedTypesEnabled is true but Server ID is too large. Cannot be larger than " + EphemeralType.MAX_EXTENDED_SERVER_ID);
             }
         }
     }
@@ -214,7 +211,8 @@ public enum EphemeralType {
      * @param ttl  ttl
      * @throws IllegalArgumentException if the ttl is not valid for the mode
      */
-    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT", justification = "toEphemeralOwner may throw IllegalArgumentException")
+    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT",
+            justification = "toEphemeralOwner may throw IllegalArgumentException")
     public static void validateTTL(CreateMode mode, long ttl) {
         if (mode.isTTL()) {
             TTL.toEphemeralOwner(ttl);

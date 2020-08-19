@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,14 +28,12 @@ import org.apache.zookeeper.server.ZooKeeperServer;
  */
 @InterfaceAudience.Public
 public interface AdminServer {
-
-    void start() throws AdminServerException;
-    void shutdown() throws AdminServerException;
-    void setZooKeeperServer(ZooKeeperServer zkServer);
+    public void start() throws AdminServerException;
+    public void shutdown() throws AdminServerException;
+    public void setZooKeeperServer(ZooKeeperServer zkServer);
 
     @InterfaceAudience.Public
-    class AdminServerException extends Exception {
-
+    public class AdminServerException extends Exception {
         private static final long serialVersionUID = 1L;
         public AdminServerException(String message, Throwable cause) {
             super(message, cause);
@@ -43,7 +41,5 @@ public interface AdminServer {
         public AdminServerException(Throwable cause) {
             super(cause);
         }
-
     }
-
 }

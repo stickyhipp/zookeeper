@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,14 +18,13 @@
 
 package org.apache.zookeeper.server.persistence;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Assert;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.zookeeper.server.DataTree;
 import org.junit.Test;
 
@@ -41,40 +40,45 @@ public class EmptySnapshotTest {
             super(snapDir);
         }
 
-        public synchronized void serialize(DataTree dt, Map<Long, Integer> sessions, File snapShot, boolean fsync) throws IOException {
+        public synchronized void serialize(DataTree dt, Map<Long, Integer> sessions, File snapShot,
+                                           boolean fsync) throws IOException {
             // Create empty new file.
-            assertTrue(snapShot.createNewFile());
-            throw new IOException("Created empty snapshot file from " + "MockFileSnap::serialize()");
+            Assert.assertTrue(snapShot.createNewFile());
+            throw new IOException("Created empty snapshot file from " +
+                                  "MockFileSnap::serialize()");
         }
 
     }
 
     @Test
     public void testNoEmptySnapshot() throws Exception {
-        File tmpFile = File.createTempFile("empty-snapshot-test", ".junit", new File(System.getProperty("build.test.dir", "build")));
+        File tmpFile = File.createTempFile("empty-snapshot-test", ".junit",
+                 new File(System.getProperty("build.test.dir", "build")));
         File tmpDataDir = new File(tmpFile + ".dir");
-        assertFalse(tmpDataDir.exists());
-        assertTrue(tmpDataDir.mkdirs());
+        Assert.assertFalse(tmpDataDir.exists());
+        Assert.assertTrue(tmpDataDir.mkdirs());
 
         FileTxnSnapLog snapLog = new FileTxnSnapLog(tmpDataDir, tmpDataDir);
         snapLog.snapLog = new MockFileSnap(snapLog.dataDir);
 
-        assertEquals(0, ((FileSnap) snapLog.snapLog).findNRecentSnapshots(10).size());
+        Assert.assertEquals(0,
+                ((FileSnap) snapLog.snapLog).findNRecentSnapshots(10).size());
 
         DataTree tree = new DataTree();
-        tree.createNode("/empty-snapshot-test-1", "data".getBytes(), null, -1, -1, 1, 1);
+        tree.createNode("/empty-snapshot-test-1", "data".getBytes(), null, -1,
+                       -1, 1, 1);
         try {
-            snapLog.save(tree, new ConcurrentHashMap<>(), false);
-            fail("Should have thrown an IOException");
+            snapLog.save(tree, new ConcurrentHashMap<Long, Integer>(), false);
+            Assert.fail("Should have thrown an IOException");
         } catch (IOException e) {
-            // no op
         }
 
-        assertEquals(0, ((FileSnap) snapLog.snapLog).findNRecentSnapshots(10).size());
+        Assert.assertEquals(0,
+                ((FileSnap) snapLog.snapLog).findNRecentSnapshots(10).size());
 
         snapLog.snapLog = new FileSnap(snapLog.dataDir);
-        snapLog.save(tree, new ConcurrentHashMap<>(), false);
-        assertEquals(1, ((FileSnap) snapLog.snapLog).findNRecentSnapshots(10).size());
-    }
-
+        snapLog.save(tree, new ConcurrentHashMap<Long, Integer>(), false);
+        Assert.assertEquals(1,
+                ((FileSnap) snapLog.snapLog).findNRecentSnapshots(10).size());
+  }
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,17 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.zookeeper.server.quorum.auth;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 /*
  * This code is originally from HDFS, see the similarly named file there
@@ -46,7 +47,6 @@ import org.junit.BeforeClass;
  * createMiniKdcConf() to provide new settings.
  */
 public class KerberosSecurityTestcase extends QuorumAuthTestBase {
-
     private static MiniKdc kdc;
     private static File workDir;
     private static Properties conf;
@@ -78,7 +78,8 @@ public class KerberosSecurityTestcase extends QuorumAuthTestBase {
      * @throws IOException
      */
     public static void createTestDir() throws IOException {
-        workDir = createTmpDir(new File(System.getProperty("build.test.dir", "build")));
+        workDir = createTmpDir(
+                new File(System.getProperty("build.test.dir", "build")));
     }
 
     static File createTmpDir(File parentDir) throws IOException {
@@ -87,8 +88,8 @@ public class KerberosSecurityTestcase extends QuorumAuthTestBase {
         // a tmpDir with a duplicate name
         File tmpDir = new File(tmpFile + ".dir");
         // never true if tmpfile does it's job
-        assertFalse(tmpDir.exists());
-        assertTrue(tmpDir.mkdirs());
+        Assert.assertFalse(tmpDir.exists());
+        Assert.assertTrue(tmpDir.mkdirs());
         return tmpDir;
     }
 
@@ -116,5 +117,4 @@ public class KerberosSecurityTestcase extends QuorumAuthTestBase {
     public static Properties getConf() {
         return conf;
     }
-
 }

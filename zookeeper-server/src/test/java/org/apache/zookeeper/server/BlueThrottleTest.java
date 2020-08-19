@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,24 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.zookeeper.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import java.util.Random;
 import org.apache.zookeeper.ZKTestCase;
+import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BlueThrottleTest extends ZKTestCase {
+import java.util.Random;
 
+public class BlueThrottleTest extends ZKTestCase {
     private static final Logger LOG = LoggerFactory.getLogger(BlueThrottleTest.class);
 
     class MockRandom extends Random {
-
         int flag = 0;
         BlueThrottle throttle;
 
@@ -45,23 +42,20 @@ public class BlueThrottleTest extends ZKTestCase {
                 return 1;
             }
         }
-
     }
 
     class BlueThrottleWithMockRandom extends BlueThrottle {
-
         public BlueThrottleWithMockRandom(MockRandom random) {
             super();
             this.rng = random;
             random.throttle = this;
         }
-
     }
 
     @Test
     public void testThrottleDisabled() {
         BlueThrottle throttler = new BlueThrottle();
-        assertTrue("Throttle should be disabled by default", throttler.checkLimit(1));
+        Assert.assertTrue("Throttle should be disabled by default", throttler.checkLimit(1));
     }
 
     @Test
@@ -69,8 +63,8 @@ public class BlueThrottleTest extends ZKTestCase {
         BlueThrottle throttler = new BlueThrottle();
         throttler.setMaxTokens(1);
         throttler.setFillTime(2000);
-        assertTrue("First request should be allowed", throttler.checkLimit(1));
-        assertFalse("Second request should be denied", throttler.checkLimit(1));
+        Assert.assertTrue("First request should be allowed", throttler.checkLimit(1));
+        Assert.assertFalse("Second request should be denied", throttler.checkLimit(1));
     }
 
     @Test
@@ -78,12 +72,12 @@ public class BlueThrottleTest extends ZKTestCase {
         BlueThrottle throttler = new BlueThrottle();
         throttler.setMaxTokens(1);
         throttler.setFillTime(500);
-        assertTrue("First request should be allowed", throttler.checkLimit(1));
-        assertFalse("Second request should be denied", throttler.checkLimit(1));
+        Assert.assertTrue("First request should be allowed", throttler.checkLimit(1));
+        Assert.assertFalse("Second request should be denied", throttler.checkLimit(1));
 
         //wait for the bucket to be refilled
         Thread.sleep(750);
-        assertTrue("Third request should be allowed since we've got a new token", throttler.checkLimit(1));
+        Assert.assertTrue("Third request should be allowed since we've got a new token", throttler.checkLimit(1));
     }
 
     @Test
@@ -94,24 +88,24 @@ public class BlueThrottleTest extends ZKTestCase {
         throttler.setFillCount(maxTokens);
         throttler.setFillTime(1000);
 
-        for (int i = 0; i < maxTokens; i++) {
+        for (int i=0;i<maxTokens;i++) {
             throttler.checkLimit(1);
         }
-        assertEquals("All tokens should be used up by now", throttler.getMaxTokens(), throttler.getDeficit());
+        Assert.assertEquals("All tokens should be used up by now", throttler.getMaxTokens(), throttler.getDeficit());
 
         Thread.sleep(110);
         throttler.checkLimit(1);
-        assertFalse("Dropping probability should still be zero", throttler.getDropChance() > 0);
+        Assert.assertFalse("Dropping probability should still be zero", throttler.getDropChance()>0);
 
         //allow bucket to be refilled
         Thread.sleep(1500);
 
-        for (int i = 0; i < maxTokens; i++) {
-            assertTrue("The first " + maxTokens + " requests should be allowed", throttler.checkLimit(1));
+        for (int i=0;i<maxTokens;i++) {
+            Assert.assertTrue("The first " + maxTokens + " requests should be allowed", throttler.checkLimit(1));
         }
 
-        for (int i = 0; i < maxTokens; i++) {
-            assertFalse("The latter " + maxTokens + " requests should be denied", throttler.checkLimit(1));
+        for (int i=0;i<maxTokens;i++) {
+            Assert.assertFalse("The latter " + maxTokens + " requests should be denied", throttler.checkLimit(1));
         }
     }
 
@@ -125,15 +119,14 @@ public class BlueThrottleTest extends ZKTestCase {
         throttler.setFreezeTime(100);
         throttler.setDropIncrease(0.5);
 
-        for (int i = 0; i < maxTokens; i++) {
+        for (int i=0;i<maxTokens;i++)
             throttler.checkLimit(1);
-        }
-        assertEquals("All tokens should be used up by now", throttler.getMaxTokens(), throttler.getDeficit());
+        Assert.assertEquals("All tokens should be used up by now", throttler.getMaxTokens(), throttler.getDeficit());
 
         Thread.sleep(120);
         //this will trigger dropping probability being increased
         throttler.checkLimit(1);
-        assertTrue("Dropping probability should be increased", throttler.getDropChance() > 0);
+        Assert.assertTrue("Dropping probability should be increased", throttler.getDropChance()>0);
         LOG.info("Dropping probability is {}", throttler.getDropChance());
 
         //allow bucket to be refilled
@@ -141,25 +134,24 @@ public class BlueThrottleTest extends ZKTestCase {
         LOG.info("Bucket is refilled with {} tokens.", maxTokens);
 
         int accepted = 0;
-        for (int i = 0; i < maxTokens; i++) {
+        for (int i=0;i<maxTokens;i++) {
             if (throttler.checkLimit(1)) {
-                accepted++;
+                accepted ++;
             }
         }
 
         LOG.info("Send {} requests, {} are accepted", maxTokens, accepted);
-        assertTrue("The dropping should be distributed", accepted < maxTokens);
+        Assert.assertTrue("The dropping should be distributed", accepted<maxTokens);
 
         accepted = 0;
 
-        for (int i = 0; i < maxTokens; i++) {
+        for (int i=0;i<maxTokens;i++) {
             if (throttler.checkLimit(1)) {
-                accepted++;
+                accepted ++;
             }
         }
 
         LOG.info("Send another {} requests, {} are accepted", maxTokens, accepted);
-        assertTrue("Later requests should have a chance", accepted > 0);
+        Assert.assertTrue("Later requests should have a chance", accepted > 0);
     }
-
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,22 +18,6 @@
 
 package org.apache.zookeeper.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.apache.jute.BinaryOutputArchive;
 import org.apache.jute.Record;
 import org.apache.zookeeper.KeeperException;
@@ -50,13 +34,26 @@ import org.apache.zookeeper.server.ZooKeeperServer.ChangeRecord;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.txn.ErrorTxn;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PrepRequestProcessorTest extends ClientBase {
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+public class PrepRequestProcessorTest extends ClientBase {
     private static final Logger LOG = LoggerFactory.getLogger(PrepRequestProcessorTest.class);
     private static final int CONNECTION_TIMEOUT = 3000;
     private static String HOSTPORT = "127.0.0.1:" + PortAssignment.unique();
@@ -77,7 +74,8 @@ public class PrepRequestProcessorTest extends ClientBase {
 
         servcnxnf = ServerCnxnFactory.createFactory(PORT, -1);
         servcnxnf.startup(zks);
-        assertTrue("waiting for server being up ", ClientBase.waitForServerUp(HOSTPORT, CONNECTION_TIMEOUT));
+        Assert.assertTrue("waiting for server being up ",
+                ClientBase.waitForServerUp(HOSTPORT, CONNECTION_TIMEOUT));
         zks.sessionTracker = new MySessionTracker();
     }
 
@@ -95,11 +93,12 @@ public class PrepRequestProcessorTest extends ClientBase {
     public void testPRequest() throws Exception {
         pLatch = new CountDownLatch(1);
         processor = new PrepRequestProcessor(zks, new MyRequestProcessor());
-        Request foo = new Request(null, 1L, 1, OpCode.create, ByteBuffer.allocate(3), null);
+        Request foo = new Request(null, 1l, 1, OpCode.create, ByteBuffer.allocate(3), null);
         processor.pRequest(foo);
 
-        assertEquals("Request should have marshalling error", new ErrorTxn(KeeperException.Code.MARSHALLINGERROR.intValue()), outcome.getTxn());
-        assertTrue("request hasn't been processed in chain", pLatch.await(5, TimeUnit.SECONDS));
+        Assert.assertEquals("Request should have marshalling error", new ErrorTxn(KeeperException.Code.MARSHALLINGERROR.intValue()),
+                outcome.getTxn());
+        Assert.assertTrue("request hasn't been processed in chain", pLatch.await(5, TimeUnit.SECONDS));
     }
 
     private Request createRequest(Record record, int opCode) throws IOException {
@@ -110,7 +109,7 @@ public class PrepRequestProcessorTest extends ClientBase {
         baos.close();
         // Id
         List<Id> ids = Arrays.asList(Ids.ANYONE_ID_UNSAFE);
-        return new Request(null, 1L, 0, opCode, ByteBuffer.wrap(baos.toByteArray()), ids);
+        return new Request(null, 1l, 0, opCode, ByteBuffer.wrap(baos.toByteArray()), ids);
     }
 
     private void process(List<Op> ops) throws Exception {
@@ -121,7 +120,7 @@ public class PrepRequestProcessorTest extends ClientBase {
         Request req = createRequest(record, OpCode.multi);
 
         processor.pRequest(req);
-        assertTrue("request hasn't been processed in chain", pLatch.await(5, TimeUnit.SECONDS));
+        Assert.assertTrue("request hasn't been processed in chain", pLatch.await(5, TimeUnit.SECONDS));
     }
 
     /**
@@ -132,23 +131,30 @@ public class PrepRequestProcessorTest extends ClientBase {
     public void testMultiOutstandingChange() throws Exception {
         zks.getZKDatabase().dataTree.createNode("/foo", new byte[0], Ids.OPEN_ACL_UNSAFE, 0, 0, 0, 0);
 
-        assertNull(zks.outstandingChangesForPath.get("/foo"));
+        Assert.assertNull(zks.outstandingChangesForPath.get("/foo"));
 
-        process(Arrays.asList(Op.setData("/foo", new byte[0], -1)));
+        process(Arrays.asList(
+                Op.setData("/foo", new byte[0], -1)));
 
         ChangeRecord cr = zks.outstandingChangesForPath.get("/foo");
-        assertNotNull("Change record wasn't set", cr);
-        assertEquals("Record zxid wasn't set correctly", 1, cr.zxid);
+        Assert.assertNotNull("Change record wasn't set", cr);
+        Assert.assertEquals("Record zxid wasn't set correctly",
+                1, cr.zxid);
 
-        process(Arrays.asList(Op.delete("/foo", -1)));
+        process(Arrays.asList(
+                Op.delete("/foo", -1)));
         cr = zks.outstandingChangesForPath.get("/foo");
-        assertEquals("Record zxid wasn't set correctly", 2, cr.zxid);
+        Assert.assertEquals("Record zxid wasn't set correctly",
+                2, cr.zxid);
+
 
         // It should fail and shouldn't change outstanding record.
-        process(Arrays.asList(Op.delete("/foo", -1)));
+        process(Arrays.asList(
+                Op.delete("/foo", -1)));
         cr = zks.outstandingChangesForPath.get("/foo");
         // zxid should still be previous result because record's not changed.
-        assertEquals("Record zxid wasn't set correctly", 2, cr.zxid);
+        Assert.assertEquals("Record zxid wasn't set correctly",
+                2, cr.zxid);
     }
 
     /**
@@ -162,15 +168,17 @@ public class PrepRequestProcessorTest extends ClientBase {
         zks.getZKDatabase().dataTree.createNode("/foo", new byte[0], Ids.OPEN_ACL_UNSAFE, 0, 0, 0, 0);
         zks.getZKDatabase().dataTree.createNode("/foo/bar", new byte[0], Ids.OPEN_ACL_UNSAFE, 0, 0, 0, 0);
 
-        assertNull(zks.outstandingChangesForPath.get("/foo"));
+        Assert.assertNull(zks.outstandingChangesForPath.get("/foo"));
 
         // multi record:
         //   set "/foo" => succeed, leave a outstanding change
         //   delete "/foo" => fail, roll back change
-        process(Arrays.asList(Op.setData("/foo", new byte[0], -1), Op.delete("/foo", -1)));
+        process(Arrays.asList(
+                Op.setData("/foo", new byte[0], -1),
+                Op.delete("/foo", -1)));
 
         // aborting multi shouldn't leave any record.
-        assertNull(zks.outstandingChangesForPath.get("/foo"));
+        Assert.assertNull(zks.outstandingChangesForPath.get("/foo"));
     }
 
     /**
@@ -186,12 +194,11 @@ public class PrepRequestProcessorTest extends ClientBase {
         Request req = createRequest(record, OpCode.setData);
         processor.pRequest(req);
         pLatch.await();
-        assertEquals(outcome.getHdr().getType(), OpCode.error);
-        assertEquals(outcome.getException().code(), KeeperException.Code.BADARGUMENTS);
+        Assert.assertEquals(outcome.getHdr().getType(), OpCode.error);
+        Assert.assertEquals(outcome.getException().code(), KeeperException.Code.BADARGUMENTS);
     }
 
     private class MyRequestProcessor implements RequestProcessor {
-
         @Override
         public void processRequest(Request request) {
             // getting called by PrepRequestProcessor
@@ -203,11 +210,9 @@ public class PrepRequestProcessorTest extends ClientBase {
             // TODO Auto-generated method stub
 
         }
-
     }
 
     private class MySessionTracker implements SessionTracker {
-
         @Override
         public boolean trackSession(long id, int to) {
             // TODO Auto-generated method stub
@@ -219,7 +224,8 @@ public class PrepRequestProcessorTest extends ClientBase {
             return false;
         }
         @Override
-        public void checkSession(long sessionId, Object owner) throws SessionExpiredException, SessionMovedException {
+        public void checkSession(long sessionId, Object owner)
+                throws SessionExpiredException, SessionMovedException {
             // TODO Auto-generated method stub
         }
         @Override
@@ -232,17 +238,18 @@ public class PrepRequestProcessorTest extends ClientBase {
             // TODO Auto-generated method stub
 
         }
-        @Override
+         @Override
         public void removeSession(long sessionId) {
             // TODO Auto-generated method stub
 
         }
         public int upgradeSession(long sessionId) {
-            // TODO Auto-generated method stub
-            return 0;
+             // TODO Auto-generated method stub
+             return 0;
         }
         @Override
-        public void setOwner(long id, Object owner) throws SessionExpiredException {
+        public void setOwner(long id, Object owner)
+                throws SessionExpiredException {
             // TODO Auto-generated method stub
 
         }
@@ -258,7 +265,7 @@ public class PrepRequestProcessorTest extends ClientBase {
         }
         @Override
         public void setSessionClosing(long sessionId) {
-            // TODO Auto-generated method stub
+          // TODO Auto-generated method stub
         }
         @Override
         public boolean isTrackingSession(long sessionId) {
@@ -266,7 +273,8 @@ public class PrepRequestProcessorTest extends ClientBase {
             return false;
         }
         @Override
-        public void checkGlobalSession(long sessionId, Object owner) throws SessionExpiredException, SessionMovedException {
+        public void checkGlobalSession(long sessionId, Object owner)
+                throws SessionExpiredException, SessionMovedException {
             // TODO Auto-generated method stub
         }
         @Override
@@ -277,7 +285,5 @@ public class PrepRequestProcessorTest extends ClientBase {
         public long getLocalSessionCount() {
             return 0;
         }
-
     }
-
 }

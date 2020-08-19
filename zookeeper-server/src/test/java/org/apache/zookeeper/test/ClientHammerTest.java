@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,27 +18,26 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs.Ids;
-import org.apache.zookeeper.ZooKeeper;
+
 import org.apache.zookeeper.common.Time;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.ZooDefs.Ids;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ClientHammerTest extends ClientBase {
-
     protected static final Logger LOG = LoggerFactory.getLogger(ClientHammerTest.class);
 
     private static final long HAMMERTHREAD_LATENCY = 5;
 
-    private abstract static class HammerThread extends Thread {
-
+    private static abstract class HammerThread extends Thread {
         protected final int count;
         protected volatile int current = 0;
 
@@ -46,11 +45,9 @@ public class ClientHammerTest extends ClientBase {
             super(name);
             this.count = count;
         }
-
     }
 
     private static class BasicHammerThread extends HammerThread {
-
         private final ZooKeeper zk;
         private final String prefix;
 
@@ -61,7 +58,7 @@ public class ClientHammerTest extends ClientBase {
         }
 
         public void run() {
-            byte[] b = new byte[256];
+            byte b[] = new byte[256];
             try {
                 for (; current < count; current++) {
                     // Simulate a bit of network latency...
@@ -69,7 +66,7 @@ public class ClientHammerTest extends ClientBase {
                     zk.create(prefix + current, b, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                 }
             } catch (Throwable t) {
-                LOG.error("Client create operation failed", t);
+                LOG.error("Client create operation Assert.failed", t);
             } finally {
                 try {
                     zk.close();
@@ -78,22 +75,22 @@ public class ClientHammerTest extends ClientBase {
                 }
             }
         }
-
     }
 
     private static class SuperHammerThread extends HammerThread {
-
         private final ClientHammerTest parent;
         private final String prefix;
 
-        SuperHammerThread(String name, ClientHammerTest parent, String prefix, int count) {
+        SuperHammerThread(String name, ClientHammerTest parent, String prefix,
+                int count)
+        {
             super(name, count);
             this.parent = parent;
             this.prefix = prefix;
         }
 
         public void run() {
-            byte[] b = new byte[256];
+            byte b[] = new byte[256];
             try {
                 for (; current < count; current++) {
                     ZooKeeper zk = parent.createClient();
@@ -108,10 +105,9 @@ public class ClientHammerTest extends ClientBase {
                     }
                 }
             } catch (Throwable t) {
-                LOG.error("Client create operation failed", t);
+                LOG.error("Client create operation Assert.failed", t);
             }
         }
-
     }
 
     /**
@@ -124,7 +120,9 @@ public class ClientHammerTest extends ClientBase {
         runHammer(10, 1000);
     }
 
-    public void runHammer(final int threadCount, final int childCount) throws Throwable {
+    public void runHammer(final int threadCount, final int childCount)
+        throws Throwable
+    {
         try {
             HammerThread[] threads = new HammerThread[threadCount];
             long start = Time.currentElapsedTime();
@@ -133,7 +131,9 @@ public class ClientHammerTest extends ClientBase {
                 String prefix = "/test-" + i;
                 zk.create(prefix, new byte[0], Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                 prefix += "/";
-                HammerThread thread = new BasicHammerThread("BasicHammerThread-" + i, zk, prefix, childCount);
+                HammerThread thread =
+                    new BasicHammerThread("BasicHammerThread-" + i, zk, prefix,
+                            childCount);
                 thread.start();
 
                 threads[i] = thread;
@@ -141,7 +141,7 @@ public class ClientHammerTest extends ClientBase {
 
             verifyHammer(start, threads, childCount);
         } catch (Throwable t) {
-            LOG.error("test failed", t);
+            LOG.error("test Assert.failed", t);
             throw t;
         }
     }
@@ -170,7 +170,9 @@ public class ClientHammerTest extends ClientBase {
                     }
                 }
                 prefix += "/";
-                HammerThread thread = new SuperHammerThread("SuperHammerThread-" + i, this, prefix, childCount);
+                HammerThread thread =
+                    new SuperHammerThread("SuperHammerThread-" + i, this,
+                            prefix, childCount);
                 thread.start();
 
                 threads[i] = thread;
@@ -178,12 +180,14 @@ public class ClientHammerTest extends ClientBase {
 
             verifyHammer(start, threads, childCount);
         } catch (Throwable t) {
-            LOG.error("test failed", t);
+            LOG.error("test Assert.failed", t);
             throw t;
         }
     }
 
-    public void verifyHammer(long start, HammerThread[] threads, int childCount) throws IOException, InterruptedException, KeeperException {
+    public void verifyHammer(long start, HammerThread[] threads, int childCount)
+        throws IOException, InterruptedException, KeeperException
+    {
         // look for the clients to finish their create operations
         LOG.info("Starting check for completed hammers");
         int workingCount = threads.length;
@@ -201,7 +205,8 @@ public class ClientHammerTest extends ClientBase {
         }
         if (workingCount > 0) {
             for (HammerThread h : threads) {
-                LOG.warn(h.getName() + " never finished creation, current:" + h.current);
+                LOG.warn(h.getName() + " never finished creation, current:"
+                        + h.current);
             }
         } else {
             LOG.info("Hammer threads completed creation operations");
@@ -209,32 +214,33 @@ public class ClientHammerTest extends ClientBase {
 
         for (HammerThread h : threads) {
             final int safetyFactor = 3;
-            verifyThreadTerminated(h, (long) threads.length
-                                              * (long) childCount
-                                              * HAMMERTHREAD_LATENCY
-                                              * (long) safetyFactor);
+            verifyThreadTerminated(h,
+                    (long)threads.length * (long)childCount
+                    * HAMMERTHREAD_LATENCY * (long)safetyFactor);
         }
-        LOG.info(new Date() + " Total time " + (Time.currentElapsedTime() - start));
+        LOG.info(new Date() + " Total time "
+                + (Time.currentElapsedTime() - start));
 
         ZooKeeper zk = createClient();
         try {
             LOG.info("******************* Connected to ZooKeeper" + new Date());
             for (int i = 0; i < threads.length; i++) {
                 LOG.info("Doing thread: " + i + " " + new Date());
-                List<String> children = zk.getChildren("/test-" + i, false);
-                assertEquals(childCount, children.size());
+                List<String> children =
+                    zk.getChildren("/test-" + i, false);
+                Assert.assertEquals(childCount, children.size());
                 children = zk.getChildren("/test-" + i, false, null);
-                assertEquals(childCount, children.size());
+                Assert.assertEquals(childCount, children.size());
             }
             for (int i = 0; i < threads.length; i++) {
-                List<String> children = zk.getChildren("/test-" + i, false);
-                assertEquals(childCount, children.size());
+                List<String> children =
+                    zk.getChildren("/test-" + i, false);
+                Assert.assertEquals(childCount, children.size());
                 children = zk.getChildren("/test-" + i, false, null);
-                assertEquals(childCount, children.size());
+                Assert.assertEquals(childCount, children.size());
             }
         } finally {
             zk.close();
         }
     }
-
 }

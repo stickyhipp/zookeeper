@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,6 +20,7 @@ package org.apache.zookeeper;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 
@@ -34,8 +35,8 @@ import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
  *                   "username", "passowrd");
  */
 public class JaasConfiguration extends javax.security.auth.login.Configuration {
-
-    private final Map<String, AppConfigurationEntry[]> sections = new HashMap<String, AppConfigurationEntry[]>();
+    private final Map<String, AppConfigurationEntry[]> sections =
+      new HashMap<String, AppConfigurationEntry[]>();
 
     public JaasConfiguration() {
     }
@@ -61,7 +62,7 @@ public class JaasConfiguration extends javax.security.auth.login.Configuration {
      * @param loginModuleName Login module name
      * @param conf login key/value args
      */
-    public void addSection(String name, String loginModuleName, final Map<String, String> conf) {
+    public void addSection(String name, String loginModuleName, final Map<String,String> conf) {
         AppConfigurationEntry[] entries = new AppConfigurationEntry[1];
         entries[0] = new AppConfigurationEntry(loginModuleName, LoginModuleControlFlag.REQUIRED, conf);
         this.sections.put(name, entries);
@@ -71,5 +72,4 @@ public class JaasConfiguration extends javax.security.auth.login.Configuration {
     public AppConfigurationEntry[] getAppConfigurationEntry(String appName) {
         return sections.get(appName);
     }
-
 }

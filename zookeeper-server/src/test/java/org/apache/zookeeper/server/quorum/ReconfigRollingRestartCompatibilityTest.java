@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,25 +18,25 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import static org.apache.zookeeper.test.ClientBase.CONNECTION_TIMEOUT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.zookeeper.PortAssignment;
+import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ArrayList;
+
 import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.PortAssignment;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.ReconfigTest;
+import org.junit.Assert;
 import org.junit.Test;
+
+import static org.apache.zookeeper.test.ClientBase.CONNECTION_TIMEOUT;
 
 /**
  * ReconfigRollingRestartCompatibilityTest - we want to make sure that users
@@ -49,7 +49,6 @@ import org.junit.Test;
  * See ZOOKEEPER-2819 for more details.
  */
 public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase {
-
     private static final String ZOO_CFG_BAK_FILE = "zoo.cfg.bak";
 
     Map<Integer, Integer> clientPorts = new HashMap<>(5);
@@ -60,8 +59,9 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
         String server;
         for (int i = 0; i < serverCount; i++) {
             clientPorts.put(i, PortAssignment.unique());
-            server = "server." + i + "=localhost:" + PortAssignment.unique() + ":" + PortAssignment.unique()
-                     + ":participant;localhost:" + clientPorts.get(i);
+            server = "server." + i + "=localhost:" + PortAssignment.unique()
+                    + ":" + PortAssignment.unique() + ":participant;localhost:"
+                    + clientPorts.get(i);
             serverAddress.put(i, server);
             sb.append(server + "\n");
         }
@@ -72,8 +72,9 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
         StringBuilder sb = new StringBuilder();
         for (Integer sid : sidsToAdd) {
             clientPorts.put(sid, PortAssignment.unique());
-            serverAddress.put(sid, "server." + sid + "=localhost:" + PortAssignment.unique() + ":" + PortAssignment.unique()
-                                   + ":participant;localhost:" + clientPorts.get(sid));
+            serverAddress.put(sid, "server." + sid + "=localhost:" + PortAssignment.unique()
+                    + ":" + PortAssignment.unique() + ":participant;localhost:"
+                    + clientPorts.get(sid));
         }
 
         for (Integer sid : sidsToRemove) {
@@ -91,23 +92,30 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
     @Test(timeout = 60000)
     // Verify no zoo.cfg.dynamic and zoo.cfg.bak files existing locally
     // when reconfig feature flag is off by default.
-    public void testNoLocalDynamicConfigAndBackupFiles() throws InterruptedException, IOException {
+    public void testNoLocalDynamicConfigAndBackupFiles()
+            throws InterruptedException, IOException {
         int serverCount = 3;
         String config = generateNewQuorumConfig(serverCount);
-        QuorumPeerTestBase.MainThread[] mt = new QuorumPeerTestBase.MainThread[serverCount];
+        QuorumPeerTestBase.MainThread mt[] = new QuorumPeerTestBase.MainThread[serverCount];
         String[] staticFileContent = new String[serverCount];
 
         for (int i = 0; i < serverCount; i++) {
-            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i), config, false);
+            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i),
+                    config, false);
             mt[i].start();
         }
 
         for (int i = 0; i < serverCount; i++) {
-            assertTrue("waiting for server " + i + " being up", ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i), CONNECTION_TIMEOUT));
-            assertNull("static file backup (zoo.cfg.bak) shouldn't exist!", mt[i].getFileByName(ZOO_CFG_BAK_FILE));
-            assertNull("dynamic configuration file (zoo.cfg.dynamic.*) shouldn't exist!", mt[i].getFileByName(mt[i].getQuorumPeer().getNextDynamicConfigFilename()));
+            Assert.assertTrue("waiting for server " + i + " being up",
+                    ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i),
+                            CONNECTION_TIMEOUT));
+            Assert.assertNull("static file backup (zoo.cfg.bak) shouldn't exist!",
+                    mt[i].getFileByName(ZOO_CFG_BAK_FILE));
+            Assert.assertNull("dynamic configuration file (zoo.cfg.dynamic.*) shouldn't exist!",
+                    mt[i].getFileByName(mt[i].getQuorumPeer().getNextDynamicConfigFilename()));
             staticFileContent[i] = Files.readAllLines(mt[i].confFile.toPath(), StandardCharsets.UTF_8).toString();
-            assertTrue("static config file should contain server entry " + serverAddress.get(i), staticFileContent[i].contains(serverAddress.get(i)));
+            Assert.assertTrue("static config file should contain server entry " + serverAddress.get(i),
+                    staticFileContent[i].contains(serverAddress.get(i)));
         }
 
         for (int i = 0; i < serverCount; i++) {
@@ -124,15 +132,18 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
         int serverCount = 3;
         String config = generateNewQuorumConfig(serverCount);
         List<String> joiningServers = new ArrayList<>();
-        QuorumPeerTestBase.MainThread[] mt = new QuorumPeerTestBase.MainThread[serverCount];
+        QuorumPeerTestBase.MainThread mt[] = new QuorumPeerTestBase.MainThread[serverCount];
         for (int i = 0; i < serverCount; ++i) {
-            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i), config, false);
+            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i),
+                    config, false);
             mt[i].start();
             joiningServers.add(serverAddress.get(i));
         }
 
         for (int i = 0; i < serverCount; ++i) {
-            assertTrue("waiting for server " + i + " being up", ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i), CONNECTION_TIMEOUT));
+            Assert.assertTrue("waiting for server " + i + " being up",
+                    ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i),
+                            CONNECTION_TIMEOUT));
         }
 
         for (int i = 0; i < serverCount; ++i) {
@@ -155,16 +166,19 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
     public void testRollingRestartWithMembershipChange() throws Exception {
         int serverCount = 3;
         String config = generateNewQuorumConfig(serverCount);
-        QuorumPeerTestBase.MainThread[] mt = new QuorumPeerTestBase.MainThread[serverCount];
+        QuorumPeerTestBase.MainThread mt[] = new QuorumPeerTestBase.MainThread[serverCount];
         List<String> joiningServers = new ArrayList<>();
         for (int i = 0; i < serverCount; ++i) {
-            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i), config, false);
+            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i),
+                    config, false);
             mt[i].start();
             joiningServers.add(serverAddress.get(i));
         }
 
         for (int i = 0; i < serverCount; ++i) {
-            assertTrue("waiting for server " + i + " being up", ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i), CONNECTION_TIMEOUT));
+            Assert.assertTrue("waiting for server " + i + " being up",
+                    ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i),
+                            CONNECTION_TIMEOUT));
         }
 
         for (int i = 0; i < serverCount; ++i) {
@@ -175,10 +189,9 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
         Map<Integer, String> oldServerAddress = new HashMap<>(serverAddress);
         List<String> newServers = new ArrayList<>(joiningServers);
         config = updateExistingQuorumConfig(Arrays.asList(3, 4), new ArrayList<Integer>());
-        newServers.add(serverAddress.get(3));
-        newServers.add(serverAddress.get(4));
+        newServers.add(serverAddress.get(3)); newServers.add(serverAddress.get(4));
         serverCount = serverAddress.size();
-        assertEquals("Server count should be 5 after config update.", serverCount, 5);
+        Assert.assertEquals("Server count should be 5 after config update.", serverCount, 5);
 
         // We are adding two new servers to the ensemble. These two servers should have the config which includes
         // all five servers (the old three servers, plus the two servers added). The old three servers should only
@@ -186,9 +199,12 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
         // peers.
         mt = Arrays.copyOf(mt, mt.length + 2);
         for (int i = 3; i < 5; ++i) {
-            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i), config, false);
+            mt[i] = new QuorumPeerTestBase.MainThread(i, clientPorts.get(i),
+                    config, false);
             mt[i].start();
-            assertTrue("waiting for server " + i + " being up", ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i), CONNECTION_TIMEOUT));
+            Assert.assertTrue("waiting for server " + i + " being up",
+                    ClientBase.waitForServerUp("127.0.0.1:" + clientPorts.get(i),
+                            CONNECTION_TIMEOUT));
             verifyQuorumConfig(i, newServers, null);
             verifyQuorumMembers(mt[i]);
         }
@@ -227,16 +243,18 @@ public class ReconfigRollingRestartCompatibilityTest extends QuorumPeerTestBase 
     }
 
     private void verifyQuorumMembers(QuorumPeerTestBase.MainThread mt, Set<String> expectedConfigs) {
-        Map<Long, QuorumPeer.QuorumServer> members = mt.getQuorumPeer().getQuorumVerifier().getAllMembers();
+        Map<Long, QuorumPeer.QuorumServer> members =
+                mt.getQuorumPeer().getQuorumVerifier().getAllMembers();
 
-        assertTrue("Quorum member should not change.", members.size() == expectedConfigs.size());
+        Assert.assertTrue("Quorum member should not change.",
+                members.size() == expectedConfigs.size());
 
         for (QuorumPeer.QuorumServer qs : members.values()) {
             String actualConfig = qs.toString();
-            assertTrue("Unexpected config " + actualConfig + " found!", expectedConfigs.contains(actualConfig));
+            Assert.assertTrue("Unexpected config " + actualConfig + " found!",
+                    expectedConfigs.contains(actualConfig));
         }
     }
-
 }
 
 

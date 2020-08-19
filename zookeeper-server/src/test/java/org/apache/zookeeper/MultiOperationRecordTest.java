@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,17 +18,17 @@
 
 package org.apache.zookeeper;
 
-import static org.junit.Assert.assertEquals;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import org.apache.jute.BinaryInputArchive;
 import org.apache.jute.BinaryOutputArchive;
 import org.apache.zookeeper.server.ByteBufferInputStream;
+import org.junit.Assert;
 import org.junit.Test;
 
-public class MultiOperationRecordTest extends ZKTestCase {
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
+public class MultiOperationRecordTest extends ZKTestCase {
     @Test
     public void testRoundTrip() throws IOException {
         MultiOperationRecord request = new MultiOperationRecord();
@@ -39,8 +39,8 @@ public class MultiOperationRecordTest extends ZKTestCase {
 
         MultiOperationRecord decodedRequest = codeDecode(request);
 
-        assertEquals(request, decodedRequest);
-        assertEquals(request.hashCode(), decodedRequest.hashCode());
+        Assert.assertEquals(request, decodedRequest);
+        Assert.assertEquals(request.hashCode(), decodedRequest.hashCode());
     }
 
     @Test
@@ -48,8 +48,8 @@ public class MultiOperationRecordTest extends ZKTestCase {
         MultiOperationRecord request = new MultiOperationRecord();
         MultiOperationRecord decodedRequest = codeDecode(request);
 
-        assertEquals(request, decodedRequest);
-        assertEquals(request.hashCode(), decodedRequest.hashCode());
+        Assert.assertEquals(request, decodedRequest);
+        Assert.assertEquals(request.hashCode(), decodedRequest.hashCode());
     }
 
     private MultiOperationRecord codeDecode(MultiOperationRecord request) throws IOException {
@@ -65,5 +65,4 @@ public class MultiOperationRecordTest extends ZKTestCase {
         decodedRequest.deserialize(bia, "request");
         return decodedRequest;
     }
-
 }

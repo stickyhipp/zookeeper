@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.zookeeper.common.ZKConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
 import org.junit.BeforeClass;
@@ -45,7 +47,6 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 public class ZKClientConfigTest {
-
     private static final File testData = new File(System.getProperty("test.data.dir", "src/test/resources/data"));
     @Rule
     public Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
@@ -143,7 +144,8 @@ public class ZKClientConfigTest {
     @Test
     public void testSetConfiguration() {
         ZKClientConfig conf = new ZKClientConfig();
-        String defaultValue = conf.getProperty(ZKClientConfig.ENABLE_CLIENT_SASL_KEY, ZKClientConfig.ENABLE_CLIENT_SASL_DEFAULT);
+        String defaultValue = conf.getProperty(ZKClientConfig.ENABLE_CLIENT_SASL_KEY,
+                ZKClientConfig.ENABLE_CLIENT_SASL_DEFAULT);
         if (defaultValue.equals("true")) {
             conf.setProperty(ENABLE_CLIENT_SASL_KEY, "false");
         } else {
@@ -180,7 +182,8 @@ public class ZKClientConfigTest {
 
         // property is set but with white spaces
         value = 12345;
-        conf.setProperty(ZKConfig.JUTE_MAXBUFFER, " " + value + " ");
+        conf.setProperty(ZKConfig.JUTE_MAXBUFFER,
+                " " + Integer.toString(value) + " ");
         result = conf.getInt(ZKConfig.JUTE_MAXBUFFER, defaultValue);
         assertEquals(value, result);
     }

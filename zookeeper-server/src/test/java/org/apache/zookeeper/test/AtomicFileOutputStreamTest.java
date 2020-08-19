@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,18 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.zookeeper.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.common.AtomicFileOutputStream;
 import org.junit.After;
@@ -34,7 +35,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class AtomicFileOutputStreamTest extends ZKTestCase {
-
     private static final String TEST_STRING = "hello world";
     private static final String TEST_STRING_2 = "goodbye world";
 
@@ -114,7 +114,8 @@ public class AtomicFileOutputStreamTest extends ZKTestCase {
         // Should not have touched original file
         assertEquals(TEST_STRING_2, ClientBase.readFile(dstFile));
 
-        assertEquals("Temporary file should have been cleaned up", dstFile.getName(), ClientBase.join(",", testDir.list()));
+        assertEquals("Temporary file should have been cleaned up",
+                dstFile.getName(), ClientBase.join(",", testDir.list()));
     }
 
     /**
@@ -196,5 +197,4 @@ public class AtomicFileOutputStreamTest extends ZKTestCase {
         assertEquals(TEST_STRING, ClientBase.readFile(dstFile));
         assertEquals(1, testDir.list().length);
     }
-
 }

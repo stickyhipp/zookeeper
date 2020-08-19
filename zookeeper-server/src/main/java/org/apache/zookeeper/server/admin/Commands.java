@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,7 +18,6 @@
 
 package org.apache.zookeeper.server.admin;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +29,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import org.apache.zookeeper.Environment;
 import org.apache.zookeeper.Environment.Entry;
 import org.apache.zookeeper.Version;
@@ -45,8 +46,8 @@ import org.apache.zookeeper.server.quorum.Leader;
 import org.apache.zookeeper.server.quorum.LeaderZooKeeperServer;
 import org.apache.zookeeper.server.quorum.QuorumPeer;
 import org.apache.zookeeper.server.quorum.QuorumZooKeeperServer;
-import org.apache.zookeeper.server.quorum.ReadOnlyZooKeeperServer;
 import org.apache.zookeeper.server.quorum.flexible.QuorumVerifier;
+import org.apache.zookeeper.server.quorum.ReadOnlyZooKeeperServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,6 @@ import org.slf4j.LoggerFactory;
  * @see JettyAdminServer
  */
 public class Commands {
-
     static final Logger LOG = LoggerFactory.getLogger(Commands.class);
 
     /** Maps command names to Command instances */
@@ -73,7 +73,7 @@ public class Commands {
         for (String name : command.getNames()) {
             Command prev = commands.put(name, command);
             if (prev != null) {
-                LOG.warn("Re-registering command {} (primary name = {})", name, command.getPrimaryName());
+                LOG.warn("Re-registering command %s (primary name = %s)", name, command.getPrimaryName());
             }
         }
         primaryNames.add(command.getPrimaryName());
@@ -93,10 +93,7 @@ public class Commands {
      *    - "command" key containing the command's primary name
      *    - "error" key containing a String error message or null if no error
      */
-    public static CommandResponse runCommand(
-        String cmdName,
-        ZooKeeperServer zkServer,
-        Map<String, String> kwargs) {
+    public static CommandResponse runCommand(String cmdName, ZooKeeperServer zkServer, Map<String, String> kwargs) {
         Command command = getCommand(cmdName);
         if (command == null) {
             return new CommandResponse(cmdName, "Unknown command: " + cmdName);
@@ -155,7 +152,6 @@ public class Commands {
      * Reset all connection statistics.
      */
     public static class CnxnStatResetCommand extends CommandBase {
-
         public CnxnStatResetCommand() {
             super(Arrays.asList("connection_stat_reset", "crst"));
         }
@@ -167,7 +163,6 @@ public class Commands {
             return response;
 
         }
-
     }
 
     /**
@@ -175,7 +170,6 @@ public class Commands {
      * @see ZooKeeperServer#getConf()
      */
     public static class ConfCommand extends CommandBase {
-
         public ConfCommand() {
             super(Arrays.asList("configuration", "conf", "config"));
         }
@@ -186,7 +180,6 @@ public class Commands {
             response.putAll(zkServer.getConf().toMap());
             return response;
         }
-
     }
 
     /**
@@ -195,7 +188,6 @@ public class Commands {
      * @see org.apache.zookeeper.server.ServerCnxn#getConnectionInfo(boolean)
      */
     public static class ConsCommand extends CommandBase {
-
         public ConsCommand() {
             super(Arrays.asList("connections", "cons"));
         }
@@ -217,14 +209,12 @@ public class Commands {
             }
             return response;
         }
-
     }
 
     /**
      * Information on ZK datadir and snapdir size in bytes
      */
     public static class DirsCommand extends CommandBase {
-
         public DirsCommand() {
             super(Arrays.asList("dirs"));
         }
@@ -236,7 +226,6 @@ public class Commands {
             response.put("logdir_size", zkServer.getLogDirSize());
             return response;
         }
-
     }
 
     /**
@@ -249,7 +238,6 @@ public class Commands {
      * @see ZooKeeperServer#getEphemerals()
      */
     public static class DumpCommand extends CommandBase {
-
         public DumpCommand() {
             super(Arrays.asList("dump"));
         }
@@ -261,14 +249,12 @@ public class Commands {
             response.put("session_id_to_ephemeral_paths", zkServer.getEphemerals());
             return response;
         }
-
     }
 
     /**
      * All defined environment variables.
      */
     public static class EnvCommand extends CommandBase {
-
         public EnvCommand() {
             super(Arrays.asList("environment", "env", "envi"), false);
         }
@@ -281,14 +267,12 @@ public class Commands {
             }
             return response;
         }
-
     }
 
     /**
      * Digest histories for every specific number of txns.
      */
     public static class DigestCommand extends CommandBase {
-
         public DigestCommand() {
             super(Arrays.asList("hash"));
         }
@@ -299,7 +283,6 @@ public class Commands {
             response.put("digests", zkServer.getZKDatabase().getDataTree().getDigestLog());
             return response;
         }
-
     }
 
     /**
@@ -307,7 +290,6 @@ public class Commands {
      *   - "tracemask": Long
      */
     public static class GetTraceMaskCommand extends CommandBase {
-
         public GetTraceMaskCommand() {
             super(Arrays.asList("get_trace_mask", "gtmk"), false);
         }
@@ -318,11 +300,9 @@ public class Commands {
             response.put("tracemask", ZooTrace.getTextTraceLevel());
             return response;
         }
-
     }
 
     public static class InitialConfigurationCommand extends CommandBase {
-
         public InitialConfigurationCommand() {
             super(Arrays.asList("initial_configuration", "icfg"));
         }
@@ -333,7 +313,6 @@ public class Commands {
             response.put("initial_configuration", zkServer.getInitialConfig());
             return response;
         }
-
     }
 
     /**
@@ -341,7 +320,6 @@ public class Commands {
      *   - "is_read_only": Boolean
      */
     public static class IsroCommand extends CommandBase {
-
         public IsroCommand() {
             super(Arrays.asList("is_read_only", "isro"));
         }
@@ -352,7 +330,6 @@ public class Commands {
             response.put("read_only", zkServer instanceof ReadOnlyZooKeeperServer);
             return response;
         }
-
     }
 
     /**
@@ -365,7 +342,6 @@ public class Commands {
      *   - "timestamp": Long
      */
     public static class LastSnapshotCommand extends CommandBase {
-
         public LastSnapshotCommand() {
             super(Arrays.asList("last_snapshot", "lsnp"));
         }
@@ -378,14 +354,12 @@ public class Commands {
             response.put("timestamp", info == null ? -1L : info.timestamp);
             return response;
         }
-
     }
 
     /**
      * Returns the leader status of this instance and the leader host string.
      */
     public static class LeaderCommand extends CommandBase {
-
         public LeaderCommand() {
             super(Arrays.asList("leader", "lead"));
         }
@@ -404,7 +378,6 @@ public class Commands {
             }
             return response;
         }
-
     }
 
     /**
@@ -432,7 +405,6 @@ public class Commands {
      *   - "pending_syncs": Integer (leader only)
      */
     public static class MonitorCommand extends CommandBase {
-
         public MonitorCommand() {
             super(Arrays.asList("monitor", "mntr"), false);
         }
@@ -441,18 +413,17 @@ public class Commands {
         public CommandResponse run(ZooKeeperServer zkServer, Map<String, String> kwargs) {
             CommandResponse response = initializeResponse();
             zkServer.dumpMonitorValues(response::put);
-            ServerMetrics.getMetrics().getMetricsProvider().dump(response::put);
+            ServerMetrics.getMetrics()
+                    .getMetricsProvider()
+                    .dump(response::put);
             return response;
 
-        }
-
-    }
+        }}
 
     /**
      * Reset all observer connection statistics.
      */
     public static class ObserverCnxnStatResetCommand extends CommandBase {
-
         public ObserverCnxnStatResetCommand() {
             super(Arrays.asList("observer_connection_stat_reset", "orst"));
         }
@@ -469,14 +440,12 @@ public class Commands {
             }
             return response;
         }
-
     }
 
     /**
      * No-op command, check if the server is running
      */
     public static class RuokCommand extends CommandBase {
-
         public RuokCommand() {
             super(Arrays.asList("ruok"));
         }
@@ -485,7 +454,6 @@ public class Commands {
         public CommandResponse run(ZooKeeperServer zkServer, Map<String, String> kwargs) {
             return initializeResponse();
         }
-
     }
 
     /**
@@ -495,7 +463,6 @@ public class Commands {
      *   - "tracemask": Long
      */
     public static class SetTraceMaskCommand extends CommandBase {
-
         public SetTraceMaskCommand() {
             super(Arrays.asList("set_trace_mask", "stmk"), false);
         }
@@ -511,7 +478,8 @@ public class Commands {
             try {
                 traceMask = Long.parseLong(kwargs.get("traceMask"));
             } catch (NumberFormatException e) {
-                response.put("error", "setTraceMask requires long traceMask argument, got " + kwargs.get("traceMask"));
+                response.put("error", "setTraceMask requires long traceMask argument, got "
+                                      + kwargs.get("traceMask"));
                 return response;
             }
 
@@ -519,7 +487,6 @@ public class Commands {
             response.put("tracemask", traceMask);
             return response;
         }
-
     }
 
     /**
@@ -532,7 +499,6 @@ public class Commands {
      *   - "node_count": Integer
      */
     public static class SrvrCommand extends CommandBase {
-
         public SrvrCommand() {
             super(Arrays.asList("server_stats", "srvr"));
         }
@@ -551,20 +517,18 @@ public class Commands {
             response.put("server_stats", zkServer.serverStats());
             response.put("client_response", zkServer.serverStats().getClientResponseStats());
             if (zkServer instanceof LeaderZooKeeperServer) {
-                Leader leader = ((LeaderZooKeeperServer) zkServer).getLeader();
+                Leader leader = ((LeaderZooKeeperServer)zkServer).getLeader();
                 response.put("proposal_stats", leader.getProposalStats());
             }
             response.put("node_count", zkServer.getZKDatabase().getNodeCount());
             return response;
         }
-
     }
 
     /**
      * Same as SrvrCommand but has extra "connections" entry.
      */
     public static class StatCommand extends SrvrCommand {
-
         public StatCommand() {
             super(Arrays.asList("stats", "stat"));
         }
@@ -575,14 +539,12 @@ public class Commands {
             response.put("connections", zkServer.getServerCnxnFactory().getAllConnectionInfo(true));
             return response;
         }
-
     }
 
     /**
      * Resets server statistics.
      */
     public static class StatResetCommand extends CommandBase {
-
         public StatResetCommand() {
             super(Arrays.asList("stat_reset", "srst"));
         }
@@ -593,7 +555,6 @@ public class Commands {
             zkServer.serverStats().reset();
             return response;
         }
-
     }
 
     /**
@@ -603,7 +564,6 @@ public class Commands {
      * @see org.apache.zookeeper.server.quorum.LearnerHandler#getLearnerHandlerInfo()
      */
     public static class SyncedObserverConsCommand extends CommandBase {
-
         public SyncedObserverConsCommand() {
             super(Arrays.asList("observers", "obsr"));
         }
@@ -633,14 +593,12 @@ public class Commands {
             response.put("observers", Collections.emptySet());
             return response;
         }
-
     }
 
     /**
      * All defined system properties.
      */
     public static class SystemPropertiesCommand extends CommandBase {
-
         public SystemPropertiesCommand() {
             super(Arrays.asList("system_properties", "sysp"), false);
         }
@@ -654,7 +612,6 @@ public class Commands {
             response.putAll(sortedSystemProperties);
             return response;
         }
-
     }
 
     /**
@@ -662,7 +619,6 @@ public class Commands {
      * It provides list of current voting members in the ensemble.
      */
     public static class VotingViewCommand extends CommandBase {
-
         public VotingViewCommand() {
             super(Arrays.asList("voting_view"));
         }
@@ -680,39 +636,32 @@ public class Commands {
             return response;
         }
 
-        private static class VotingView {
 
+        private static class VotingView {
             private final Map<Long, String> view;
 
-            VotingView(Map<Long, QuorumPeer.QuorumServer> view) {
-                this.view = view.entrySet()
-                                .stream()
-                                .filter(e -> e.getValue().addr != null)
-                                .collect(Collectors.toMap(
-                                    Map.Entry::getKey,
-                                    e -> String.format(
-                                        "%s:%d%s:%s%s",
+            VotingView(Map<Long,QuorumPeer.QuorumServer> view) {
+                this.view = view.entrySet().stream()
+                        .filter(e -> e.getValue().addr != null)
+                        .collect(Collectors.toMap(Map.Entry::getKey,
+                                e -> String.format("%s:%d%s:%s%s",
                                         QuorumPeer.QuorumServer.delimitedHostString(e.getValue().addr),
                                         e.getValue().addr.getPort(),
                                         e.getValue().electionAddr == null ? "" : ":" + e.getValue().electionAddr.getPort(),
                                         e.getValue().type.equals(QuorumPeer.LearnerType.PARTICIPANT) ? "participant" : "observer",
-                                        e.getValue().clientAddr == null || e.getValue().isClientAddrFromStatic
-                                            ? ""
-                                            : String.format(
-                                                ";%s:%d",
-                                                QuorumPeer.QuorumServer.delimitedHostString(e.getValue().clientAddr),
-                                                e.getValue().clientAddr.getPort())),
-                                    (v1, v2) -> v1, // cannot get duplicates as this straight draws from the other map
-                                    TreeMap::new));
+                                        e.getValue().clientAddr ==null || e.getValue().isClientAddrFromStatic ? "" :
+                                                String.format(";%s:%d",
+                                                        QuorumPeer.QuorumServer.delimitedHostString(e.getValue().clientAddr),
+                                                        e.getValue().clientAddr.getPort())),
+                                (v1, v2) -> v1, // cannot get duplicates as this straight draws from the other map
+                                TreeMap::new));
             }
 
             @JsonAnyGetter
             public Map<Long, String> getView() {
                 return view;
             }
-
         }
-
     }
 
     /**
@@ -721,7 +670,6 @@ public class Commands {
      * @see DataTree#getWatches()
      */
     public static class WatchCommand extends CommandBase {
-
         public WatchCommand() {
             super(Arrays.asList("watches", "wchc"));
         }
@@ -733,7 +681,6 @@ public class Commands {
             response.put("session_id_to_watched_paths", dt.getWatches().toMap());
             return response;
         }
-
     }
 
     /**
@@ -742,7 +689,6 @@ public class Commands {
      * @see DataTree#getWatchesByPath()
      */
     public static class WatchesByPathCommand extends CommandBase {
-
         public WatchesByPathCommand() {
             super(Arrays.asList("watches_by_path", "wchp"));
         }
@@ -754,7 +700,6 @@ public class Commands {
             response.put("path_to_session_ids", dt.getWatchesByPath().toMap());
             return response;
         }
-
     }
 
     /**
@@ -762,7 +707,6 @@ public class Commands {
      * @see DataTree#getWatchesSummary()
      */
     public static class WatchSummaryCommand extends CommandBase {
-
         public WatchSummaryCommand() {
             super(Arrays.asList("watch_summary", "wchs"));
         }
@@ -774,7 +718,6 @@ public class Commands {
             response.putAll(dt.getWatchesSummary().toMap());
             return response;
         }
-
     }
 
     /**
@@ -782,7 +725,6 @@ public class Commands {
      * It can be in one of these phases: ELECTION, DISCOVERY, SYNCHRONIZATION, BROADCAST
      */
     public static class ZabStateCommand extends CommandBase {
-
         public ZabStateCommand() {
             super(Arrays.asList("zabstate"), false);
         }
@@ -796,21 +738,20 @@ public class Commands {
                 QuorumVerifier qv = peer.getQuorumVerifier();
 
                 QuorumPeer.QuorumServer voter = qv.getVotingMembers().get(peer.getId());
-                boolean voting = (voter != null
-                                  && voter.addr.equals(peer.getQuorumAddress())
-                                  && voter.electionAddr.equals(peer.getElectionAddress()));
+                boolean voting = (
+                        voter != null
+                                && voter.addr.equals(peer.getQuorumAddress())
+                                && voter.electionAddr.equals(peer.getElectionAddress())
+                );
                 response.put("voting", voting);
                 response.put("zabstate", zabState.name().toLowerCase());
             } else {
                 response.put("voting", false);
                 response.put("zabstate", "");
             }
-            return response;
+            return response ;
         }
-
     }
 
-    private Commands() {
-    }
-
+    private Commands() {}
 }

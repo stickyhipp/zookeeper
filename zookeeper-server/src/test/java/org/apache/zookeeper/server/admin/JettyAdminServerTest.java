@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,25 +18,20 @@
 
 package org.apache.zookeeper.server.admin;
 
-import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.Security;
-import java.security.cert.X509Certificate;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import org.apache.zookeeper.PortAssignment;
-import org.apache.zookeeper.ZKTestCase;
+
 import org.apache.zookeeper.common.KeyStoreFileType;
 import org.apache.zookeeper.common.X509Exception.SSLContextException;
+import org.apache.zookeeper.PortAssignment;
+import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.common.X509KeyType;
 import org.apache.zookeeper.common.X509TestContext;
 import org.apache.zookeeper.server.ZooKeeperServerMainTest;
@@ -45,13 +40,20 @@ import org.apache.zookeeper.server.quorum.QuorumPeerTestBase;
 import org.apache.zookeeper.test.ClientBase;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JettyAdminServerTest extends ZKTestCase {
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.security.GeneralSecurityException;
 
+public class JettyAdminServerTest extends ZKTestCase{
     protected static final Logger LOG = LoggerFactory.getLogger(JettyAdminServerTest.class);
 
     private static final String URL_FORMAT = "http://localhost:%d/commands";
@@ -73,18 +75,16 @@ public class JettyAdminServerTest extends ZKTestCase {
         try {
             tmpDir = ClientBase.createEmptyTestDir();
             x509TestContext = X509TestContext.newBuilder()
-                                             .setTempDir(tmpDir)
-                                             .setKeyStorePassword("")
-                                             .setKeyStoreKeyType(X509KeyType.EC)
-                                             .setTrustStorePassword("")
-                                             .setTrustStoreKeyType(X509KeyType.EC)
-                                             .build();
-            System.setProperty(
-                "zookeeper.ssl.quorum.keyStore.location",
-                x509TestContext.getKeyStoreFile(KeyStoreFileType.PEM).getAbsolutePath());
-            System.setProperty(
-                "zookeeper.ssl.quorum.trustStore.location",
-                x509TestContext.getTrustStoreFile(KeyStoreFileType.PEM).getAbsolutePath());
+                    .setTempDir(tmpDir)
+                    .setKeyStorePassword("")
+                    .setKeyStoreKeyType(X509KeyType.EC)
+                    .setTrustStorePassword("")
+                    .setTrustStoreKeyType(X509KeyType.EC)
+                    .build();
+            System.setProperty("zookeeper.ssl.quorum.keyStore.location",
+                    x509TestContext.getKeyStoreFile(KeyStoreFileType.PEM).getAbsolutePath());
+            System.setProperty("zookeeper.ssl.quorum.trustStore.location",
+                    x509TestContext.getTrustStoreFile(KeyStoreFileType.PEM).getAbsolutePath());
         } catch (Exception e) {
             LOG.info("Problems encountered while setting up encryption for Jetty admin server test: " + e);
         }
@@ -95,14 +95,10 @@ public class JettyAdminServerTest extends ZKTestCase {
         System.setProperty("zookeeper.admin.portUnification", "true");
 
         // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
+        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
         }};
 
         // Create all-trusting trust manager
@@ -110,15 +106,11 @@ public class JettyAdminServerTest extends ZKTestCase {
         try {
             sc = SSLContext.getInstance("SSL");
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        } catch (Exception e) {
-            LOG.error("Failed to customize encryption for HTTPS: e");
-        }
+        } catch (Exception e) { LOG.error("Failed to customize encryption for HTTPS: e"); }
 
         // Create all-trusting hostname verifier
         HostnameVerifier allValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
+            public boolean verify(String hostname, SSLSession session) { return true; }
         };
 
         // This is a temporary fix while we do not yet have certificates set up to make
@@ -148,7 +140,7 @@ public class JettyAdminServerTest extends ZKTestCase {
      */
     @Test
     public void testJettyAdminServer() throws AdminServerException, IOException, SSLContextException, GeneralSecurityException {
-        JettyAdminServer server = new JettyAdminServer();
+        JettyAdminServer server = new JettyAdminServer();;
         try {
             server.start();
             queryAdminServer(jettyAdminPort);
@@ -169,17 +161,17 @@ public class JettyAdminServerTest extends ZKTestCase {
         ZooKeeperServerMainTest.MainThread main = new ZooKeeperServerMainTest.MainThread(CLIENT_PORT, false, null);
         main.start();
 
-        assertTrue(
-            "waiting for server being up",
-            ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT, ClientBase.CONNECTION_TIMEOUT));
+        Assert.assertTrue("waiting for server being up",
+                ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT,
+                ClientBase.CONNECTION_TIMEOUT));
 
         queryAdminServer(jettyAdminPort);
 
         main.shutdown();
 
-        assertTrue(
-            "waiting for server down",
-            ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT, ClientBase.CONNECTION_TIMEOUT));
+        Assert.assertTrue("waiting for server down",
+                ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT,
+                        ClientBase.CONNECTION_TIMEOUT));
     }
 
     /**
@@ -195,15 +187,13 @@ public class JettyAdminServerTest extends ZKTestCase {
         final int ADMIN_SERVER_PORT1 = PortAssignment.unique();
         final int ADMIN_SERVER_PORT2 = PortAssignment.unique();
 
-        String quorumCfgSection = String.format(
-            "server.1=127.0.0.1:%d:%d;%d\nserver.2=127.0.0.1:%d:%d;%d",
-            PortAssignment.unique(),
-            PortAssignment.unique(),
-            CLIENT_PORT_QP1,
-            PortAssignment.unique(),
-            PortAssignment.unique(),
-            CLIENT_PORT_QP2);
-        QuorumPeerTestBase.MainThread q1 = new QuorumPeerTestBase.MainThread(1, CLIENT_PORT_QP1, ADMIN_SERVER_PORT1, quorumCfgSection, null);
+        String quorumCfgSection = String.format
+            ("server.1=127.0.0.1:%d:%d;%d\nserver.2=127.0.0.1:%d:%d;%d",
+             PortAssignment.unique(), PortAssignment.unique(), CLIENT_PORT_QP1,
+             PortAssignment.unique(), PortAssignment.unique(), CLIENT_PORT_QP2
+            );
+        QuorumPeerTestBase.MainThread q1 = new QuorumPeerTestBase.MainThread(
+                1, CLIENT_PORT_QP1, ADMIN_SERVER_PORT1, quorumCfgSection, null);
         q1.start();
 
         // Since JettyAdminServer reads a system property to determine its port,
@@ -211,17 +201,18 @@ public class JettyAdminServerTest extends ZKTestCase {
         // again with the second port number
         Thread.sleep(500);
 
-        QuorumPeerTestBase.MainThread q2 = new QuorumPeerTestBase.MainThread(2, CLIENT_PORT_QP2, ADMIN_SERVER_PORT2, quorumCfgSection, null);
+        QuorumPeerTestBase.MainThread q2 = new QuorumPeerTestBase.MainThread(
+                2, CLIENT_PORT_QP2, ADMIN_SERVER_PORT2, quorumCfgSection, null);
         q2.start();
 
         Thread.sleep(500);
 
-        assertTrue(
-            "waiting for server 1 being up",
-            ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP1, ClientBase.CONNECTION_TIMEOUT));
-        assertTrue(
-            "waiting for server 2 being up",
-            ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP2, ClientBase.CONNECTION_TIMEOUT));
+        Assert.assertTrue("waiting for server 1 being up",
+                ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP1,
+                ClientBase.CONNECTION_TIMEOUT));
+        Assert.assertTrue("waiting for server 2 being up",
+                        ClientBase.waitForServerUp("127.0.0.1:" + CLIENT_PORT_QP2,
+                        ClientBase.CONNECTION_TIMEOUT));
 
         queryAdminServer(ADMIN_SERVER_PORT1);
         queryAdminServer(ADMIN_SERVER_PORT2);
@@ -229,19 +220,19 @@ public class JettyAdminServerTest extends ZKTestCase {
         q1.shutdown();
         q2.shutdown();
 
-        assertTrue(
-            "waiting for server 1 down",
-            ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP1, ClientBase.CONNECTION_TIMEOUT));
-        assertTrue(
-            "waiting for server 2 down",
-            ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP2, ClientBase.CONNECTION_TIMEOUT));
+        Assert.assertTrue("waiting for server 1 down",
+                ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP1,
+                        ClientBase.CONNECTION_TIMEOUT));
+        Assert.assertTrue("waiting for server 2 down",
+                ClientBase.waitForServerDown("127.0.0.1:" + CLIENT_PORT_QP2,
+                        ClientBase.CONNECTION_TIMEOUT));
     }
 
     /**
      * Check that we can load the commands page of an AdminServer running at
      * localhost:port. (Note that this should work even if no zk server is set.)
      */
-    private void queryAdminServer(int port) throws IOException, SSLContextException {
+    private void queryAdminServer(int port) throws MalformedURLException, IOException, SSLContextException {
         queryAdminServer(String.format(URL_FORMAT, port), false);
         queryAdminServer(String.format(HTTPS_URL_FORMAT, port), true);
     }
@@ -249,7 +240,7 @@ public class JettyAdminServerTest extends ZKTestCase {
     /**
      * Check that loading urlStr results in a non-zero length response.
      */
-    private void queryAdminServer(String urlStr, boolean encrypted) throws IOException, SSLContextException {
+    private void queryAdminServer(String urlStr, boolean encrypted) throws MalformedURLException, IOException, SSLContextException {
         URL url = new URL(urlStr);
         BufferedReader dis;
         if (!encrypted) {
@@ -259,7 +250,6 @@ public class JettyAdminServerTest extends ZKTestCase {
             dis = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         }
         String line = dis.readLine();
-        assertTrue(line.length() > 0);
+        Assert.assertTrue(line.length() > 0);
     }
-
 }

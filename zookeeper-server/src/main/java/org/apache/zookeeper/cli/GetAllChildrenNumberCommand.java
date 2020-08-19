@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
  * work for additional information regarding copyright ownership. The ASF
@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.apache.zookeeper.cli;
 
 import org.apache.commons.cli.CommandLine;
@@ -28,7 +27,6 @@ import org.apache.zookeeper.KeeperException;
  * getAllChildrenNumber command for CLI
  */
 public class GetAllChildrenNumberCommand extends CliCommand {
-
     private static Options options = new Options();
     private String[] args;
 
@@ -69,5 +67,4 @@ public class GetAllChildrenNumberCommand extends CliCommand {
 
         return false;
     }
-
 }

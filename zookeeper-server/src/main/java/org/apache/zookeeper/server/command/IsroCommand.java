@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,6 +19,7 @@
 package org.apache.zookeeper.server.command;
 
 import java.io.PrintWriter;
+
 import org.apache.zookeeper.server.ServerCnxn;
 import org.apache.zookeeper.server.quorum.ReadOnlyZooKeeperServer;
 
@@ -38,5 +39,4 @@ public class IsroCommand extends AbstractFourLetterCommand {
             pw.print("rw");
         }
     }
-
 }

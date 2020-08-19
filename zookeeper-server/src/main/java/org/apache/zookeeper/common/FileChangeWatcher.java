@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,6 +19,10 @@
 package org.apache.zookeeper.common;
 
 import com.sun.nio.file.SensitivityWatchEventModifier;
+import org.apache.zookeeper.server.ZooKeeperThread;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystem;
@@ -28,9 +32,6 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.function.Consumer;
-import org.apache.zookeeper.server.ZooKeeperThread;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Instances of this class can be used to watch a directory for file changes. When a file is added to, deleted from,
@@ -44,7 +45,6 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public final class FileChangeWatcher {
-
     private static final Logger LOG = LoggerFactory.getLogger(FileChangeWatcher.class);
 
     public enum State {
@@ -72,7 +72,14 @@ public final class FileChangeWatcher {
 
         LOG.debug("Registering with watch service: {}", dirPath);
 
-        dirPath.register(watchService, new WatchEvent.Kind<?>[]{StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.OVERFLOW}, SensitivityWatchEventModifier.HIGH);
+        dirPath.register(
+                watchService,
+                new WatchEvent.Kind<?>[]{
+                        StandardWatchEventKinds.ENTRY_CREATE,
+                        StandardWatchEventKinds.ENTRY_DELETE,
+                        StandardWatchEventKinds.ENTRY_MODIFY,
+                        StandardWatchEventKinds.OVERFLOW},
+                SensitivityWatchEventModifier.HIGH);
         state = State.NEW;
         this.watcherThread = new WatcherThread(watchService, callback);
         this.watcherThread.setDaemon(true);
@@ -158,7 +165,9 @@ public final class FileChangeWatcher {
      * Tells the background thread to stop. Does not wait for it to exit.
      */
     public void stop() {
-        if (compareAndSetState(new State[]{State.RUNNING, State.STARTING}, State.STOPPING)) {
+        if (compareAndSetState(
+                new State[]{State.RUNNING, State.STARTING},
+                State.STOPPING)) {
             watcherThread.interrupt();
         }
     }
@@ -167,7 +176,6 @@ public final class FileChangeWatcher {
      * Inner class that implements the watcher thread logic.
      */
     private class WatcherThread extends ZooKeeperThread {
-
         private static final String THREAD_NAME = "FileChangeWatcher";
 
         final WatchService watchService;
@@ -183,7 +191,9 @@ public final class FileChangeWatcher {
         public void run() {
             try {
                 LOG.info(getName() + " thread started");
-                if (!compareAndSetState(FileChangeWatcher.State.STARTING, FileChangeWatcher.State.RUNNING)) {
+                if (!compareAndSetState(
+                        FileChangeWatcher.State.STARTING,
+                        FileChangeWatcher.State.RUNNING)) {
                     // stop() called shortly after start(), before
                     // this thread started running.
                     FileChangeWatcher.State state = FileChangeWatcher.this.getState();
@@ -212,12 +222,13 @@ public final class FileChangeWatcher {
                 WatchKey key;
                 try {
                     key = watchService.take();
-                } catch (InterruptedException | ClosedWatchServiceException e) {
+                } catch (InterruptedException|ClosedWatchServiceException e) {
                     LOG.debug("{} was interrupted and is shutting down...", getName());
                     break;
                 }
                 for (WatchEvent<?> event : key.pollEvents()) {
-                    LOG.debug("Got file changed event: {} with context: {}", event.kind(), event.context());
+                    LOG.debug("Got file changed event: {} with context: {}", event.kind(),
+                        event.context());
                     try {
                         callback.accept(event);
                     } catch (Throwable e) {
@@ -235,7 +246,5 @@ public final class FileChangeWatcher {
                 }
             }
         }
-
     }
-
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,29 +19,27 @@
 package org.apache.zookeeper.server.admin;
 
 import java.io.IOException;
+import java.util.*;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.zookeeper.common.QuorumX509Util;
-import org.apache.zookeeper.common.X509Util;
+
+import org.apache.zookeeper.common.*;
 import org.apache.zookeeper.server.ZooKeeperServer;
-import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +57,6 @@ import org.slf4j.LoggerFactory;
  * @see CommandOutputter
  */
 public class JettyAdminServer implements AdminServer {
-
     static final Logger LOG = LoggerFactory.getLogger(JettyAdminServer.class);
 
     public static final int DEFAULT_PORT = 8080;
@@ -77,23 +74,20 @@ public class JettyAdminServer implements AdminServer {
     private ZooKeeperServer zkServer;
 
     public JettyAdminServer() throws AdminServerException, IOException, GeneralSecurityException {
-        this(
-            System.getProperty("zookeeper.admin.serverAddress", DEFAULT_ADDRESS),
-            Integer.getInteger("zookeeper.admin.serverPort", DEFAULT_PORT),
-            Integer.getInteger("zookeeper.admin.idleTimeout", DEFAULT_IDLE_TIMEOUT),
-            System.getProperty("zookeeper.admin.commandURL", DEFAULT_COMMAND_URL),
-            Integer.getInteger("zookeeper.admin.httpVersion", DEFAULT_HTTP_VERSION),
-            Boolean.getBoolean("zookeeper.admin.portUnification"));
+        this(System.getProperty("zookeeper.admin.serverAddress", DEFAULT_ADDRESS),
+             Integer.getInteger("zookeeper.admin.serverPort", DEFAULT_PORT),
+             Integer.getInteger("zookeeper.admin.idleTimeout", DEFAULT_IDLE_TIMEOUT),
+             System.getProperty("zookeeper.admin.commandURL", DEFAULT_COMMAND_URL),
+             Integer.getInteger("zookeeper.admin.httpVersion", DEFAULT_HTTP_VERSION),
+             Boolean.getBoolean("zookeeper.admin.portUnification"));
     }
 
-    public JettyAdminServer(
-        String address,
-        int port,
-        int timeout,
-        String commandUrl,
-        int httpVersion,
-        boolean portUnification) throws IOException, GeneralSecurityException {
-
+    public JettyAdminServer(String address,
+                            int port,
+                            int timeout,
+                            String commandUrl,
+                            int httpVersion,
+                            boolean portUnification) throws IOException, GeneralSecurityException {
         this.port = port;
         this.idleTimeout = timeout;
         this.commandUrl = commandUrl;
@@ -138,10 +132,9 @@ public class JettyAdminServer implements AdminServer {
                 sslContextFactory.setTrustStore(trustStore);
                 sslContextFactory.setTrustStorePassword(certAuthPassword);
 
-                connector = new ServerConnector(
-                    server,
-                    new UnifiedConnectionFactory(sslContextFactory, HttpVersion.fromVersion(httpVersion).asString()),
-                    new HttpConnectionFactory(config));
+                connector = new ServerConnector(server,
+                        new UnifiedConnectionFactory(sslContextFactory, HttpVersion.fromVersion(httpVersion).asString()),
+                        new HttpConnectionFactory(config));
             }
         }
 
@@ -168,14 +161,13 @@ public class JettyAdminServer implements AdminServer {
         } catch (Exception e) {
             // Server.start() only throws Exception, so let's at least wrap it
             // in an identifiable subclass
-            String message = String.format(
-                "Problem starting AdminServer on address %s, port %d and command URL %s",
-                address,
-                port,
-                commandUrl);
-            throw new AdminServerException(message, e);
+            throw new AdminServerException(String.format(
+                    "Problem starting AdminServer on address %s,"
+                            + " port %d and command URL %s", address, port,
+                    commandUrl), e);
         }
-        LOG.info("Started AdminServer on address {}, port {} and command URL {}", address, port, commandUrl);
+        LOG.info(String.format("Started AdminServer on address %s, port %d"
+                + " and command URL %s", address, port, commandUrl));
     }
 
     /**
@@ -190,12 +182,10 @@ public class JettyAdminServer implements AdminServer {
         try {
             server.stop();
         } catch (Exception e) {
-            String message = String.format(
-                "Problem stopping AdminServer on address %s, port %d and command URL %s",
-                address,
-                port,
-                commandUrl);
-            throw new AdminServerException(message, e);
+            throw new AdminServerException(String.format(
+                    "Problem stopping AdminServer on address %s,"
+                            + " port %d and command URL %s", address, port, commandUrl),
+                    e);
         }
     }
 
@@ -214,12 +204,9 @@ public class JettyAdminServer implements AdminServer {
     }
 
     private class CommandServlet extends HttpServlet {
-
         private static final long serialVersionUID = 1L;
 
-        protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
+        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
             // Capture the command name from the URL
             String cmd = request.getPathInfo();
             if (cmd == null || cmd.equals("/")) {
@@ -234,7 +221,8 @@ public class JettyAdminServer implements AdminServer {
             cmd = cmd.substring(1);
 
             // Extract keyword arguments to command from request parameters
-            @SuppressWarnings("unchecked") Map<String, String[]> parameterMap = request.getParameterMap();
+            @SuppressWarnings("unchecked")
+            Map<String, String[]> parameterMap = request.getParameterMap();
             Map<String, String> kwargs = new HashMap<String, String>();
             for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
                 kwargs.put(entry.getKey(), entry.getValue()[0]);
@@ -249,7 +237,6 @@ public class JettyAdminServer implements AdminServer {
             response.setContentType(outputter.getContentType());
             outputter.output(cmdResponse, response.getWriter());
         }
-
     }
 
     /**
@@ -265,5 +252,4 @@ public class JettyAdminServer implements AdminServer {
         }
         return links;
     }
-
 }

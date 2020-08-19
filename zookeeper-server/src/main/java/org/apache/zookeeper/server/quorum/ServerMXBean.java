@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,14 +22,12 @@ package org.apache.zookeeper.server.quorum;
  * A quorum server MBean.
  */
 public interface ServerMXBean {
-
     /**
      * @return name of the server MBean
      */
-    String getName();
+    public String getName();
     /**
-     * @return the start time the server
+     * @return the start time the server 
      */
-    String getStartTime();
-
+    public String getStartTime();
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,12 +18,13 @@
 
 package org.apache.zookeeper.server.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class JvmPauseMonitorTest {
 
@@ -32,7 +33,7 @@ public class JvmPauseMonitorTest {
     private final Long warnTH = -1L;
     private JvmPauseMonitor pauseMonitor;
 
-    @Test(timeout = 5000)
+    @Test(timeout=5000)
     public void testJvmPauseMonitorExceedInfoThreshold() throws InterruptedException {
         QuorumPeerConfig qpConfig = mock(QuorumPeerConfig.class);
         when(qpConfig.getJvmPauseSleepTimeMs()).thenReturn(sleepTime);
@@ -41,15 +42,15 @@ public class JvmPauseMonitorTest {
         pauseMonitor = new JvmPauseMonitor(qpConfig);
         pauseMonitor.serviceStart();
 
-        assertEquals(sleepTime, Long.valueOf(pauseMonitor.sleepTimeMs));
-        assertEquals(infoTH, Long.valueOf(pauseMonitor.infoThresholdMs));
+        Assert.assertEquals(sleepTime, Long.valueOf(pauseMonitor.sleepTimeMs));
+        Assert.assertEquals(infoTH, Long.valueOf(pauseMonitor.infoThresholdMs));
 
-        while (pauseMonitor.getNumGcInfoThresholdExceeded() == 0) {
+        while(pauseMonitor.getNumGcInfoThresholdExceeded() == 0) {
             Thread.sleep(200);
         }
     }
 
-    @Test(timeout = 5000)
+    @Test(timeout=5000)
     public void testJvmPauseMonitorExceedWarnThreshold() throws InterruptedException {
         QuorumPeerConfig qpConfig = mock(QuorumPeerConfig.class);
         when(qpConfig.getJvmPauseSleepTimeMs()).thenReturn(sleepTime);
@@ -58,10 +59,10 @@ public class JvmPauseMonitorTest {
         pauseMonitor = new JvmPauseMonitor(qpConfig);
         pauseMonitor.serviceStart();
 
-        assertEquals(sleepTime, Long.valueOf(pauseMonitor.sleepTimeMs));
-        assertEquals(warnTH, Long.valueOf(pauseMonitor.warnThresholdMs));
+        Assert.assertEquals(sleepTime, Long.valueOf(pauseMonitor.sleepTimeMs));
+        Assert.assertEquals(warnTH, Long.valueOf(pauseMonitor.warnThresholdMs));
 
-        while (pauseMonitor.getNumGcWarnThresholdExceeded() == 0) {
+        while(pauseMonitor.getNumGcWarnThresholdExceeded() == 0) {
             Thread.sleep(200);
         }
 
@@ -71,5 +72,4 @@ public class JvmPauseMonitorTest {
     public void teardown() {
         pauseMonitor.serviceStop();
     }
-
 }

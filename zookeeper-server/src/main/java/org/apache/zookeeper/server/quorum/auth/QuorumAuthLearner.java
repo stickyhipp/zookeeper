@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -36,6 +36,5 @@ public interface QuorumAuthLearner {
      * @throws IOException
      *             if there is an authentication failure
      */
-    void authenticate(Socket sock, String hostname) throws IOException;
-
+    public void authenticate(Socket sock, String hostname) throws IOException;
 }

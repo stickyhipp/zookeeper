@@ -18,14 +18,15 @@
 
 package org.apache.zookeeper.test;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.util.ResourceLeakDetector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.CompositeByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.util.ResourceLeakDetector;
 
 /**
  * This is a custom ByteBufAllocator that tracks outstanding allocations and
@@ -45,8 +46,8 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  */
 public class TestByteBufAllocator extends PooledByteBufAllocator {
-
-    private static AtomicReference<TestByteBufAllocator> INSTANCE = new AtomicReference<>(null);
+    private static AtomicReference<TestByteBufAllocator> INSTANCE =
+            new AtomicReference<>(null);
 
     /**
      * Get the singleton testing allocator.
@@ -83,46 +84,56 @@ public class TestByteBufAllocator extends PooledByteBufAllocator {
     private final List<ByteBuf> trackedBuffers = new ArrayList<>();
     private final ResourceLeakDetector.Level oldLevel;
 
-    private TestByteBufAllocator(ResourceLeakDetector.Level oldLevel) {
+    private TestByteBufAllocator(ResourceLeakDetector.Level oldLevel)
+    {
         super(false);
         this.oldLevel = oldLevel;
     }
 
     @Override
-    protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
+    protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity)
+    {
         return track(super.newHeapBuffer(initialCapacity, maxCapacity));
     }
 
     @Override
-    protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
+    protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity)
+    {
         return track(super.newDirectBuffer(initialCapacity, maxCapacity));
     }
 
     @Override
-    public CompositeByteBuf compositeHeapBuffer(int maxNumComponents) {
+    public CompositeByteBuf compositeHeapBuffer(int maxNumComponents)
+    {
         return track(super.compositeHeapBuffer(maxNumComponents));
     }
 
     @Override
-    public CompositeByteBuf compositeDirectBuffer(int maxNumComponents) {
+    public CompositeByteBuf compositeDirectBuffer(int maxNumComponents)
+    {
         return track(super.compositeDirectBuffer(maxNumComponents));
     }
 
-    private synchronized CompositeByteBuf track(CompositeByteBuf byteBuf) {
+    private synchronized CompositeByteBuf track(CompositeByteBuf byteBuf)
+    {
         trackedBuffers.add(Objects.requireNonNull(byteBuf));
         return byteBuf;
     }
 
-    private synchronized ByteBuf track(ByteBuf byteBuf) {
+    private synchronized ByteBuf track(ByteBuf byteBuf)
+    {
         trackedBuffers.add(Objects.requireNonNull(byteBuf));
         return byteBuf;
     }
 
-    private void checkInstanceForLeaks() {
+    private void checkInstanceForLeaks()
+    {
         try {
             long referencedBuffersCount = 0;
             synchronized (this) {
-                referencedBuffersCount = trackedBuffers.stream().filter(byteBuf -> byteBuf.refCnt() > 0).count();
+                referencedBuffersCount = trackedBuffers.stream()
+                        .filter(byteBuf -> byteBuf.refCnt() > 0)
+                        .count();
                 // Make tracked buffers eligible for GC
                 trackedBuffers.clear();
             }
@@ -138,5 +149,4 @@ public class TestByteBufAllocator extends PooledByteBufAllocator {
             ResourceLeakDetector.setLevel(oldLevel);
         }
     }
-
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,8 +18,8 @@
 
 package org.apache.zookeeper.test;
 
-import static org.junit.Assert.fail;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.zookeeper.KeeperException.SessionExpiredException;
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.server.SessionTracker.Session;
@@ -28,6 +28,7 @@ import org.apache.zookeeper.server.ZooKeeperServerListener;
 import org.apache.zookeeper.server.quorum.LeaderSessionTracker;
 import org.apache.zookeeper.server.quorum.LearnerSessionTracker;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -39,14 +40,15 @@ import org.slf4j.LoggerFactory;
  */
 public class SessionTrackerCheckTest extends ZKTestCase {
 
-    protected static final Logger LOG = LoggerFactory.getLogger(SessionTrackerCheckTest.class);
+    protected static final Logger LOG = LoggerFactory
+            .getLogger(SessionTrackerCheckTest.class);
     public static final int TICK_TIME = 1000;
     public static final int CONNECTION_TIMEOUT = TICK_TIME * 10;
 
-    private ConcurrentHashMap<Long, Integer> sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
+    private ConcurrentHashMap<Long, Integer> sessionsWithTimeouts =
+            new ConcurrentHashMap<Long, Integer>();
 
     private class Expirer implements SessionExpirer {
-
         long sid;
 
         public Expirer(long sid) {
@@ -59,7 +61,6 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         public long getServerId() {
             return sid;
         }
-
     }
 
     @Before
@@ -75,13 +76,15 @@ public class SessionTrackerCheckTest extends ZKTestCase {
     public void testLearnerSessionTracker() throws Exception {
         Expirer expirer = new Expirer(1);
         // With local session on
-        LearnerSessionTracker tracker = new LearnerSessionTracker(expirer, sessionsWithTimeouts, TICK_TIME, expirer.sid, true, testZKSListener());
+        LearnerSessionTracker tracker = new LearnerSessionTracker(expirer,
+                sessionsWithTimeouts, TICK_TIME, expirer.sid, true,
+                testZKSListener());
 
         // Unknown session
         long sessionId = 0xb100ded;
         try {
             tracker.checkSession(sessionId, null);
-            fail("Unknown session should have failed");
+            Assert.fail("Unknown session should have failed");
         } catch (SessionExpiredException e) {
             // Get expected exception
         }
@@ -91,7 +94,7 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Global session should not fail");
+            Assert.fail("Global session should not fail");
         }
 
         // Local session
@@ -99,7 +102,7 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Local session should not fail");
+            Assert.fail("Local session should not fail");
         }
 
         // During session upgrade
@@ -107,18 +110,19 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Session during upgrade should not fail");
+            Assert.fail("Session during upgrade should not fail");
         }
 
         // With local session off
-        tracker = new LearnerSessionTracker(expirer, sessionsWithTimeouts, TICK_TIME, expirer.sid, false, testZKSListener());
+        tracker = new LearnerSessionTracker(expirer, sessionsWithTimeouts,
+                TICK_TIME, expirer.sid, false, testZKSListener());
 
         // Should be noop
         sessionId = 0xdeadbeef;
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Should not get any exception");
+            Assert.fail("Should not get any exception");
         }
 
     }
@@ -127,14 +131,16 @@ public class SessionTrackerCheckTest extends ZKTestCase {
     public void testLeaderSessionTracker() throws Exception {
         Expirer expirer = new Expirer(2);
         // With local session on
-        LeaderSessionTracker tracker = new LeaderSessionTracker(expirer, sessionsWithTimeouts, TICK_TIME, expirer.sid, true, testZKSListener());
+        LeaderSessionTracker tracker = new LeaderSessionTracker(expirer,
+                sessionsWithTimeouts, TICK_TIME, expirer.sid, true,
+                testZKSListener());
 
         // Local session from other server
         long sessionId = ((expirer.sid + 1) << 56) + 1;
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("local session from other server should not fail");
+            Assert.fail("local session from other server should not fail");
         }
 
         // Track global session
@@ -142,12 +148,12 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Global session should not fail");
+            Assert.fail("Global session should not fail");
         }
         try {
             tracker.checkGlobalSession(sessionId, null);
         } catch (Exception e) {
-            fail("Global session should not fail " + e);
+            Assert.fail("Global session should not fail " + e);
         }
 
         // Local session from the leader
@@ -155,7 +161,7 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Local session on the leader should not fail");
+            Assert.fail("Local session on the leader should not fail");
         }
 
         // During session upgrade
@@ -163,16 +169,17 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Session during upgrade should not fail");
+            Assert.fail("Session during upgrade should not fail");
         }
         try {
             tracker.checkGlobalSession(sessionId, null);
         } catch (Exception e) {
-            fail("Global session should not fail " + e);
+            Assert.fail("Global session should not fail " + e);
         }
 
         // With local session off
-        tracker = new LeaderSessionTracker(expirer, sessionsWithTimeouts, TICK_TIME, expirer.sid, false, testZKSListener());
+        tracker = new LeaderSessionTracker(expirer, sessionsWithTimeouts,
+                TICK_TIME, expirer.sid, false, testZKSListener());
 
         // Global session
         sessionId = 0xdeadbeef;
@@ -180,19 +187,19 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         try {
             tracker.checkSession(sessionId, null);
         } catch (Exception e) {
-            fail("Global session should not fail");
+            Assert.fail("Global session should not fail");
         }
         try {
             tracker.checkGlobalSession(sessionId, null);
         } catch (Exception e) {
-            fail("Global session should not fail");
+            Assert.fail("Global session should not fail");
         }
 
         // Local session from other server
         sessionId = ((expirer.sid + 1) << 56) + 2;
         try {
             tracker.checkSession(sessionId, null);
-            fail("local session from other server should fail");
+            Assert.fail("local session from other server should fail");
         } catch (SessionExpiredException e) {
             // Got expected exception
         }
@@ -201,7 +208,7 @@ public class SessionTrackerCheckTest extends ZKTestCase {
         sessionId = ((expirer.sid) << 56) + 2;
         try {
             tracker.checkSession(sessionId, null);
-            fail("local session from the leader should fail");
+            Assert.fail("local session from the leader should fail");
         } catch (SessionExpiredException e) {
             // Got expected exception
         }
@@ -217,5 +224,4 @@ public class SessionTrackerCheckTest extends ZKTestCase {
             }
         };
     }
-
 }

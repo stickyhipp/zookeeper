@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,9 +18,10 @@
 
 package org.apache.zookeeper.server.quorum;
 
-import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.zookeeper.server.Request;
 import org.apache.zookeeper.server.RequestProcessor;
+
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Allows the blocking of the request processor queue on a ZooKeeperServer.
@@ -73,5 +74,4 @@ public class DelayRequestProcessor implements RequestProcessor {
         zooKeeperServer.commitProcessor.nextProcessor = delayRequestProcessor;
         return delayRequestProcessor;
     }
-
 }

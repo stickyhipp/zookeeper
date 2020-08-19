@@ -92,7 +92,7 @@ public class CommandResponse {
      *
      * @param m map of key/value pairs
      */
-    public void putAll(Map<? extends String, ?> m) {
+    public void putAll(Map<? extends String,?> m) {
         data.putAll(m);
     }
 
@@ -109,5 +109,4 @@ public class CommandResponse {
         m.putAll(data);
         return m;
     }
-
 }

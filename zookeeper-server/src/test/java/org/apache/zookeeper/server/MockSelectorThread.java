@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 
 public class MockSelectorThread extends NIOServerCnxnFactory.SelectorThread {
-
     public MockSelectorThread(NIOServerCnxnFactory fact) throws IOException {
         fact.super(0);
     }
@@ -30,5 +29,4 @@ public class MockSelectorThread extends NIOServerCnxnFactory.SelectorThread {
     public boolean addInterestOpsUpdateRequest(SelectionKey sk) {
         return super.addInterestOpsUpdateRequest(sk);
     }
-
 }

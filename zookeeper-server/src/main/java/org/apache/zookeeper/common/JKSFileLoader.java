@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,12 +25,10 @@ import java.security.KeyStoreException;
  * Implementation of {@link FileKeyStoreLoader} that loads from JKS files.
  */
 class JKSFileLoader extends StandardTypeFileKeyStoreLoader {
-
-    private JKSFileLoader(
-        String keyStorePath,
-        String trustStorePath,
-        String keyStorePassword,
-        String trustStorePassword) {
+    private JKSFileLoader(String keyStorePath,
+                          String trustStorePath,
+                          String keyStorePassword,
+                          String trustStorePassword) {
         super(keyStorePath, trustStorePath, keyStorePassword, trustStorePassword);
     }
 
@@ -40,12 +38,9 @@ class JKSFileLoader extends StandardTypeFileKeyStoreLoader {
     }
 
     static class Builder extends FileKeyStoreLoader.Builder<JKSFileLoader> {
-
         @Override
         JKSFileLoader build() {
             return new JKSFileLoader(keyStorePath, trustStorePath, keyStorePassword, trustStorePassword);
         }
-
     }
-
 }

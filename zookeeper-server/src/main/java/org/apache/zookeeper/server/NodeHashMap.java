@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The interface defined to manage the hash based on the entries in the
+ * The interface defined to manage the hash based on the entries in the 
  * nodes map.
  */
 public interface NodeHashMap {
@@ -34,7 +34,7 @@ public interface NodeHashMap {
      * @param path the path of the node
      * @param node the actual node associated with this path
      */
-    DataNode put(String path, DataNode node);
+    public DataNode put(String path, DataNode node);
 
     /**
      * Add the node into the map without update the digest.
@@ -42,14 +42,14 @@ public interface NodeHashMap {
      * @param path the path of the node
      * @param node the actual node associated with this path
      */
-    DataNode putWithoutDigest(String path, DataNode node);
+    public DataNode putWithoutDigest(String path, DataNode node);
 
     /**
      * Return the data node associated with the path.
      *
-     * @param path the path to read from
+     * @param path the path to read from 
      */
-    DataNode get(String path);
+    public DataNode get(String path);
 
     /**
      * Remove the path from the internal nodes map.
@@ -57,27 +57,27 @@ public interface NodeHashMap {
      * @param path the path to remove
      * @return the node being removed
      */
-    DataNode remove(String path);
+    public DataNode remove(String path);
 
     /**
      * Return all key set view inside this map.
      */
-    ConcurrentHashMap.KeySetView<String, DataNode> keySet();
+    public ConcurrentHashMap.KeySetView<String, DataNode> keySet();
 
     /**
      * Return all the entries inside this map.
      */
-    Set<Map.Entry<String, DataNode>> entrySet();
+    public Set<Map.Entry<String, DataNode>> entrySet();
 
     /**
      * Clear all the items stored inside this map.
      */
-    void clear();
+    public void clear();
 
     /**
      * Return the size of the nodes stored in this map.
      */
-    int size();
+    public int size();
 
     /**
      * Called before we made the change on the node, which will clear
@@ -86,7 +86,7 @@ public interface NodeHashMap {
      * @param path the path being changed
      * @param node the node associated with the path
      */
-    void preChange(String path, DataNode node);
+    public void preChange(String path, DataNode node);
 
     /**
      * Called after making the changes on the node, which will update
@@ -95,11 +95,10 @@ public interface NodeHashMap {
      * @param path the path being changed
      * @param node the node associated with the path
      */
-    void postChange(String path, DataNode node);
+    public void postChange(String path, DataNode node);
 
     /**
      * Return the digest value.
      */
-    long getDigest();
-
+    public long getDigest();
 }

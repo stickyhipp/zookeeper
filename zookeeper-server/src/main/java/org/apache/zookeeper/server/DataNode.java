@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,9 +20,10 @@ package org.apache.zookeeper.server;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Collections;
+
 import org.apache.jute.InputArchive;
 import org.apache.jute.OutputArchive;
 import org.apache.jute.Record;
@@ -34,7 +35,7 @@ import org.apache.zookeeper.data.StatPersisted;
  * <p>
  * A data node contains a reference to its parent, a byte array as its data, an
  * array of ACLs, a stat object, and a set of its children's paths.
- *
+ * 
  */
 @SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public class DataNode implements Record {
@@ -42,12 +43,12 @@ public class DataNode implements Record {
     // the digest value of this node, calculated from path, data and stat
     private volatile long digest;
 
-    // indicate if the digest of this node is up to date or not, used to
+    // indicate if the digest of this node is up to date or not, used to 
     // optimize the performance.
     volatile boolean digestCached;
 
     /** the data for this datanode */
-    byte[] data;
+    byte data[];
 
     /**
      * the acl map long for this datanode. the datatree has the map
@@ -77,7 +78,7 @@ public class DataNode implements Record {
 
     /**
      * create a DataNode with parent, data, acls and stat
-     *
+     * 
      * @param data
      *            the data to be set
      * @param acl
@@ -85,7 +86,7 @@ public class DataNode implements Record {
      * @param stat
      *            the stat for this node.
      */
-    public DataNode(byte[] data, Long acl, StatPersisted stat) {
+    public DataNode(byte data[], Long acl, StatPersisted stat) {
         this.data = data;
         this.acl = acl;
         this.stat = stat;
@@ -93,7 +94,7 @@ public class DataNode implements Record {
 
     /**
      * Method that inserts a child into the children set
-     *
+     * 
      * @param child
      *            to be inserted
      * @return true if this set did not already contain the specified element
@@ -108,7 +109,7 @@ public class DataNode implements Record {
 
     /**
      * Method that removes a child from the children set
-     *
+     * 
      * @param child
      * @return true if this set contained the specified element
      */
@@ -121,7 +122,7 @@ public class DataNode implements Record {
 
     /**
      * convenience method for setting the children for this datanode
-     *
+     * 
      * @param children
      */
     public synchronized void setChildren(HashSet<String> children) {
@@ -130,7 +131,7 @@ public class DataNode implements Record {
 
     /**
      * convenience methods to get the children
-     *
+     * 
      * @return the children of this datanode. If the datanode has no children, empty
      *         set is returned
      */
@@ -142,7 +143,7 @@ public class DataNode implements Record {
         return Collections.unmodifiableSet(children);
     }
 
-    public synchronized void copyStat(Stat to) {
+    synchronized public void copyStat(Stat to) {
         to.setAversion(stat.getAversion());
         to.setCtime(stat.getCtime());
         to.setCzxid(stat.getCzxid());
@@ -159,7 +160,7 @@ public class DataNode implements Record {
         // when we do the Cversion we need to translate from the count of the creates
         // to the count of the changes (v3 semantics)
         // for every create there is a delete except for the children still present
-        to.setCversion(stat.getCversion() * 2 - numChildren);
+        to.setCversion(stat.getCversion()*2 - numChildren);
         to.setNumChildren(numChildren);
     }
 
@@ -171,7 +172,8 @@ public class DataNode implements Record {
         return stat.getEphemeralOwner();
     }
 
-    public synchronized void deserialize(InputArchive archive, String tag) throws IOException {
+    synchronized public void deserialize(InputArchive archive, String tag)
+            throws IOException {
         archive.startRecord("node");
         data = archive.readBuffer("data");
         acl = archive.readLong("acl");
@@ -180,7 +182,8 @@ public class DataNode implements Record {
         archive.endRecord("node");
     }
 
-    public synchronized void serialize(OutputArchive archive, String tag) throws IOException {
+    synchronized public void serialize(OutputArchive archive, String tag)
+            throws IOException {
         archive.startRecord(this, "node");
         archive.writeBuffer(data, "data");
         archive.writeLong(acl, "acl");
@@ -207,5 +210,4 @@ public class DataNode implements Record {
     public byte[] getData() {
         return data;
     }
-
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,12 +25,10 @@ import java.security.KeyStoreException;
  * Implementation of {@link FileKeyStoreLoader} that loads from PKCS12 files.
  */
 class PKCS12FileLoader extends StandardTypeFileKeyStoreLoader {
-
-    private PKCS12FileLoader(
-        String keyStorePath,
-        String trustStorePath,
-        String keyStorePassword,
-        String trustStorePassword) {
+    private PKCS12FileLoader(String keyStorePath,
+                             String trustStorePath,
+                             String keyStorePassword,
+                             String trustStorePassword) {
         super(keyStorePath, trustStorePath, keyStorePassword, trustStorePassword);
     }
 
@@ -40,12 +38,9 @@ class PKCS12FileLoader extends StandardTypeFileKeyStoreLoader {
     }
 
     static class Builder extends FileKeyStoreLoader.Builder<PKCS12FileLoader> {
-
         @Override
         PKCS12FileLoader build() {
             return new PKCS12FileLoader(keyStorePath, trustStorePath, keyStorePassword, trustStorePassword);
         }
-
     }
-
 }

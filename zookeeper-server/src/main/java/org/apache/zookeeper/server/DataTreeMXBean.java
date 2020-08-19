@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,28 +22,26 @@ package org.apache.zookeeper.server;
  * Zookeeper data tree MBean.
  */
 public interface DataTreeMXBean {
-
     /**
      * @return number of znodes in the data tree.
      */
-    int getNodeCount();
+    public int getNodeCount();
     /**
      * @return the most recent zxid processed by the data tree.
      */
-    String getLastZxid();
+    public String getLastZxid();
     /**
      * @return number of watches set.
      */
-    int getWatchCount();
-
+    public int getWatchCount();
+    
     /**
-     * @return data tree size in bytes. The size includes the znode path and
+     * @return data tree size in bytes. The size includes the znode path and 
      * its value.
      */
-    long approximateDataSize();
+    public long approximateDataSize();
     /**
      * @return number of ephemeral nodes in the data tree
      */
-    int countEphemerals();
-
+    public int countEphemerals();
 }

@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,34 +22,32 @@ package org.apache.zookeeper.server.quorum;
  * A proxy for a remote quorum peer.
  */
 public interface RemotePeerMXBean {
-
     /**
      * @return name of the peer
      */
-    String getName();
+    public String getName();
     /**
-     * @return IP address of the quorum peer
+     * @return IP address of the quorum peer 
      */
-    String getQuorumAddress();
+    public String getQuorumAddress();
 
     /**
      * @return the election address
      */
-    String getElectionAddress();
+    public String getElectionAddress();
 
     /**
      * @return the client address
      */
-    String getClientAddress();
+    public String getClientAddress();
 
     /**
      * @return the learner type
      */
-    String getLearnerType();
+    public String getLearnerType();
 
     /**
      * @return true if the peer is the current leader
      */
-    boolean isLeader();
-
+    public boolean isLeader();
 }

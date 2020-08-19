@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,19 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.zookeeper.server.quorum;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import javax.management.ObjectName;
 import org.apache.zookeeper.jmx.MBeanRegistry;
 import org.apache.zookeeper.jmx.ZKMBeanInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LearnerHandlerBean implements LearnerHandlerMXBean, ZKMBeanInfo {
+import javax.management.ObjectName;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
+public class LearnerHandlerBean implements LearnerHandlerMXBean, ZKMBeanInfo{
     private static final Logger LOG = LoggerFactory.getLogger(LearnerHandlerBean.class);
 
     private final LearnerHandler learnerHandler;
@@ -45,11 +44,8 @@ public class LearnerHandlerBean implements LearnerHandlerMXBean, ZKMBeanInfo {
 
     @Override
     public String getName() {
-        return MBeanRegistry.getInstance()
-                            .makeFullPath(
-                                "Learner_Connections",
-                                ObjectName.quote(remoteAddr),
-                                String.format("\"id:%d\"", learnerHandler.getSid()));
+        return MBeanRegistry.getInstance().makeFullPath("Learner_Connections", ObjectName.quote(remoteAddr),
+                String.format("\"id:%d\"", learnerHandler.getSid()));
     }
 
     @Override
@@ -67,5 +63,4 @@ public class LearnerHandlerBean implements LearnerHandlerMXBean, ZKMBeanInfo {
     public String toString() {
         return "LearnerHandlerBean{remoteIP=" + remoteAddr + ",ServerId=" + learnerHandler.getSid() + "}";
     }
-
 }

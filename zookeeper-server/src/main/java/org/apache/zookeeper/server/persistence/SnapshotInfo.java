@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,7 +23,6 @@ package org.apache.zookeeper.server.persistence;
  * of a snapshot file
  */
 public class SnapshotInfo {
-
     public long zxid;
     public long timestamp;
 
@@ -31,5 +30,4 @@ public class SnapshotInfo {
         this.zxid = zxid;
         this.timestamp = timestamp;
     }
-
 }

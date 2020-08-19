@@ -1,4 +1,4 @@
-/*
+/**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -22,15 +22,13 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 public class ClientSkipACLTest extends ClientTest {
-
     @BeforeClass
-    public static void setup() {
+    static public void setup() {
         System.setProperty("zookeeper.skipACL", "yes");
     }
 
     @AfterClass
-    public static void teardown() {
+    static public void teardown() {
         System.clearProperty("zookeeper.skipACL");
     }
-
 }
