@@ -18,17 +18,17 @@
 
 package org.apache.jute;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 // TODO: introduce JuteTestCase as in ZKTestCase
 
@@ -47,8 +47,8 @@ public class BinaryInputArchiveTest {
             ia.readString("");
             fail("Should have thrown an IOException");
         } catch (IOException e) {
-            assertTrue(e.getMessage().startsWith(BinaryInputArchive.UNREASONBLE_LENGTH),
-                    () -> "Not 'Unreasonable length' exception: " + e);
+            assertTrue("Not 'Unreasonable length' exception: " + e,
+                    e.getMessage().startsWith(BinaryInputArchive.UNREASONBLE_LENGTH));
         }
     }
 
@@ -155,8 +155,8 @@ public class BinaryInputArchiveTest {
       ia.readString("");
       fail("Should have thrown an IOException");
     } catch (IOException e) {
-      assertTrue(e.getMessage().startsWith(BinaryInputArchive.UNREASONBLE_LENGTH),
-              () -> "Not 'Unreasonable length' exception: " + e);
+      assertTrue("Not 'Unreasonable length' exception: " + e,
+          e.getMessage().startsWith(BinaryInputArchive.UNREASONBLE_LENGTH));
     }
   }
 
