@@ -1,21 +1,8 @@
 language: java
 sudo: false
-
-matrix:
-  include:
-    - os: linux
-      jdk: openjdk8
-    - os: linux
-      jdk: openjdk11
-    - os: linux
-      arch: s390x
-      jdk: openjdk11
-      addons:
-        apt:
-          update: true
-          packages:
-            - maven
-            - libcppunit-dev
+jdk:
+  - openjdk8
+  - openjdk11
 
 cache:
   directories:
