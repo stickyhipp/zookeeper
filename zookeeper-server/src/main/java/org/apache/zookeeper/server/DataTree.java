@@ -697,9 +697,10 @@ public class DataTree {
         // root node for now.
         String lastPrefix = pTrie.findMaxPrefix(path);
 
-        if (rootZookeeper.equals(lastPrefix) || lastPrefix.isEmpty()) {
+        if (rootZookeeper.equals(lastPrefix) || "".equals(lastPrefix)) {
             return null;
-        } else {
+        }
+        else {
             return lastPrefix;
         }
     }

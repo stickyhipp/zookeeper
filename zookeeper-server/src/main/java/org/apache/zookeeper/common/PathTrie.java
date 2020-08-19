@@ -18,17 +18,11 @@
 
 package org.apache.zookeeper.common;
 
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.Deque;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,301 +40,254 @@ import org.slf4j.LoggerFactory;
  *      (bc)
  *   cf/
  *   (cf)
- */
+ */    
 public class PathTrie {
-
-    /** Logger for this class */
+    /**
+     * the logger for this class
+     */
     private static final Logger LOG = LoggerFactory.getLogger(PathTrie.class);
-
-    /** Root node of PathTrie */
-    private final TrieNode rootNode;
-
-    private final ReadWriteLock lock = new ReentrantReadWriteLock(true);
-
-    private final Lock readLock = lock.readLock();
-
-    private final Lock writeLock = lock.writeLock();
-
+    
+    /**
+     * the root node of PathTrie
+     */
+    private final TrieNode rootNode ;
+    
     static class TrieNode {
-        final String value;
+        boolean property = false;
         final Map<String, TrieNode> children;
-        boolean property;
-        TrieNode parent;
-
+        TrieNode parent = null;
         /**
-         * Create a trie node with parent as parameter.
-         *
-         * @param parent the parent of this node
-         * @param value the value stored in this node
+         * create a trienode with parent
+         * as parameter
+         * @param parent the parent of this trienode
          */
-        private TrieNode(TrieNode parent, String value) {
-            this.value = value;
+        private TrieNode(TrieNode parent) {
+            children = new HashMap<String, TrieNode>();
             this.parent = parent;
-            this.property = false;
-            this.children = new HashMap<>(4);
         }
-
+        
         /**
-         * Get the parent of this node.
-         *
+         * get the parent of this node
          * @return the parent node
          */
         TrieNode getParent() {
             return this.parent;
         }
-
+        
         /**
-         * set the parent of this node.
-         *
+         * set the parent of this node
          * @param parent the parent to set to
          */
         void setParent(TrieNode parent) {
             this.parent = parent;
         }
-
+        
         /**
-         * A property that is set for a node - making it special.
+         * a property that is set 
+         * for a node - making it 
+         * special.
          */
         void setProperty(boolean prop) {
             this.property = prop;
         }
-
-        /**
-         * The property of this node.
-         *
-         * @return the property for this node
+        
+        /** the property of this
+         * node 
+         * @return the property for this
+         * node
          */
-        boolean hasProperty() {
+        boolean getProperty() {
             return this.property;
         }
-
         /**
-         * The value stored in this node.
-         *
-         * @return the value stored in this node
-         */
-        public String getValue() {
-          return this.value;
-        }
-
-        /**
-         * Add a child to the existing node.
-         *
+         * add a child to the existing node
          * @param childName the string name of the child
          * @param node the node that is the child
          */
         void addChild(String childName, TrieNode node) {
-            this.children.putIfAbsent(childName, node);
+            synchronized(children) {
+                if (children.containsKey(childName)) {
+                    return;
+                }
+                children.put(childName, node);
+            }
         }
-
+     
         /**
-         * Delete child from this node.
-         *
-         * @param childName the name of the child to be deleted
+         * delete child from this node
+         * @param childName the string name of the child to 
+         * be deleted
          */
         void deleteChild(String childName) {
-            this.children.computeIfPresent(childName, (key, childNode) -> {
-                // Node no longer has an external property associated
-                childNode.setProperty(false);
-
-                // Delete it if it has no children (is a leaf node)
-                if (childNode.isLeafNode()) {
-                    childNode.setParent(null);
-                    return null;
+            synchronized(children) {
+                if (!children.containsKey(childName)) {
+                    return;
                 }
-
-                return childNode;
-            });
+                TrieNode childNode = children.get(childName);
+                // this is the only child node.
+                if (childNode.getChildren().length == 1) { 
+                    childNode.setParent(null);
+                    children.remove(childName);
+                }
+                else {
+                    // their are more child nodes
+                    // so just reset property.
+                    childNode.setProperty(false);
+                }
+            }
         }
-
+        
         /**
-         * Return the child of a node mapping to the input child name.
-         *
+         * return the child of a node mapping
+         * to the input childname
          * @param childName the name of the child
          * @return the child of a node
          */
         TrieNode getChild(String childName) {
-            return this.children.get(childName);
+            synchronized(children) {
+               if (!children.containsKey(childName)) {
+                   return null;
+               }
+               else {
+                   return children.get(childName);
+               }
+            }
         }
 
         /**
-         * Get the list of children of this trienode.
-         *
-         * @return A collection containing the node's children
+         * get the list of children of this 
+         * trienode.
+         * @return the string list of its children
          */
-        Collection<String> getChildren() {
-            return children.keySet();
+        String[] getChildren() {
+           synchronized(children) {
+               return children.keySet().toArray(new String[0]);
+           }
         }
-
+        
         /**
-         * Determine if this node is a leaf (has no children).
-         *
-         * @return true if this node is a lead node; otherwise false
+         * get the string representation
+         * for this node
          */
-        boolean isLeafNode() {
-            return children.isEmpty();
-        }
-
-        @Override
         public String toString() {
-          return "TrieNode [name=" + value + ", property=" + property
-              + ", children=" + children.keySet() + "]";
+            StringBuilder sb = new StringBuilder();
+            sb.append("Children of trienode: ");
+            synchronized(children) {
+                for (String str: children.keySet()) {
+                    sb.append(" " + str);
+                }
+            }
+            return sb.toString();
         }
     }
-
+    
     /**
-     * Construct a new PathTrie with a root node.
+     * construct a new PathTrie with
+     * a root node of /
      */
     public PathTrie() {
-        this.rootNode = new TrieNode(null, "/");
+        this.rootNode = new TrieNode(null);
     }
-  
+    
     /**
-     * Add a path to the path trie. All paths are relative to the root node.
-     *
-     * @param path the path to add to the trie
+     * add a path to the path trie 
+     * @param path
      */
-    public void addPath(final String path) {
-        Objects.requireNonNull(path, "Path cannot be null");
-
-        final String[] pathComponents = StringUtils.split(path, '/');
-        if (pathComponents.length == 0) {
-            throw new IllegalArgumentException("Invalid path: " + path);
+    public void addPath(String path) {
+        if (path == null) {
+            return;
         }
-
-        writeLock.lock();
-        try {
-            TrieNode parent = rootNode;
-            for (final String part : pathComponents) {
-                TrieNode child = parent.getChild(part);
-                if (child == null) {
-                    child = new TrieNode(parent, part);
-                    parent.addChild(part, child);
-                }
-                parent = child;
+        String[] pathComponents = path.split("/");
+        TrieNode parent = rootNode;
+        String part = null;
+        if (pathComponents.length <= 1) {
+            throw new IllegalArgumentException("Invalid path " + path);
+        }
+        for (int i=1; i<pathComponents.length; i++) {
+            part = pathComponents[i];
+            if (parent.getChild(part) == null) {
+                parent.addChild(part, new TrieNode(parent));
             }
-            parent.setProperty(true);
-        } finally {
-            writeLock.unlock();
+            parent = parent.getChild(part);
         }
+        parent.setProperty(true);
     }
-
+    
     /**
-     * Delete a path from the trie. All paths are relative to the root node.
-     *
+     * delete a path from the trie
      * @param path the path to be deleted
      */
-    public void deletePath(final String path) {
-        Objects.requireNonNull(path, "Path cannot be null");
-
-        final String[] pathComponents = StringUtils.split(path, '/');
-        if (pathComponents.length == 0) {
-            throw new IllegalArgumentException("Invalid path: " + path);
+    public void deletePath(String path) {
+        if (path == null) {
+            return;
         }
-
-        writeLock.lock();
-        try {
-            TrieNode parent = rootNode;
-            for (final String part : pathComponents) {
-                if (parent.getChild(part) == null) {
-                    // the path does not exist
-                    return;
-                }
-                parent = parent.getChild(part);
-                LOG.debug("{}", parent);
+        String[] pathComponents = path.split("/");
+        TrieNode parent = rootNode;
+        String part = null;
+        if (pathComponents.length <= 1) { 
+            throw new IllegalArgumentException("Invalid path " + path);
+        }
+        for (int i=1; i<pathComponents.length; i++) {
+            part = pathComponents[i];
+            if (parent.getChild(part) == null) {
+                //the path does not exist 
+                return;
             }
-
-            final TrieNode realParent = parent.getParent();
-            realParent.deleteChild(parent.getValue());
-        } finally {
-            writeLock.unlock();
+            parent = parent.getChild(part);
+            LOG.info("{}",parent);
         }
+        TrieNode realParent  = parent.getParent();
+        realParent.deleteChild(part);
     }
-
+    
     /**
-     * Return true if the given path exists in the trie, otherwise return false;
-     * All paths are relative to the root node.
-     *
+     * return the largest prefix for the input path.
      * @param path the input path
-     * @return the largest prefix for the
-     */ 
-    public boolean existsNode(final String path) {
-      Objects.requireNonNull(path, "Path cannot be null");
-
-      final String[] pathComponents = StringUtils.split(path, '/');
-      if (pathComponents.length == 0) {
-          throw new IllegalArgumentException("Invalid path: " + path);
-      }
-
-      readLock.lock();
-      try {
-          TrieNode parent = rootNode;
-          for (final String part : pathComponents) {
-              if (parent.getChild(part) == null) {
-                  // the path does not exist
-                  return false;
-              }
-              parent = parent.getChild(part);
-              LOG.debug("{}", parent);
-          }
-      } finally {
-          readLock.unlock();
-      }
-      return true;
-    }
-
-    /**
-     * Return the largest prefix for the input path. All paths are relative to the
-     * root node.
-     *
-     * @param path the input path
-     * @return the largest prefix for the input path
+     * @return the largest prefix for the input path.
      */
-    public String findMaxPrefix(final String path) {
-        Objects.requireNonNull(path, "Path cannot be null");
-
-        final String[] pathComponents = StringUtils.split(path, '/');
-
-        readLock.lock();
-        try {
-            TrieNode parent = rootNode;
-            TrieNode deepestPropertyNode = null;
-            for (final String element : pathComponents) {
-                parent = parent.getChild(element);
-                if (parent == null) {
-                    LOG.debug("{}", element);
-                    break;
-                }
-                if (parent.hasProperty()) {
-                  deepestPropertyNode = parent;
-                }
-            }
-
-            if (deepestPropertyNode == null) {
-              return "/";
-            }
-
-            final Deque<String> treePath = new ArrayDeque<>();
-            TrieNode node = deepestPropertyNode;
-            while (node != this.rootNode) {
-              treePath.offerFirst(node.getValue());
-              node = node.parent;
-            }
-            return "/" + String.join("/", treePath);
-        } finally {
-            readLock.unlock();
+    public String findMaxPrefix(String path) {
+        if (path == null) {
+            return null;
         }
+        if ("/".equals(path)) {
+            return path;
+        }
+        String[] pathComponents = path.split("/");
+        TrieNode parent = rootNode;
+        List<String> components = new ArrayList<String>();
+        if (pathComponents.length <= 1) {
+            throw new IllegalArgumentException("Invalid path " + path);
+        }
+        int i = 1;
+        String part = null;
+        StringBuilder sb = new StringBuilder();
+        int lastindex = -1;
+        while((i < pathComponents.length)) {
+            if (parent.getChild(pathComponents[i]) != null) {
+                part = pathComponents[i];
+                parent = parent.getChild(part);
+                components.add(part);
+                if (parent.getProperty()) {
+                    lastindex = i-1;
+                }
+            }
+            else {
+                break;
+            }
+            i++;
+        }
+        for (int j=0; j< (lastindex+1); j++) {
+            sb.append("/" + components.get(j));
+        }
+        return sb.toString();
     }
 
     /**
-     * Clear all nodes in the trie.
+     * clear all nodes
      */
     public void clear() {
-      writeLock.lock();
-      try {
-          rootNode.getChildren().clear();
-      } finally {
-          writeLock.unlock();
-      }
+        for(String child : rootNode.getChildren()) {
+            rootNode.deleteChild(child);
+        }
     }
 }
