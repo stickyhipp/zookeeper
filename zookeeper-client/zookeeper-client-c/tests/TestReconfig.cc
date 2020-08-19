@@ -265,7 +265,7 @@ public:
 
     void tearDown()
     {
-        for (unsigned int i = 0; i < clients.size(); i++)
+        for (int i = 0; i < clients.size(); i++)
         {
             clients.at(i).close();
         }
@@ -316,7 +316,7 @@ public:
 
         stringstream ss;
 
-        for (uint32_t i = start; i >= stop; i--, octet--)
+        for (int i = start; i >= stop; i--, octet--)
         {
             ss << "10.10.10." << octet << ":" << portOffset + octet;
 
@@ -573,6 +573,8 @@ public:
     {
         zoo_deterministic_conn_order(0);
 
+        int rc = ZOK;
+
         uint32_t numServers = 9;
         const string initial_hosts = createHostList(numServers); // 10.10.10.9:2009...10.10.10.1:2001
 
@@ -582,7 +584,7 @@ public:
             numClientsPerHost.at(client.getServerPort() - portOffset - 1)++;
         }
 
-        for (uint32_t i = 0; i < numServers; i++) {
+        for (int i = 0; i < numServers; i++) {
             CPPUNIT_ASSERT(numClientsPerHost.at(i) <= upperboundClientsPerServer(numClients, numServers));
             CPPUNIT_ASSERT(numClientsPerHost.at(i) >= lowerboundClientsPerServer(numClients, numServers));
             numClientsPerHost.at(i) = 0; // prepare for next test

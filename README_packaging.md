@@ -8,15 +8,14 @@ http://bigtop.apache.org/
 
 ## Requirements
 
-- you need maven to build the java code
-- gcc, cppunit, openssl and python-setuptools are required to build C and python bindings. (only needed when using `-Pfull-build`)
+- ant (recommended version 1.9.4 or later for concurrent JUnit test execution) or maven to build the java code
+- gcc, cppunit and python-setuptools are required to build C and python bindings.
 
 On RHEL machine:
 
 ```
 yum install cppunit
 yum install python-setuptools
-yum install openssl openssl-devel
 ```
 
 On Ubuntu:
@@ -24,7 +23,6 @@ On Ubuntu:
 ```
 apt-get install cppunit
 apt-get install python-setuptools
-apt-get install openssl libssl-dev
 ```
 
 
