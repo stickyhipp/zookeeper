@@ -65,7 +65,7 @@ public class LearnerSessionTracker extends UpgradeableSessionTracker {
         this.touchTable.set(new ConcurrentHashMap<Long, Integer>());
         this.globalSessionsWithTimeouts = sessionsWithTimeouts;
         this.serverId = id;
-        nextSessionId.set(SessionTrackerImpl.initializeNextSessionId(serverId));
+        nextSessionId.set(SessionTrackerImpl.initializeNextSession(serverId));
 
         this.localSessionsEnabled = localSessionsEnabled;
         if (this.localSessionsEnabled) {
