@@ -45,8 +45,6 @@ public class FileChangeWatcherTest extends ZKTestCase {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileChangeWatcherTest.class);
 
-    private static final long FS_TIMEOUT = 30000L;
-
     @BeforeClass
     public static void createTempFile() throws IOException {
         tempDir = ClientBase.createEmptyTestDir();
@@ -89,7 +87,7 @@ public class FileChangeWatcherTest extends ZKTestCase {
                 FileUtils.writeStringToFile(tempFile, "Hello world " + i + "\n", StandardCharsets.UTF_8, true);
                 synchronized (events) {
                     if (events.size() < i + 1) {
-                        events.wait(FS_TIMEOUT);
+                        events.wait(3000L);
                     }
                     assertEquals("Wrong number of events", i + 1, events.size());
                     WatchEvent<?> event = events.get(i);
@@ -130,7 +128,7 @@ public class FileChangeWatcherTest extends ZKTestCase {
             FileUtils.touch(tempFile);
             synchronized (events) {
                 if (events.isEmpty()) {
-                    events.wait(FS_TIMEOUT);
+                    events.wait(3000L);
                 }
                 assertFalse(events.isEmpty());
                 WatchEvent<?> event = events.get(0);
@@ -164,7 +162,7 @@ public class FileChangeWatcherTest extends ZKTestCase {
             tempFile2.deleteOnExit();
             synchronized (events) {
                 if (events.isEmpty()) {
-                    events.wait(FS_TIMEOUT);
+                    events.wait(3000L);
                 }
                 assertFalse(events.isEmpty());
                 WatchEvent<?> event = events.get(0);
@@ -203,7 +201,7 @@ public class FileChangeWatcherTest extends ZKTestCase {
             tempFile.delete();
             synchronized (events) {
                 if (events.isEmpty()) {
-                    events.wait(FS_TIMEOUT);
+                    events.wait(3000L);
                 }
                 assertFalse(events.isEmpty());
                 WatchEvent<?> event = events.get(0);
@@ -241,14 +239,14 @@ public class FileChangeWatcherTest extends ZKTestCase {
             FileUtils.writeStringToFile(tempFile, "Hello world\n", StandardCharsets.UTF_8, true);
             synchronized (callCount) {
                 while (callCount.get() == 0) {
-                    callCount.wait(FS_TIMEOUT);
+                    callCount.wait(3000L);
                 }
             }
             LOG.info("Modifying file again");
             FileUtils.writeStringToFile(tempFile, "Hello world again\n", StandardCharsets.UTF_8, true);
             synchronized (callCount) {
                 if (callCount.get() == 1) {
-                    callCount.wait(FS_TIMEOUT);
+                    callCount.wait(3000L);
                 }
             }
             // The value of callCount can exceed 1 only if the callback thread
