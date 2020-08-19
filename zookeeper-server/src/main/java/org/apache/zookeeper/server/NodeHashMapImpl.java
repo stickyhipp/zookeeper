@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.zookeeper.server.util.AdHash;
+import org.apache.zookeeper.server.util.DigestCalculator;
 
 /**
  * a simple wrapper to ConcurrentHashMap that recalculates a digest after
@@ -32,11 +33,6 @@ public class NodeHashMapImpl implements NodeHashMap {
     private final ConcurrentHashMap<String, DataNode> nodes = new ConcurrentHashMap<String, DataNode>();
 
     private AdHash hash = new AdHash();
-    private final DigestCalculator digestCalculator;
-
-    public NodeHashMapImpl(DigestCalculator digestCalculator) {
-        this.digestCalculator = digestCalculator;
-    }
 
     @Override
     public DataNode put(String path, DataNode node) {
@@ -102,14 +98,14 @@ public class NodeHashMapImpl implements NodeHashMap {
     }
 
     private void addDigest(String path, DataNode node) {
-        if (ZooKeeperServer.isDigestEnabled()) {
-            hash.addDigest(digestCalculator.calculateDigest(path, node));
+        if (DigestCalculator.digestEnabled()) {
+            hash.addDigest(DigestCalculator.calculateDigest(path, node));
         }
     }
 
     private void removeDigest(String path, DataNode node) {
-        if (ZooKeeperServer.isDigestEnabled()) {
-            hash.removeDigest(digestCalculator.calculateDigest(path, node));
+        if (DigestCalculator.digestEnabled()) {
+            hash.removeDigest(DigestCalculator.calculateDigest(path, node));
         }
     }
 
