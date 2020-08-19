@@ -441,7 +441,6 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
                 addCnxn(cnxn);
             } else {
                 LOG.error("Unsuccessful handshake with session 0x{}", Long.toHexString(cnxn.getSessionId()));
-                ServerMetrics.getMetrics().UNSUCCESSFUL_HANDSHAKE.add(1);
                 cnxn.close(ServerCnxn.DisconnectReason.FAILED_HANDSHAKE);
             }
         }
