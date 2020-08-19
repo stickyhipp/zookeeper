@@ -35,25 +35,27 @@ public class ManagedUtil {
     private static boolean isLog4jJmxEnabled() {
         boolean enabled = false;
 
-        if (Boolean.getBoolean("zookeeper.jmx.log4j.disable")) {
-            LOG.info("Log4j 1.2 jmx support is disabled by property.");
-        } else {
-            try {
-                Class.forName("org.apache.log4j.jmx.HierarchyDynamicMBean");
+        try {
+            Class.forName("org.apache.log4j.spi.LoggerRepository");
+
+            if (Boolean.getBoolean("zookeeper.jmx.log4j.disable")) {
+                LOG.info("Log4j found but jmx support is disabled.");
+            } else {
                 enabled = true;
-                LOG.info("Log4j 1.2 jmx support found and enabled.");
-            } catch (ClassNotFoundException e) {
-                LOG.info("Log4j 1.2 jmx support not found; jmx disabled.");
+                LOG.info("Log4j found with jmx enabled.");
             }
+
+        } catch (ClassNotFoundException e) {
+            LOG.info("Log4j not found.");
         }
 
         return enabled;
     }
 
     /**
-     * Register the log4j JMX mbeans. Set system property
+     * Register the log4j JMX mbeans. Set environment variable
      * "zookeeper.jmx.log4j.disable" to true to disable registration.
-     * @see http://logging.apache.org/log4j/1.2/apidocs/index.html?org/apache/log4j/jmx/package-summary.html
+     * See http://logging.apache.org/log4j/1.2/apidocs/index.html?org/apache/log4j/jmx/package-summary.html
      * @throws JMException if registration fails
      */
     @SuppressWarnings("rawtypes")
@@ -106,7 +108,7 @@ public class ManagedUtil {
                     hdm.getClass().getMethod("addLoggerMBean", String.class).invoke(hdm, loggerName);
                 }
             } catch (Exception e) {
-                LOG.error("Problems while registering log4j 1.2 jmx beans!", e);
+                LOG.error("Problems while registering log4j jmx beans!", e);
                 throw new JMException(e.toString());
             }
         }
