@@ -20,6 +20,7 @@ package org.apache.zookeeper.server.quorum;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.apache.zookeeper.AsyncCallback;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper.States;
@@ -88,7 +89,12 @@ public class CloseSessionTxnTest extends QuorumPeerTestBase {
         // 4. verify the ephemeral node is gone
         for (int i = 0; i < numServers; i++) {
             final CountDownLatch syncedLatch = new CountDownLatch(1);
-            servers.zk[i].sync(path, (rc, path1, ctx) -> syncedLatch.countDown(), null);
+            servers.zk[i].sync(path, new AsyncCallback.VoidCallback() {
+                @Override
+                public void processResult(int rc, String path, Object ctx) {
+                    syncedLatch.countDown();
+                }
+            }, null);
             Assert.assertTrue(syncedLatch.await(3, TimeUnit.SECONDS));
             Assert.assertNull(servers.zk[i].exists(path, false));
         }

@@ -26,6 +26,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 import org.apache.commons.cli.PosixParser;
+import org.apache.zookeeper.AsyncCallback;
 
 /**
  * sync command for cli
@@ -63,7 +64,11 @@ public class SyncCommand extends CliCommand {
         CompletableFuture<Integer> cf = new CompletableFuture<>();
 
         try {
-            zk.sync(path, (rc, path1, ctx) -> cf.complete(rc), null);
+            zk.sync(path, new AsyncCallback.VoidCallback() {
+                public void processResult(int rc, String path, Object ctx) {
+                    cf.complete(rc);
+                }
+            }, null);
 
             int resultCode = cf.get(SYNC_TIMEOUT, TimeUnit.MILLISECONDS);
             if (resultCode == 0) {

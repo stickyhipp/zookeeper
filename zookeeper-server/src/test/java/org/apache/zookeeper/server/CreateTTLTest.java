@@ -131,8 +131,11 @@ public class CreateTTLTest extends ClientBase {
 
     @Test
     public void testCreateAsync() throws KeeperException, InterruptedException {
-        AsyncCallback.Create2Callback callback = (rc, path, ctx, name, stat) -> {
-            // NOP
+        AsyncCallback.Create2Callback callback = new AsyncCallback.Create2Callback() {
+            @Override
+            public void processResult(int rc, String path, Object ctx, String name, Stat stat) {
+                // NOP
+            }
         };
         zk.create("/foo", new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_WITH_TTL, callback, null, 100);
 
@@ -209,8 +212,11 @@ public class CreateTTLTest extends ClientBase {
         }
 
         for (CreateMode createMode : CreateMode.values()) {
-            AsyncCallback.Create2Callback callback = (rc, path, ctx, name, stat) -> {
-                // NOP
+            AsyncCallback.Create2Callback callback = new AsyncCallback.Create2Callback() {
+                @Override
+                public void processResult(int rc, String path, Object ctx, String name, Stat stat) {
+                    // NOP
+                }
             };
             try {
                 zk.create("/foo", new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, createMode, callback, null, createMode.isTTL() ? 0 : 100);
