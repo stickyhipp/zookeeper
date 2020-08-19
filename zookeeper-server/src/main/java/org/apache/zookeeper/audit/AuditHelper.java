@@ -18,6 +18,7 @@
 package org.apache.zookeeper.audit;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.jute.Record;
@@ -132,8 +133,13 @@ public final class AuditHelper {
     }
 
     private static void deserialize(Request request, Record record) throws IOException {
-        request.request.rewind();
-        ByteBufferInputStream.byteBuffer2Record(request.request.slice(), record);
+        ByteBufferInputStream.byteBuffer2Record(getRequestData(request), record);
+    }
+
+    private static ByteBuffer getRequestData(Request request) {
+        ByteBuffer reqData = request.request.slice();
+        reqData.rewind();
+        return reqData;
     }
 
     private static Result getResult(ProcessTxnResult rc, boolean failedTxn) {
