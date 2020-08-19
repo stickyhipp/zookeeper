@@ -600,7 +600,7 @@ void acl_completion_dispatch(int rc, struct ACL_vector *acl, struct Stat *stat, 
 /* -------------------------------------------------------------------------- */
 
 
-static PyObject *pyzookeeper_init_common(PyObject *self, PyObject *args, int ssl) {
+static PyObject *pyzookeeper_init_optional_ssl(PyObject *self, PyObject *args, int ssl) {
   const char *host;
   const char *cert_str;
   PyObject *watcherfn = Py_None;
@@ -643,13 +643,8 @@ static PyObject *pyzookeeper_init_common(PyObject *self, PyObject *args, int ssl
   watchers[handle] = pyw;
 
   if (ssl) {
-#ifdef HAVE_OPENSSL_H
     zh = zookeeper_init_ssl( host, cert_str, watcherfn != Py_None ? watcher_dispatch : NULL,
                              recv_timeout, cid.client_id == -1 ? 0 : &cid, pyw, 0 );
-#else
-    fprintf(stderr, "SSL support not compiled in (called with ssl=%d).\n", ssl);
-    abort();
-#endif
   } else {
     zh = zookeeper_init( host, watcherfn != Py_None ? watcher_dispatch : NULL,
                          recv_timeout, cid.client_id == -1 ? 0 : &cid, pyw, 0 );
@@ -657,7 +652,7 @@ static PyObject *pyzookeeper_init_common(PyObject *self, PyObject *args, int ssl
 
   if (zh == NULL)
     {
-      PyErr_Format( ZooKeeperException, "Could not internally obtain%s zookeeper handle", ssl ? " SSL" : "" );
+      PyErr_SetString( ZooKeeperException, "Could not internally obtain SSL zookeeper handle" );
       return NULL;
     }
 
@@ -667,16 +662,14 @@ static PyObject *pyzookeeper_init_common(PyObject *self, PyObject *args, int ssl
 
 static PyObject *pyzookeeper_init(PyObject *self, PyObject *args)
 {
-  return pyzookeeper_init_common(self, args, /*ssl*/0);
+  return pyzookeeper_init_optional_ssl(self, args, 0);
 }
 
 
-#ifdef HAVE_OPENSSL_H
 static PyObject *pyzookeeper_init_ssl(PyObject *self, PyObject *args)
 {
-  return pyzookeeper_init_common(self, args, /*ssl*/1);
+  return pyzookeeper_init_optional_ssl(self, args, 1);
 }
-#endif
 
 
 /* -------------------------------------------------------------------------- */
@@ -1525,9 +1518,7 @@ PyObject *pyzoo_deterministic_conn_order(PyObject *self, PyObject *args)
 
 static PyMethodDef ZooKeeperMethods[] = {
   {"init", pyzookeeper_init, METH_VARARGS, pyzk_init_doc },
-#ifdef HAVE_OPENSSL_H
   {"init_ssl", pyzookeeper_init_ssl, METH_VARARGS, pyzk_init_ssl_doc },
-#endif
   {"create",pyzoo_create, METH_VARARGS, pyzk_create_doc },
   {"delete",pyzoo_delete, METH_VARARGS, pyzk_delete_doc },
   {"get_children", pyzoo_get_children, METH_VARARGS, pyzk_get_children_doc },
@@ -1598,14 +1589,8 @@ PyMODINIT_FUNC initzookeeper(void) {
 #else
   PyObject *module = Py_InitModule("zookeeper", ZooKeeperMethods);
 #endif
-
   if (init_zhandles(32) == 0) {
-#if PY_MAJOR_VERSION >= 3
-    Py_DECREF(module);
-    return PyErr_NoMemory();
-#else
-    return;
-#endif
+    return; // TODO: Is there any way to raise an exception here?
   }
 
   ZooKeeperException = PyErr_NewException("zookeeper.ZooKeeperException",

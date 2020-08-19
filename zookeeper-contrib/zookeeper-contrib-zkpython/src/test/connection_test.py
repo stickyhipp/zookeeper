@@ -58,8 +58,7 @@ class ConnectionTest(zktestbase.TestBase):
                           self.handle,
                           "/")
 
-    @unittest.skipUnless(hasattr(zookeeper, 'init_ssl'),
-                         "SSL support not compiled in.")
+
     def testsslconnection(self):
         cv = threading.Condition()
         self.connected = False
