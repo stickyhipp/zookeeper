@@ -100,8 +100,8 @@ public class RequestThrottler extends ZooKeeperCriticalThread {
 
     protected boolean shouldThrottleOp(Request request, long elapsedTime) {
         return request.isThrottlable()
-                && ZooKeeperServer.getThrottledOpWaitTime() > 0
-                && elapsedTime > ZooKeeperServer.getThrottledOpWaitTime();
+                && zks.getThrottledOpWaitTime() > 0
+                && elapsedTime > zks.getThrottledOpWaitTime();
     }
 
 

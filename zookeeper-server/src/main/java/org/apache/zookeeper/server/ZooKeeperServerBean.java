@@ -316,11 +316,11 @@ public class ZooKeeperServerBean implements ZooKeeperServerMXBean, ZKMBeanInfo {
     ///////////////////////////////////////////////////////////////////////////
 
     public int getThrottledOpWaitTime() {
-        return ZooKeeperServer.getThrottledOpWaitTime();
+        return zks.getThrottledOpWaitTime();
     }
 
     public void setThrottledOpWaitTime(int val) {
-        ZooKeeperServer.setThrottledOpWaitTime(val);
+        zks.setThrottledOpWaitTime(val);
     }
 
     ///////////////////////////////////////////////////////////////////////////
