@@ -23,7 +23,7 @@
 #include "check_zk_version.h"
 
 int main() {
-  puts(ZOO_VERSION);
+  printf("%d.%d.%d\n", ZOO_MAJOR_VERSION, ZOO_MINOR_VERSION, ZOO_PATCH_VERSION);
   return 0;
 }
 
