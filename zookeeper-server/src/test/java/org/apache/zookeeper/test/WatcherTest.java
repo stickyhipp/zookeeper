@@ -153,12 +153,16 @@ public class WatcherTest extends ClientBase {
 
             MyWatcher connWatcher = new MyWatcher();
 
-            Watcher watcher = event -> {
-                try {
-                    queue.put(event);
-                } catch (InterruptedException e) {
-                    // Oh well, never mind
+            Watcher watcher = new Watcher() {
+                @Override
+                public void process(WatchedEvent event) {
+                    try {
+                        queue.put(event);
+                    } catch (InterruptedException e) {
+                        // Oh well, never mind
+                    }
                 }
+
             };
 
             zk = createClient(connWatcher, hostPort);

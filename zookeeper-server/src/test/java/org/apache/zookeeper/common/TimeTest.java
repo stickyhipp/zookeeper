@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
@@ -68,9 +69,12 @@ public class TimeTest extends ClientBase {
 
     private static Watcher createWatcher() {
         watchCount.incrementAndGet();
-        return event -> {
-            watchCount.decrementAndGet();
-            System.out.printf("%d event = %s\n", discrepancy(), event);
+        return new Watcher() {
+            @Override
+            public void process(WatchedEvent event) {
+                watchCount.decrementAndGet();
+                System.out.printf("%d event = %s\n", discrepancy(), event);
+            }
         };
 
     }

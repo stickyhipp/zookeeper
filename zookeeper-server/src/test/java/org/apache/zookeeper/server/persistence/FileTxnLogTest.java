@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.DummyWatcher;
 import org.apache.zookeeper.PortAssignment;
 import org.apache.zookeeper.ZKTestCase;
 import org.apache.zookeeper.ZooDefs;
@@ -218,10 +217,11 @@ public class FileTxnLogTest extends ZKTestCase {
         ServerCnxnFactory f = ServerCnxnFactory.createFactory(PORT, -1);
         f.startup(zks);
         assertTrue("waiting for server being up ", ClientBase.waitForServerUp(HOSTPORT, CONNECTION_TIMEOUT));
-        ZooKeeper zk = new ZooKeeper(HOSTPORT, CONNECTION_TIMEOUT, DummyWatcher.INSTANCE);
+        ZooKeeper zk = new ZooKeeper(HOSTPORT, CONNECTION_TIMEOUT, event -> {
+        });
 
         // Generate transactions
-        HashSet<Long> zxids = new HashSet<>();
+        HashSet<Long> zxids = new HashSet<Long>();
         byte[] bytes = new byte[NODE_SIZE];
         Random random = new Random();
         random.nextBytes(bytes);
