@@ -221,9 +221,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
     }
 
     synchronized public void removeSession(long sessionId) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing session 0x{}", Long.toHexString(sessionId));
-        }
+        LOG.debug("Removing session 0x" + Long.toHexString(sessionId));
         SessionImpl s = sessionsById.remove(sessionId);
         sessionsWithTimeout.remove(sessionId);
         if (LOG.isTraceEnabled()) {
@@ -269,9 +267,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
             session = existedSession;
         } else {
             added = true;
-            if (LOG.isDebugEnabled()) {
-              LOG.debug("Adding session 0x{}", Long.toHexString(id));
-            }
+            LOG.debug("Adding session 0x" + Long.toHexString(id));
         }
 
         if (LOG.isTraceEnabled()) {
@@ -297,9 +293,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
             throws KeeperException.SessionExpiredException,
             KeeperException.SessionMovedException,
             KeeperException.UnknownSessionException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Checking session 0x" + Long.toHexString(sessionId));
-        }
+        LOG.debug("Checking session 0x" + Long.toHexString(sessionId));
         SessionImpl session = sessionsById.get(sessionId);
 
         if (session == null) {

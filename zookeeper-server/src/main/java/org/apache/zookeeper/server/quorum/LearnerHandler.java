@@ -575,7 +575,7 @@ public class LearnerHandler extends ZooKeeperThread {
                 ServerMetrics.getMetrics().DIFF_COUNT.add(1);
             }
 
-            LOG.debug("Sending NEWLEADER message to {}", sid);
+            LOG.debug("Sending NEWLEADER message to " + sid);
             // the version of this quorumVerifier will be set by leader.lead() in case
             // the leader is just being established. waitForEpochAck makes sure that readyToStart is true if
             // we got here, so the version was set
@@ -606,8 +606,9 @@ public class LearnerHandler extends ZooKeeperThread {
                 return;
             }
 
-            LOG.debug("Received NEWLEADER-ACK message from {}", sid);
-
+            if(LOG.isDebugEnabled()){
+            	LOG.debug("Received NEWLEADER-ACK message from " + sid);
+            }
             learnerMaster.waitForNewLeaderAck(getSid(), qp.getZxid());
 
             syncLimitCheck.start();
@@ -627,7 +628,7 @@ public class LearnerHandler extends ZooKeeperThread {
             // so we need to mark when the peer can actually start
             // using the data
             //
-            LOG.debug("Sending UPTODATE message to {}", sid);
+            LOG.debug("Sending UPTODATE message to " + sid);
             queuedPackets.add(new QuorumPacket(Leader.UPTODATE, -1, null, null));
 
             while (true) {
@@ -653,7 +654,9 @@ public class LearnerHandler extends ZooKeeperThread {
                 switch (qp.getType()) {
                 case Leader.ACK:
                     if (this.learnerType == LearnerType.OBSERVER) {
-                        LOG.debug("Received ACK from Observer {}", this.sid);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Received ACK from Observer  " + this.sid);
+                        }
                     }
                     syncLimitCheck.updateAck(qp.getZxid());
                     learnerMaster.processAck(this.sid, qp.getZxid(), sock.getLocalSocketAddress());
@@ -840,11 +843,9 @@ public class LearnerHandler extends ZooKeeperThread {
                 needSnap = false;
             } else if (peerLastZxid > maxCommittedLog && !isPeerNewEpochZxid) {
                 // Newer than committedLog, send trunc and done
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Sending TRUNC to follower zxidToSend=0x" +
-                        Long.toHexString(maxCommittedLog) +
-                        " for peer sid:" +  getSid());
-                }
+                LOG.debug("Sending TRUNC to follower zxidToSend=0x" +
+                          Long.toHexString(maxCommittedLog) +
+                          " for peer sid:" +  getSid());
                 queueOpPacket(Leader.TRUNC, maxCommittedLog);
                 currentZxid = maxCommittedLog;
                 needOpPacket = false;
@@ -881,10 +882,8 @@ public class LearnerHandler extends ZooKeeperThread {
                         queuedPackets.clear();
                         needOpPacket = true;
                     } else {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Queueing committedLog 0x{}",
+                        LOG.debug("Queueing committedLog 0x{}",
                                 Long.toHexString(currentZxid));
-                        }
                         Iterator<Proposal> committedLogItr =
                                 db.getCommittedLog().iterator();
                         currentZxid = queueCommittedProposals(committedLogItr,
@@ -910,10 +909,8 @@ public class LearnerHandler extends ZooKeeperThread {
             if (needSnap) {
                 currentZxid = db.getDataTreeLastProcessedZxid();
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Start forwarding 0x" + Long.toHexString(currentZxid) +
-                    " for peer sid: " +  getSid());
-            }
+            LOG.debug("Start forwarding 0x" + Long.toHexString(currentZxid) +
+                      " for peer sid: " +  getSid());
             leaderLastZxid = learnerMaster.startForwarding(this, currentZxid);
         } finally {
             rl.unlock();

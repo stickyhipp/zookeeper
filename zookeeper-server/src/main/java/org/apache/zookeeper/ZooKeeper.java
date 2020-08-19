@@ -1406,7 +1406,9 @@ public class ZooKeeper implements AutoCloseable {
      */
     public synchronized void close() throws InterruptedException {
         if (!cnxn.getState().isAlive()) {
-            LOG.debug("Close called on already closed client");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Close called on already closed client");
+            }
             return;
         }
 
@@ -1417,7 +1419,9 @@ public class ZooKeeper implements AutoCloseable {
         try {
             cnxn.close();
         } catch (IOException e) {
-            LOG.debug("Ignoring unexpected exception during close", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Ignoring unexpected exception during close", e);
+            }
         }
 
         LOG.info("Session: 0x" + Long.toHexString(getSessionId()) + " closed");

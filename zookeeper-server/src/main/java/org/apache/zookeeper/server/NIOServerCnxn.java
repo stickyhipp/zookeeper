@@ -135,9 +135,10 @@ public class NIOServerCnxn extends ServerCnxn {
      * asynchronous writes.
      */
     public void sendBuffer(ByteBuffer... buffers) {
-        LOG.trace("Add a buffer to outgoingBuffers, sk {} is valid: {}", sk,
-            sk.isValid());
-
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Add a buffer to outgoingBuffers, sk " + sk
+                      + " is valid: " + sk.isValid());
+        }
         synchronized (outgoingBuffers) {
             for (ByteBuffer buffer : buffers) {
                 outgoingBuffers.add(buffer);
@@ -362,9 +363,9 @@ public class NIOServerCnxn extends ServerCnxn {
         } catch (CancelledKeyException e) {
             LOG.warn("CancelledKeyException causing close of session 0x"
                      + Long.toHexString(sessionId));
-
-            LOG.debug("CancelledKeyException stack trace", e);
-
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("CancelledKeyException stack trace", e);
+            }
             close(DisconnectReason.CANCELLED_KEY_EXCEPTION);
         } catch (CloseRequestException e) {
             // expecting close to log session closure
@@ -384,8 +385,9 @@ public class NIOServerCnxn extends ServerCnxn {
         } catch (IOException e) {
             LOG.warn("Exception causing close of session 0x"
                      + Long.toHexString(sessionId) + ": " + e.getMessage());
-
-            LOG.debug("IOException stack trace", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("IOException stack trace", e);
+            }
             close(DisconnectReason.IO_EXCEPTION);
         }
     }
@@ -611,7 +613,9 @@ public class NIOServerCnxn extends ServerCnxn {
                 // need to cancel this selection key from the selector
                 sk.cancel();
             } catch (Exception e) {
-                LOG.debug("ignoring exception during selectionkey cancel", e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("ignoring exception during selectionkey cancel", e);
+                }
             }
         }
 
@@ -626,14 +630,11 @@ public class NIOServerCnxn extends ServerCnxn {
             return;
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Closed socket connection for client "
-                    + sock.socket().getRemoteSocketAddress()
-                    + (sessionId != 0 ?
-                            " which had sessionid 0x" + Long.toHexString(sessionId) :
-                            " (no session established for client)"));
-        }
-
+        LOG.debug("Closed socket connection for client "
+                + sock.socket().getRemoteSocketAddress()
+                + (sessionId != 0 ?
+                        " which had sessionid 0x" + Long.toHexString(sessionId) :
+                        " (no session established for client)"));
         closeSock(sock);
     }
 
@@ -655,23 +656,31 @@ public class NIOServerCnxn extends ServerCnxn {
             sock.socket().shutdownOutput();
         } catch (IOException e) {
             // This is a relatively common exception that we can't avoid
-             LOG.debug("ignoring exception during output shutdown", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ignoring exception during output shutdown", e);
+            }
         }
         try {
             sock.socket().shutdownInput();
         } catch (IOException e) {
             // This is a relatively common exception that we can't avoid
-            LOG.debug("ignoring exception during input shutdown", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ignoring exception during input shutdown", e);
+            }
         }
         try {
             sock.socket().close();
         } catch (IOException e) {
-            LOG.debug("ignoring exception during socket close", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ignoring exception during socket close", e);
+            }
         }
         try {
             sock.close();
         } catch (IOException e) {
-            LOG.debug("ignoring exception during socketchannel close", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ignoring exception during socketchannel close", e);
+            }
         }
     }
 

@@ -71,7 +71,9 @@ public class SaslServerPrincipal {
             if (!canonicalHostName.equals(ia.getHostAddress())) {
                 hostName = canonicalHostName;
             }
-            LOG.debug("Canonicalized address to {}", hostName);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Canonicalized address to {}", hostName);
+            }
         }
         String serverPrincipal = principalUserName + "/" + hostName;
         return serverPrincipal;

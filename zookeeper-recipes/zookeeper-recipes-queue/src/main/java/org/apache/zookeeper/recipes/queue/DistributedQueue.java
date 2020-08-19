@@ -218,7 +218,8 @@ public class DistributedQueue {
         }
 
         public void process(WatchedEvent event){
-            LOG.debug("Watcher fired: {}", event);
+            LOG.debug("Watcher fired on path: " + event.getPath() + " state: " + 
+                    event.getState() + " type " + event.getType());
             latch.countDown();
         }
         public void await() throws InterruptedException {

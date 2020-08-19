@@ -196,28 +196,39 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
             try {
                 sock.socket().shutdownInput();
             } catch (IOException e) {
-                LOG.debug("Ignoring exception during shutdown input", e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Ignoring exception during shutdown input", e);
+                }
             }
             try {
                 sock.socket().shutdownOutput();
             } catch (IOException e) {
-                LOG.debug("Ignoring exception during shutdown output", e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Ignoring exception during shutdown output",
+                            e);
+                }
             }
             try {
                 sock.socket().close();
             } catch (IOException e) {
-                LOG.debug("Ignoring exception during socket close", e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Ignoring exception during socket close", e);
+                }
             }
             try {
                 sock.close();
             } catch (IOException e) {
-                LOG.debug("Ignoring exception during channel close", e);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Ignoring exception during channel close", e);
+                }
             }
         }
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
-            LOG.debug("SendThread interrupted during sleep, ignoring");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("SendThread interrupted during sleep, ignoring");
+            }
         }
         sockKey = null;
     }
@@ -225,9 +236,13 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     @Override
     void close() {
         try {
-            LOG.trace("Doing client selector close");
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Doing client selector close");
+            }
             selector.close();
-            LOG.trace("Closed client selector");
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Closed client selector");
+            }
         } catch (IOException e) {
             LOG.warn("Ignoring exception during selector close", e);
         }

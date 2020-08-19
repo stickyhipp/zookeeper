@@ -225,15 +225,11 @@ public class ZooKeeperSaslClient {
             }
             byte[] usedata = data;
             if (data != null) {
-                LOG.debug(
-                    "ServerSaslResponseCallback(): saslToken server response: (length={})",
-                    usedata.length);
+                LOG.debug("ServerSaslResponseCallback(): saslToken server response: (length="+usedata.length+")");
             }
             else {
                 usedata = new byte[0];
-                LOG.debug(
-                    "ServerSaslResponseCallback(): using empty data[] as server response (length={})",
-                    usedata.length);
+                LOG.debug("ServerSaslResponseCallback(): using empty data[] as server response (length="+usedata.length+")");
             }
             client.respondToServer(usedata, (ClientCnxn)ctx);
         }
@@ -245,7 +241,9 @@ public class ZooKeeperSaslClient {
             if (!initializedLogin) {
                 synchronized (this) {
                     if (login == null) {
-                        LOG.debug("JAAS loginContext is: {}", loginContext);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("JAAS loginContext is: " + loginContext);
+                        }
                         // note that the login object is static: it's shared amongst all zookeeper-related connections.
                         // in order to ensure the login is initialized only once, it must be synchronized the code snippet.
                         login = new Login(loginContext, new SaslClientCallbackHandler(null, "Client"), clientConfig);
@@ -321,7 +319,7 @@ public class ZooKeeperSaslClient {
                     final byte[] retval =
                         Subject.doAs(subject, new PrivilegedExceptionAction<byte[]>() {
                                 public byte[] run() throws SaslException {
-                                    LOG.debug("saslClient.evaluateChallenge(len={})", saslToken.length);
+                                    LOG.debug("saslClient.evaluateChallenge(len="+saslToken.length+")");
                                     return saslClient.evaluateChallenge(saslToken);
                                 }
                             });
@@ -354,7 +352,9 @@ public class ZooKeeperSaslClient {
 
     private void sendSaslPacket(byte[] saslToken, ClientCnxn cnxn)
       throws SaslException{
-        LOG.debug("ClientCnxn:sendSaslPacket:length={}", saslToken.length);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("ClientCnxn:sendSaslPacket:length="+saslToken.length);
+        }
 
         GetSASLRequest request = new GetSASLRequest();
         request.setToken(saslToken);
@@ -370,8 +370,9 @@ public class ZooKeeperSaslClient {
     }
 
     private void sendSaslPacket(ClientCnxn cnxn) throws SaslException {
-        LOG.debug("ClientCnxn:sendSaslPacket:length={}", saslToken.length);
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("ClientCnxn:sendSaslPacket:length="+saslToken.length);
+        }
         GetSASLRequest request = new GetSASLRequest();
         request.setToken(createSaslToken());
         SetSASLResponse response = new SetSASLResponse();
@@ -455,8 +456,9 @@ public class ZooKeeperSaslClient {
         } catch (SecurityException e) {
             // Thrown if the caller does not have permission to retrieve the Configuration.
             // In this case, simply returning false is correct.
-            LOG.debug("Could not retrieve login configuration", e);
-
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Could not retrieve login configuration: " + e);
+            }
             return false;
         }
     }

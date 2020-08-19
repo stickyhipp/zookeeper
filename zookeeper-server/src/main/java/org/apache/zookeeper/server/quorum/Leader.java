@@ -856,7 +856,7 @@ public class Leader extends LearnerMaster {
         if (p.request == null) {
             LOG.warn("Going to commmit null: " + p);
         } else if (p.request.getHdr().getType() == OpCode.reconfig) {
-            LOG.debug("Committing a reconfiguration! {}", outstandingProposals.size());
+            LOG.debug("Committing a reconfiguration! " + outstandingProposals.size());
 
             //if this server is voter in new config with the same quorum address,
             //then it will remain the leader
@@ -927,7 +927,9 @@ public class Leader extends LearnerMaster {
 
 
         if (outstandingProposals.size() == 0) {
-            LOG.debug("outstanding is 0");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("outstanding is 0");
+            }
             return;
         }
         if (lastCommitted >= zxid) {
@@ -950,6 +952,10 @@ public class Leader extends LearnerMaster {
         }
 
         p.addAck(sid);
+        /*if (LOG.isDebugEnabled()) {
+            LOG.debug("Count for zxid: 0x{} is {}",
+                    Long.toHexString(zxid), p.ackSet.size());
+        }*/
 
         boolean hasCommitted = tryToCommit(p, zxid, followerAddr);
 
@@ -1177,7 +1183,9 @@ public class Leader extends LearnerMaster {
                p.addQuorumVerifier(self.getLastSeenQuorumVerifier());
            }
 
-            LOG.debug("Proposing:: {}", request);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Proposing:: " + request);
+            }
 
             lastProposed = p.packet.getZxid();
             outstandingProposals.put(lastProposed, p);

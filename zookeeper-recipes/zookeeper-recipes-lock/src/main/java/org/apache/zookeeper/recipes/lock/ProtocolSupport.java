@@ -126,8 +126,8 @@ class ProtocolSupport {
                 if (exception == null) {
                     exception = e;
                 }
-                LOG.debug("Attempt {} failed with connection loss so " +
-                    "attempting to reconnect", i, e);
+                LOG.debug("Attempt " + i + " failed with connection loss so " +
+                		"attempting to reconnect: " + e, e);
                 retryDelay(i);
             }
         }
@@ -186,7 +186,7 @@ class ProtocolSupport {
             try {
                 Thread.sleep(attemptCount * retryDelay);
             } catch (InterruptedException e) {
-                LOG.debug("Failed to sleep", e);
+                LOG.debug("Failed to sleep: " + e, e);
             }
         }
     }

@@ -105,8 +105,9 @@ public class FinalRequestProcessor implements RequestProcessor {
     }
 
     public void processRequest(Request request) {
-        LOG.debug("Processing request:: {}", request);
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Processing request:: " + request);
+        }
         // request.addRQRec(">final");
         long traceMask = ZooTrace.CLIENT_REQUEST_TRACE_MASK;
         if (request.type == OpCode.ping) {
@@ -212,7 +213,9 @@ public class FinalRequestProcessor implements RequestProcessor {
                 throw ke;
             }
 
-            LOG.debug("{}",request);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("{}",request);
+            }
 
             if (request.isStale()) {
                 ServerMetrics.getMetrics().STALE_REPLIES.add(1);

@@ -151,7 +151,8 @@ public class WriteLock extends ProtocolSupport {
     private class LockWatcher implements Watcher {
         public void process(WatchedEvent event) {
             // lets either become the leader or watch the new/updated node
-            LOG.debug("Watcher fired: {}", event);
+            LOG.debug("Watcher fired on path: " + event.getPath() + " state: " + 
+                    event.getState() + " type " + event.getType());
             try {
                 lock();
             } catch (Exception e) {
@@ -180,7 +181,9 @@ public class WriteLock extends ProtocolSupport {
             for (String name : names) {
                 if (name.startsWith(prefix)) {
                     id = name;
-                    LOG.debug("Found id created last time: {}", id);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Found id created last time: " + id);
+                    }
                     break;
                 }
             }
@@ -188,7 +191,9 @@ public class WriteLock extends ProtocolSupport {
                 id = zookeeper.create(dir + "/" + prefix, data, 
                         getAcl(), EPHEMERAL_SEQUENTIAL);
 
-                LOG.debug("Created id: {}", id);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Created id: " + id);
+                }
             }
 
         }
@@ -227,7 +232,9 @@ public class WriteLock extends ProtocolSupport {
                     if (!lessThanMe.isEmpty()) {
                         ZNodeName lastChildName = lessThanMe.last();
                         lastChildId = lastChildName.getName();
-                        LOG.debug("watching less than me node: {}", lastChildId);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("watching less than me node: " + lastChildId);
+                        }
                         Stat stat = zookeeper.exists(lastChildId, new LockWatcher());
                         if (stat != null) {
                             return Boolean.FALSE;

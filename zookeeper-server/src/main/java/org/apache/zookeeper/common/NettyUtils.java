@@ -151,8 +151,10 @@ public class NettyUtils {
                     validInetAddresses.add(inetAddress);
                 }
             }
-            LOG.debug("Detected {} local network addresses: {}",
-                validInetAddresses.size(), validInetAddresses);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Detected {} local network addresses", validInetAddresses.size());
+                LOG.debug("Resolved local addresses are: {}", Arrays.toString(validInetAddresses.toArray()));
+            }
             return validInetAddresses.size() > 0 ? validInetAddresses.size() : DEFAULT_INET_ADDRESS_COUNT;
         } catch (SocketException ex) {
             LOG.warn("Failed to list all network interfaces, assuming 1", ex);
