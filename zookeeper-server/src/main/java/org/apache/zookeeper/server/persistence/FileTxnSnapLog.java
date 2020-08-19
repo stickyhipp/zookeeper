@@ -132,7 +132,7 @@ public class FileTxnSnapLog {
                     ZOOKEEPER_DATADIR_AUTOCREATE));
             }
 
-            if (!this.dataDir.mkdirs() && !this.dataDir.exists()) {
+            if (!this.dataDir.mkdirs()) {
                 throw new DatadirException("Unable to create data directory " + this.dataDir);
             }
         }
@@ -151,7 +151,7 @@ public class FileTxnSnapLog {
                     ZOOKEEPER_DATADIR_AUTOCREATE));
             }
 
-            if (!this.snapDir.mkdirs() && !this.snapDir.exists()) {
+            if (!this.snapDir.mkdirs()) {
                 throw new DatadirException("Unable to create snap directory " + this.snapDir);
             }
         }
