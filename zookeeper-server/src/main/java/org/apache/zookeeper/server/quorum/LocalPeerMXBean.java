@@ -120,8 +120,4 @@ public interface LocalPeerMXBean extends ServerMXBean {
      */
     boolean isLeader();
 
-    /**
-     * @return Current maxCnxns allowed to a single ZooKeeper server
-     */
-    int getMaxCnxns();
 }

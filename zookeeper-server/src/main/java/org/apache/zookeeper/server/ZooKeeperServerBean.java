@@ -403,8 +403,4 @@ public class ZooKeeperServerBean implements ZooKeeperServerMXBean, ZKMBeanInfo {
     public void setLargeRequestThreshold(int threshold) {
         zks.setLargeRequestThreshold(threshold);
     }
-
-    public int getMaxCnxns() {
-        return ServerCnxnHelper.getMaxCnxns(zks.secureServerCnxnFactory, zks.serverCnxnFactory);
-    }
 }
