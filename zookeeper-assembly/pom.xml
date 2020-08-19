@@ -27,6 +27,7 @@
     <relativePath>..</relativePath>
   </parent>
 
+  <groupId>org.apache.zookeeper</groupId>
   <artifactId>zookeeper-assembly</artifactId>
   <packaging>pom</packaging>
   <name>Apache ZooKeeper - Assembly</name>
