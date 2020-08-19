@@ -20,7 +20,6 @@ package org.apache.zookeeper.server;
 
 import static org.apache.zookeeper.test.ClientBase.CONNECTION_TIMEOUT;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -131,7 +130,7 @@ public class CRCTest extends ZKTestCase {
         File snapFile = null;
         File logFile = null;
         for (File file : list) {
-            LOG.info("file is {}", file);
+            LOG.info("file is " + file);
             if (file.getName().startsWith("log")) {
                 logFile = file;
                 corruptFile(logFile);
@@ -142,11 +141,10 @@ public class CRCTest extends ZKTestCase {
         //we will get a checksum failure
         try {
             while (itr.next()) {
-                // no op
             }
-            fail();
+            assertTrue(false);
         } catch (IOException ie) {
-            LOG.warn("crc corruption", ie);
+            LOG.info("crc corruption", ie);
         }
         itr.close();
         // find the last snapshot

@@ -82,7 +82,7 @@ public class SaslAuthFailTest extends ClientBase {
             fail("Should have gotten exception.");
         } catch (Exception e) {
             // ok, exception as expected.
-            LOG.debug("Got exception as expected", e);
+            LOG.info("Got exception as expected: " + e);
         }
     }
 

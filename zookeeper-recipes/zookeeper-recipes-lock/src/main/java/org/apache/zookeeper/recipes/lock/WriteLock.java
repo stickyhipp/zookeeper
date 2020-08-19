@@ -130,13 +130,13 @@ public class WriteLock extends ProtocolSupport {
                 };
                 zopdel.execute();
             } catch (InterruptedException e) {
-                LOG.warn("Unexpected exception", e);
-                // set that we have been interrupted.
+                LOG.warn("Caught: " + e, e);
+                //set that we have been interrupted.
                 Thread.currentThread().interrupt();
             } catch (KeeperException.NoNodeException e) {
                 // do nothing
             } catch (KeeperException e) {
-                LOG.warn("Unexpected exception", e);
+                LOG.warn("Caught: " + e, e);
                 throw new RuntimeException(e.getMessage(), e);
             } finally {
                 LockListener lockListener = getLockListener();
@@ -161,7 +161,7 @@ public class WriteLock extends ProtocolSupport {
             try {
                 lock();
             } catch (Exception e) {
-                LOG.warn("Failed to acquire lock", e);
+                LOG.warn("Failed to acquire lock: " + e, e);
             }
         }
 
@@ -221,7 +221,7 @@ public class WriteLock extends ProtocolSupport {
                 }
                 List<String> names = zookeeper.getChildren(dir, false);
                 if (names.isEmpty()) {
-                    LOG.warn("No children in: {} when we've just created one! Lets recreate it...", dir);
+                    LOG.warn("No children in: " + dir + " when we've just created one! Lets recreate it...");
                     // lets force the recreation of the id
                     id = null;
                 } else {
@@ -235,12 +235,12 @@ public class WriteLock extends ProtocolSupport {
                     if (!lessThanMe.isEmpty()) {
                         ZNodeName lastChildName = lessThanMe.last();
                         lastChildId = lastChildName.getName();
-                        LOG.debug("Watching less than me node: {}", lastChildId);
+                        LOG.debug("watching less than me node: {}", lastChildId);
                         Stat stat = zookeeper.exists(lastChildId, new LockWatcher());
                         if (stat != null) {
                             return Boolean.FALSE;
                         } else {
-                            LOG.warn("Could not find the stats for less than me: {}", lastChildName.getName());
+                            LOG.warn("Could not find the stats for less than me: " + lastChildName.getName());
                         }
                     } else {
                         if (isOwner()) {

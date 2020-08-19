@@ -254,7 +254,7 @@ public class ZooKeeperSaslClient {
             throw e;
         } catch (Exception e) {
             // ..but consume (with a log message) all other types of exceptions.
-            LOG.error("Exception while trying to create SASL client.", e);
+            LOG.error("Exception while trying to create SASL client: " + e);
             return null;
         }
     }
@@ -272,10 +272,9 @@ public class ZooKeeperSaslClient {
                     sendSaslPacket(saslToken, cnxn);
                 }
             } catch (SaslException e) {
-                LOG.error(
-                    "SASL authentication failed using login context '{}'.",
-                    this.getLoginContext(),
-                    e);
+                LOG.error("SASL authentication failed using login context '"
+                          + this.getLoginContext()
+                          + "' with exception: {}", e);
                 saslState = SaslState.FAILED;
                 gotLastPacket = true;
             }

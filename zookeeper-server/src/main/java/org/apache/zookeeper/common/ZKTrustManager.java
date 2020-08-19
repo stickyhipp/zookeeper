@@ -151,10 +151,7 @@ public class ZKTrustManager extends X509ExtendedTrustManager {
             hostnameVerifier.verify(hostAddress, certificate);
         } catch (SSLException addressVerificationException) {
             try {
-                LOG.debug(
-                    "Failed to verify host address: {} attempting to verify host name with reverse dns lookup",
-                    hostAddress,
-                    addressVerificationException);
+                LOG.debug("Failed to verify host address: {} attempting to verify host name with reverse dns lookup", hostAddress, addressVerificationException);
                 hostName = inetAddress.getHostName();
                 hostnameVerifier.verify(hostName, certificate);
             } catch (SSLException hostnameVerificationException) {

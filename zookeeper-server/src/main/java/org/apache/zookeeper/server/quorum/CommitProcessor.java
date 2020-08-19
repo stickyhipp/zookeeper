@@ -434,9 +434,9 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements RequestP
 
         initBatchSizes();
 
-        LOG.info(
-            "Configuring CommitProcessor with {} worker threads.",
-            numWorkerThreads > 0 ? numWorkerThreads : "no");
+        LOG.info("Configuring CommitProcessor with "
+                 + (numWorkerThreads > 0 ? numWorkerThreads : "no")
+                 + " worker threads.");
         if (workerPool == null) {
             workerPool = new WorkerService("CommitProcWork", numWorkerThreads, true);
         }
@@ -471,10 +471,7 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements RequestP
             throw new IllegalArgumentException(errorMsg);
         }
 
-        LOG.info
-            ("Configuring CommitProcessor with readBatchSize {} commitBatchSize {}",
-             maxReadBatchSize,
-             maxCommitBatchSize);
+        LOG.info("Configuring CommitProcessor with readBatchSize {} commitBatchSize {}", maxReadBatchSize, maxCommitBatchSize);
     }
 
     private static void processCommitMetrics(Request request, boolean isWrite) {
@@ -532,7 +529,7 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements RequestP
         @Override
         public void cleanup() {
             if (!stopped) {
-                LOG.error("Exception thrown by downstream processor, unable to continue.");
+                LOG.error("Exception thrown by downstream processor," + " unable to continue.");
                 CommitProcessor.this.halt();
             }
         }

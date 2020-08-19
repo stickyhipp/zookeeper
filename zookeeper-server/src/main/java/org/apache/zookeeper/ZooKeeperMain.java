@@ -328,12 +328,19 @@ public class ZooKeeperMain {
                 while ((line = (String) readLine.invoke(console, getPrompt())) != null) {
                     executeLine(line);
                 }
-            } catch (ClassNotFoundException
-                | NoSuchMethodException
-                | InvocationTargetException
-                | IllegalAccessException
-                | InstantiationException e
-            ) {
+            } catch (ClassNotFoundException e) {
+                LOG.debug("Unable to start jline", e);
+                jlinemissing = true;
+            } catch (NoSuchMethodException e) {
+                LOG.debug("Unable to start jline", e);
+                jlinemissing = true;
+            } catch (InvocationTargetException e) {
+                LOG.debug("Unable to start jline", e);
+                jlinemissing = true;
+            } catch (IllegalAccessException e) {
+                LOG.debug("Unable to start jline", e);
+                jlinemissing = true;
+            } catch (InstantiationException e) {
                 LOG.debug("Unable to start jline", e);
                 jlinemissing = true;
             }
@@ -389,7 +396,6 @@ public class ZooKeeperMain {
         }
 
         boolean watch = false;
-
         LOG.debug("Processing {}", cmd);
 
         if (cmd.equals("quit")) {

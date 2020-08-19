@@ -196,7 +196,7 @@ public class LeaderElectionSupportTest extends ClientBase {
                         // stopping the ELECTED node, so re-election will happen.
                         electionSupport1.stop();
                     } catch (Exception e) {
-                        LOGGER.error("Unexpected exception", e);
+                        LOGGER.error("Unexpected error", e);
                     }
                 }
                 if (eventType == EventType.ELECTED_COMPLETE) {
@@ -255,7 +255,9 @@ public class LeaderElectionSupportTest extends ClientBase {
 
                 latch.countDown();
             } catch (Exception e) {
-                LOGGER.warn("Failed to run leader election.", e);
+                LOGGER.warn(
+                    "Failed to run leader election due to: {}",
+                    e.getMessage());
                 failureCounter.incrementAndGet();
             }
         });

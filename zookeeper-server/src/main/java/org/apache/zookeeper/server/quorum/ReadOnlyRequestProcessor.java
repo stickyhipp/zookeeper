@@ -28,6 +28,7 @@ import org.apache.zookeeper.server.RequestProcessor;
 import org.apache.zookeeper.server.ZooKeeperCriticalThread;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.ZooTrace;
+import org.apache.zookeeper.server.quorum.Leader.XidRolloverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +104,11 @@ public class ReadOnlyRequestProcessor extends ZooKeeperCriticalThread implements
                     nextProcessor.processRequest(request);
                 }
             }
+        } catch (RequestProcessorException e) {
+            if (e.getCause() instanceof XidRolloverException) {
+                LOG.info(e.getCause().getMessage());
+            }
+            handleException(this.getName(), e);
         } catch (Exception e) {
             handleException(this.getName(), e);
         }

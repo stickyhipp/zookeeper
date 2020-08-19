@@ -212,7 +212,6 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Channel inactive {}", ctx.channel());
             }
-
             allChannels.remove(ctx.channel());
             NettyServerCnxn cnxn = ctx.channel().attr(CONNECTION_ATTRIBUTE).getAndSet(null);
             if (cnxn != null) {
@@ -268,9 +267,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             try {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("message received called {}", msg);
-                }
+                LOG.trace("message received called {}", msg);
                 try {
                     LOG.debug("New message {} from {}", msg, ctx.channel());
                     NettyServerCnxn cnxn = ctx.channel().attr(CONNECTION_ATTRIBUTE).get();
@@ -294,7 +291,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
                 NettyServerCnxn cnxn = ctx.channel().attr(CONNECTION_ATTRIBUTE).get();
                 if (cnxn != null && cnxn.getQueuedReadableBytes() == 0 && cnxn.readIssuedAfterReadComplete == 0) {
                     ctx.read();
-                    LOG.debug("Issued a read since we do not have anything to consume after channelReadComplete");
+                    LOG.debug("Issued a read since we do not have " + "anything to consume after channelReadComplete");
                 }
             }
 
@@ -305,9 +302,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
         // Note: this listener is only added when LOG.isTraceEnabled() is true,
         // so it should not do any work other than trace logging.
         private final GenericFutureListener<Future<Void>> onWriteCompletedTracer = (f) -> {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("write success: {}", f.isSuccess());
-            }
+            LOG.trace("write success: {}", f.isSuccess());
         };
 
         @Override
@@ -335,7 +330,9 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
          */
         public void operationComplete(Future<Channel> future) {
             if (future.isSuccess()) {
-                LOG.debug("Successful handshake with session 0x{}", Long.toHexString(cnxn.getSessionId()));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Successful handshake with session 0x{}", Long.toHexString(cnxn.getSessionId()));
+                }
                 SSLEngine eng = sslHandler.engine();
                 // Don't try to verify certificate if we didn't ask client to present one
                 if (eng.getNeedClientAuth() || eng.getWantClientAuth()) {
@@ -514,7 +511,7 @@ public class NettyServerCnxnFactory extends ServerCnxnFactory {
                 // This will remove the cnxn from cnxns
                 cnxn.close(reason);
             } catch (Exception e) {
-                LOG.warn("Ignoring exception closing cnxn sessionid 0x{}", Long.toHexString(cnxn.getSessionId()), e);
+                LOG.warn("Ignoring exception closing cnxn sessionid 0x" + Long.toHexString(cnxn.getSessionId()), e);
             }
         }
 

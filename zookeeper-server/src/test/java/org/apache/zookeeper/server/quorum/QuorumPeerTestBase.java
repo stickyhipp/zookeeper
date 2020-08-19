@@ -119,7 +119,7 @@ public class QuorumPeerTestBase extends ZKTestCase implements Watcher {
             this.clientPort = clientPort;
             this.quorumCfgSection = quorumCfgSection;
             this.otherConfigs = otherConfigs;
-            LOG.info("id = {} tmpDir = {} clientPort = {}", myid, baseDir, clientPort);
+            LOG.info("id = " + myid + " tmpDir = " + baseDir + " clientPort = " + clientPort);
             confFile = new File(baseDir, "zoo.cfg");
 
             FileWriter fwriter = new FileWriter(confFile);
@@ -202,7 +202,10 @@ public class QuorumPeerTestBase extends ZKTestCase implements Watcher {
 
         public MainThread(int myid, int clientPort, int adminServerPort, Integer secureClientPort, String quorumCfgSection, String configs, String peerType, boolean writeDynamicConfigFile, String version) throws IOException {
             tmpDir = ClientBase.createTmpDir();
-            LOG.info("id = {} tmpDir = {} clientPort = {} adminServerPort = {}", myid, tmpDir, clientPort, adminServerPort);
+            LOG.info("id = " + myid
+                     + " tmpDir = " + tmpDir
+                     + " clientPort = " + clientPort
+                     + " adminServerPort = " + adminServerPort);
 
             File dataDir = new File(tmpDir, "data");
             if (!dataDir.mkdir()) {

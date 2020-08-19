@@ -151,7 +151,9 @@ final class ZKHostnameVerifier implements HostnameVerifier {
             verify(host, x509);
             return true;
         } catch (final SSLException ex) {
-            log.debug("Unexpected exception", ex);
+            if (log.isDebugEnabled()) {
+                log.debug(ex.getMessage(), ex);
+            }
             return false;
         }
     }

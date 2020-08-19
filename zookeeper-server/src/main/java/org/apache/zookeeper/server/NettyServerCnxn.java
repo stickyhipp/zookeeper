@@ -94,8 +94,9 @@ public class NettyServerCnxn extends ServerCnxn {
     public void close() {
         closingChannel = true;
 
-        LOG.debug("close called for session id: 0x{}", Long.toHexString(sessionId));
-
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("close called for sessionid:0x{}", Long.toHexString(sessionId));
+        }
         setStale();
 
         // ZOOKEEPER-2743:
@@ -105,11 +106,14 @@ public class NettyServerCnxn extends ServerCnxn {
 
         // if this is not in cnxns then it's already closed
         if (!factory.cnxns.remove(this)) {
-            LOG.debug("cnxns size:{}", factory.cnxns.size());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("cnxns size:{}", factory.cnxns.size());
+            }
             return;
         }
-
-        LOG.debug("close in progress for session id: 0x{}", Long.toHexString(sessionId));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("close in progress for sessionid:0x{}", Long.toHexString(sessionId));
+        }
 
         factory.removeCnxnFromSessionMap(this);
 
@@ -161,7 +165,9 @@ public class NettyServerCnxn extends ServerCnxn {
         try {
             sendResponse(h, e, "notification");
         } catch (IOException e1) {
-            LOG.debug("Problem sending to {}", getRemoteSocketAddress(), e1);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Problem sending to " + getRemoteSocketAddress(), e1);
+            }
             close();
         }
     }
@@ -329,7 +335,9 @@ public class NettyServerCnxn extends ServerCnxn {
      */
     void processMessage(ByteBuf buf) {
         checkIsInEventLoop("processMessage");
-        LOG.debug("0x{} queuedBuffer: {}", Long.toHexString(sessionId), queuedBuffer);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("0x{} queuedBuffer: {}", Long.toHexString(sessionId), queuedBuffer);
+        }
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("0x{} buf {}", Long.toHexString(sessionId), ByteBufUtil.hexDump(buf));
@@ -356,9 +364,7 @@ public class NettyServerCnxn extends ServerCnxn {
                 // Have to check !closingChannel, because an error in
                 // receiveMessage() could have led to close() being called.
                 if (!closingChannel && buf.isReadable()) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Before copy {}", buf);
-                    }
+                    LOG.trace("Before copy {}", buf);
 
                     if (queuedBuffer == null) {
                         queuedBuffer = channel.alloc().compositeBuffer();
@@ -508,13 +514,13 @@ public class NettyServerCnxn extends ServerCnxn {
                 }
             }
         } catch (IOException e) {
-            LOG.warn("Closing connection to {}", getRemoteSocketAddress(), e);
+            LOG.warn("Closing connection to " + getRemoteSocketAddress(), e);
             close(DisconnectReason.IO_EXCEPTION);
         } catch (ClientCnxnLimitException e) {
             // Common case exception, print at debug level
             ServerMetrics.getMetrics().CONNECTION_REJECTED.add(1);
 
-            LOG.debug("Closing connection to {}", getRemoteSocketAddress(), e);
+            LOG.debug("Closing connection to " + getRemoteSocketAddress(), e);
             close(DisconnectReason.CLIENT_RATE_LIMIT);
         }
     }

@@ -147,7 +147,7 @@ public class ClientCnxnSocketNetty extends ClientCnxnSocket {
                     connectLock.lock();
                     try {
                         if (!channelFuture.isSuccess()) {
-                            LOG.warn("future isn't success.", channelFuture.cause());
+                            LOG.info("future isn't success, cause:", channelFuture.cause());
                             return;
                         } else if (connectFuture == null) {
                             LOG.info("connect attempt cancelled");
@@ -519,7 +519,7 @@ public class ClientCnxnSocketNetty extends ClientCnxnSocket {
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            LOG.error("Unexpected throwable", cause);
+            LOG.warn("Exception caught", cause);
             cleanup();
         }
 

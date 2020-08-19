@@ -34,6 +34,7 @@ public class DistributedQueueTest extends ClientBase {
     @After
     public void tearDown() throws Exception {
         super.tearDown();
+        LOG.info("FINISHED " + getTestName());
     }
 
     @Test

@@ -723,7 +723,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                 while (running) {
                     udpSocket.receive(packet);
                     if (packet.getLength() != 4) {
-                        LOG.warn("Got more than just an xid! Len = {}", packet.getLength());
+                        LOG.warn("Got more than just an xid! Len = " + packet.getLength());
                     } else {
                         responseBuffer.clear();
                         responseBuffer.getInt(); // Skip the xid
@@ -1037,11 +1037,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                 // this should only happen once when moving to a
                 // new code version
                 currentEpoch = epochOfZxid;
-                LOG.info(
-                    "{} not found! Creating with a reasonable default of {}. "
-                        + "This should only happen when you are upgrading your installation",
-                    CURRENT_EPOCH_FILENAME,
-                    currentEpoch);
+                LOG.info(CURRENT_EPOCH_FILENAME + " not found! Creating with a reasonable default of {}. This should only happen when you are upgrading your installation", currentEpoch);
                 writeLongToFile(CURRENT_EPOCH_FILENAME, currentEpoch);
             }
             if (epochOfZxid > currentEpoch) {
@@ -1057,11 +1053,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                 // this should only happen once when moving to a
                 // new code version
                 acceptedEpoch = epochOfZxid;
-                LOG.info(
-                    "{} not found! Creating with a reasonable default of {}. "
-                        + "This should only happen when you are upgrading your installation",
-                    ACCEPTED_EPOCH_FILENAME,
-                    acceptedEpoch);
+                LOG.info(ACCEPTED_EPOCH_FILENAME + " not found! Creating with a reasonable default of {}. This should only happen when you are upgrading your installation", acceptedEpoch);
                 writeLongToFile(ACCEPTED_EPOCH_FILENAME, acceptedEpoch);
             }
             if (acceptedEpoch < currentEpoch) {
@@ -1595,7 +1587,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
      * Set the number of milliseconds of each tick
      */
     public void setTickTime(int tickTime) {
-        LOG.info("tickTime set to {}", tickTime);
+        LOG.info("tickTime set to " + tickTime);
         this.tickTime = tickTime;
     }
 
@@ -1617,7 +1609,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     /** Whether to enable local sessions */
     public void enableLocalSessions(boolean flag) {
-        LOG.info("Local sessions {}", (flag ? "enabled" : "disabled"));
+        LOG.info("Local sessions " + (flag ? "enabled" : "disabled"));
         localSessionsEnabled = flag;
     }
 
@@ -1628,7 +1620,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     /** Whether to allow local sessions to upgrade to global sessions */
     public void enableLocalSessionsUpgrading(boolean flag) {
-        LOG.info("Local session upgrading {}", (flag ? "enabled" : "disabled"));
+        LOG.info("Local session upgrading " + (flag ? "enabled" : "disabled"));
         localSessionsUpgradingEnabled = flag;
     }
 
@@ -1639,7 +1631,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     /** minimum session timeout in milliseconds */
     public void setMinSessionTimeout(int min) {
-        LOG.info("minSessionTimeout set to {}", min);
+        LOG.info("minSessionTimeout set to " + min);
         this.minSessionTimeout = min;
     }
 
@@ -1650,7 +1642,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     /** maximum session timeout in milliseconds */
     public void setMaxSessionTimeout(int max) {
-        LOG.info("maxSessionTimeout set to {}", max);
+        LOG.info("maxSessionTimeout set to " + max);
         this.maxSessionTimeout = max;
     }
 
@@ -1675,7 +1667,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
      * Set the number of ticks that the initial synchronization phase can take
      */
     public void setInitLimit(int initLimit) {
-        LOG.info("initLimit set to {}", initLimit);
+        LOG.info("initLimit set to " + initLimit);
         this.initLimit = initLimit;
     }
 
@@ -1778,7 +1770,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                             QuorumPeerConfig.writeDynamicConfig(fileName, qv, true);
                         }
                     } catch (IOException e) {
-                        LOG.error("Error writing next dynamic config file to disk", e);
+                        LOG.error("Error writing next dynamic config file to disk: ", e.getMessage());
                     }
                 }
             }
@@ -1790,11 +1782,11 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             if ((quorumVerifier != null) && (quorumVerifier.getVersion() >= qv.getVersion())) {
                 // this is normal. For example - server found out about new config through FastLeaderElection gossiping
                 // and then got the same config in UPTODATE message so its already known
-                LOG.debug(
-                    "{} setQuorumVerifier called with known or old config {}. Current version: {}",
-                    getId(),
-                    qv.getVersion(),
-                    quorumVerifier.getVersion());
+                LOG.debug("{} setQuorumVerifier called with known or old config {}."
+                          + " Current version: {}",
+                          getId(),
+                          qv.getVersion(),
+                          quorumVerifier.getVersion());
                 return quorumVerifier;
             }
             QuorumVerifier prevQV = quorumVerifier;
@@ -1811,7 +1803,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                         QuorumPeerConfig.writeDynamicConfig(dynamicConfigFilename, qv, false);
                         QuorumPeerConfig.editStaticConfig(configFilename, dynamicConfigFilename, needEraseClientInfoFromStaticConfig());
                     } catch (IOException e) {
-                        LOG.error("Error closing file", e);
+                        LOG.error("Error closing file: ", e.getMessage());
                     }
                 } else {
                     LOG.info("writeToDisk == true but configFilename == null");
@@ -1857,7 +1849,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
      * Set the synclimit
      */
     public void setSyncLimit(int syncLimit) {
-        LOG.info("syncLimit set to {}", syncLimit);
+        LOG.info("syncLimit set to " + syncLimit);
         this.syncLimit = syncLimit;
     }
 
@@ -1872,7 +1864,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
      * Set the connectToLearnerMasterLimit
      */
     public void setConnectToLearnerMasterLimit(int connectToLearnerMasterLimit) {
-        LOG.info("connectToLearnerMasterLimit set to {}", connectToLearnerMasterLimit);
+        LOG.info("connectToLearnerMasterLimit set to " + connectToLearnerMasterLimit);
         this.connectToLearnerMasterLimit = connectToLearnerMasterLimit;
     }
 
@@ -1888,7 +1880,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
      */
     public boolean getSyncEnabled() {
         if (System.getProperty(SYNC_ENABLED) != null) {
-            LOG.info("{}={}", SYNC_ENABLED, Boolean.getBoolean(SYNC_ENABLED));
+            LOG.info(SYNC_ENABLED + "=" + Boolean.getBoolean(SYNC_ENABLED));
             return Boolean.getBoolean(SYNC_ENABLED);
         } else {
             return syncEnabled;
@@ -2304,7 +2296,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         if (currentVote != null && designatedLeader != currentVote.getId()) {
             setCurrentVote(new Vote(designatedLeader, zxid));
             reconfigFlagSet();
-            LOG.warn("Suggested leader: {}", designatedLeader);
+            LOG.warn("Suggested leader: " + designatedLeader);
             return true;
         }
         return false;

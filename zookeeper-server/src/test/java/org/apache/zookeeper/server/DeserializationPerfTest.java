@@ -62,14 +62,18 @@ public class DeserializationPerfTest extends ZKTestCase {
 
         assertEquals(count, dserTree.getNodeCount());
 
-        LOG.info(
-            "Deserialized {} nodes in {} ms ({}us/node), depth={} width={} datalen={}",
-            count,
-            durationms,
-            pernodeus,
-            depth,
-            width,
-            len);
+        LOG.info("Deserialized "
+                         + count
+                         + " nodes in "
+                         + durationms
+                         + " ms ("
+                         + pernodeus
+                         + "us/node), depth="
+                         + depth
+                         + " width="
+                         + width
+                         + " datalen="
+                         + len);
     }
 
     @Test

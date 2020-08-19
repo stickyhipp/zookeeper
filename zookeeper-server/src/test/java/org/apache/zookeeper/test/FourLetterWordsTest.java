@@ -125,7 +125,7 @@ public class FourLetterWordsTest extends ClientBase {
 
     private void verify(String cmd, String expected) throws IOException, SSLContextException {
         String resp = sendRequest(cmd);
-        LOG.info("cmd {} expected {} got {}", cmd, expected, resp);
+        LOG.info("cmd " + cmd + " expected " + expected + " got " + resp);
         assertTrue(resp.contains(expected));
     }
 

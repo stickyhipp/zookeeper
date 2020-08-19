@@ -109,9 +109,13 @@ public class MessageTracker {
         if (messages.isEmpty()) {
             LOG.info("No buffered timestamps for messages {} {}", sentOrReceivedText, serverAddr);
         } else {
-            LOG.warn("Last {} timestamps for messages {} {}:", messages.size(), sentOrReceivedText, serverAddr);
+            LOG.warn("Last {} timestamps for messages {} {}:",
+                messages.size(), sentOrReceivedText, serverAddr);
             while (!messages.isEmpty()) {
-                LOG.warn("{} {}  {}", sentOrReceivedText, serverAddr, messages.take().toString());
+                LOG.warn("{} {}  {}",
+                    sentOrReceivedText,
+                    serverAddr,
+                    messages.take().toString());
             }
         }
     }

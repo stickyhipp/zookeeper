@@ -54,10 +54,7 @@ public class JUnit4ZKTestRunner extends BlockJUnit4ClassRunner {
             try {
                 list = Arrays.asList(new FrameworkMethod(klass.getMethod(methodName)));
             } catch (NoSuchMethodException nsme) {
-                LOG.warn(
-                    "{} does not have test.method={}. failing to default methods.",
-                    klass.getName(),
-                    methodName);
+                LOG.warn("{} does not have test.method={}. failing to default methods.", klass.getName(), methodName);
             }
         }
         return list;
@@ -102,7 +99,7 @@ public class JUnit4ZKTestRunner extends BlockJUnit4ClassRunner {
                     && annotation.expected().isAssignableFrom(t.getClass())) {
                     LOG.info("TEST METHOD {} THREW EXPECTED EXCEPTION {}", name, annotation.expected());
                 } else {
-                    LOG.warn("TEST METHOD FAILED {}", name, t);
+                    LOG.info("TEST METHOD FAILED {}", name, t);
                 }
                 throw t;
             }

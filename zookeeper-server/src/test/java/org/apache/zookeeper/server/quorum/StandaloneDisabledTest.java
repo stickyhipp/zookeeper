@@ -60,16 +60,13 @@ public class StandaloneDisabledTest extends QuorumPeerTestBase {
         //start one server
         startServer(leaderId, serverStrings.get(leaderId) + "\n");
         ReconfigTest.testServerHasConfig(zkHandles[leaderId], null, null);
-        LOG.info(
-            "Initial Configuration:\n{}",
-            new String(zkHandles[leaderId].getConfig(this, new Stat())));
+        LOG.info("Initial Configuration:\n" + new String(zkHandles[leaderId].getConfig(this, new Stat())));
 
         //start and add 2 followers
         startFollowers();
         testReconfig(leaderId, true, reconfigServers);
-        LOG.info(
-            "Configuration after adding 2 followers:\n{}",
-            new String(zkHandles[leaderId].getConfig(this, new Stat())));
+        LOG.info("Configuration after adding 2 followers:\n"
+                         + new String(zkHandles[leaderId].getConfig(this, new Stat())));
 
         //shutdown leader- quorum should still exist
         shutDownServer(leaderId);
@@ -91,9 +88,7 @@ public class StandaloneDisabledTest extends QuorumPeerTestBase {
         reconfigServers.add(Integer.toString(leaderId));
         reconfigServers.add(Integer.toString(follower1));
         testReconfig(follower2, false, reconfigServers);
-        LOG.info(
-            "Configuration after removing leader and follower 1:\n{}",
-            new String(zkHandles[follower2].getConfig(this, new Stat())));
+        LOG.info("Configuration after removing leader and follower 1:\n" + new String(zkHandles[follower2].getConfig(this, new Stat())));
 
         // Kill server 1 to avoid it interferences with FLE of the quorum {2, 3, 4}.
         shutDownServer(follower1);
@@ -116,9 +111,8 @@ public class StandaloneDisabledTest extends QuorumPeerTestBase {
         startObservers(observerStrings);
         testReconfig(follower2, true, reconfigServers); //add partcipants
         testReconfig(follower2, true, observerStrings); //change to observers
-        LOG.info(
-            "Configuration after adding two observers:\n{}",
-            new String(zkHandles[follower2].getConfig(this, new Stat())));
+        LOG.info("Configuration after adding two observers:\n"
+                         + new String(zkHandles[follower2].getConfig(this, new Stat())));
 
         shutDownData();
     }
@@ -184,7 +178,7 @@ public class StandaloneDisabledTest extends QuorumPeerTestBase {
         zkAdminHandles[id] = new ZooKeeperAdmin("127.0.0.1:" + clientPorts[id], CONNECTION_TIMEOUT, this);
         zkAdminHandles[id].addAuthInfo("digest", "super:test".getBytes());
         String statCommandOut = FourLetterWordMain.send4LetterWord("127.0.0.1", clientPorts[id], "stat");
-        LOG.info("Started server id {} with config:\n{}\nStat output:\n{}", id, config, statCommandOut);
+        LOG.info(String.format("Started server id %d with config:\n%s\nStat output:\n%s", id, config, statCommandOut));
     }
 
     /**

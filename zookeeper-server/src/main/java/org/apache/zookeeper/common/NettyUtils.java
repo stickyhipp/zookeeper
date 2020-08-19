@@ -130,15 +130,21 @@ public class NettyUtils {
             for (NetworkInterface networkInterface : Collections.list(allNetworkInterfaces)) {
                 for (InetAddress inetAddress : Collections.list(networkInterface.getInetAddresses())) {
                     if (inetAddress.isLinkLocalAddress()) {
-                        LOG.debug("Ignoring link-local InetAddress {}", inetAddress);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Ignoring link-local InetAddress {}", inetAddress);
+                        }
                         continue;
                     }
                     if (inetAddress.isMulticastAddress()) {
-                        LOG.debug("Ignoring multicast InetAddress {}", inetAddress);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Ignoring multicast InetAddress {}", inetAddress);
+                        }
                         continue;
                     }
                     if (inetAddress.isLoopbackAddress()) {
-                        LOG.debug("Ignoring loopback InetAddress {}", inetAddress);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Ignoring loopback InetAddress {}", inetAddress);
+                        }
                         continue;
                     }
                     validInetAddresses.add(inetAddress);
