@@ -34,7 +34,6 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.SyncRequestProcessor;
-import org.apache.zookeeper.server.TxnLogEntry;
 import org.apache.zookeeper.server.ZKDatabase;
 import org.apache.zookeeper.server.ZooKeeperServer;
 import org.apache.zookeeper.server.quorum.Leader.Proposal;
@@ -106,10 +105,8 @@ public class GetProposalFromTxnTest extends ZKTestCase {
         // Get zxid of create requests
         while (itr.hasNext()) {
             Proposal proposal = itr.next();
-            TxnLogEntry logEntry = SerializeUtils.deserializeTxn(
-                    proposal.packet.getData());
-            TxnHeader hdr = logEntry.getHeader();
-            Record rec = logEntry.getTxn();
+            TxnHeader hdr = new TxnHeader();
+            Record rec = SerializeUtils.deserializeTxn(proposal.packet.getData(), hdr);
             if (hdr.getType() == OpCode.create) {
                 retrievedZxids.add(hdr.getZxid());
                 createCount++;

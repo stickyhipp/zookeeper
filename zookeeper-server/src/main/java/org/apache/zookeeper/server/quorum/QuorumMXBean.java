@@ -73,7 +73,4 @@ public interface QuorumMXBean {
      */
     void setObserverElectionDelayMS(long delayMS);
 
-    boolean getDigestEnabled();
-
-    void disableDigest();
 }

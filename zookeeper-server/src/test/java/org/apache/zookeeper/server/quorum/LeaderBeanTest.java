@@ -60,23 +60,19 @@ public class LeaderBeanTest {
     private QuorumPeer qp;
     private QuorumVerifier quorumVerifierMock;
 
-    public static Map<Long, QuorumServer> getMockedPeerViews(long myId) {
+    @Before
+    public void setUp() throws IOException, X509Exception {
+        qp = new QuorumPeer();
+        long myId = qp.getId();
+
         int clientPort = PortAssignment.unique();
         Map<Long, QuorumServer> peersView = new HashMap<Long, QuorumServer>();
         InetAddress clientIP = InetAddress.getLoopbackAddress();
 
-        peersView.put(Long.valueOf(myId),
-                new QuorumServer(myId, new InetSocketAddress(clientIP, PortAssignment.unique()),
-                        new InetSocketAddress(clientIP, PortAssignment.unique()),
-                        new InetSocketAddress(clientIP, clientPort), LearnerType.PARTICIPANT));
-        return peersView;
-    }
+        peersView.put(Long.valueOf(myId), new QuorumServer(myId, new InetSocketAddress(clientIP, PortAssignment.unique()), new InetSocketAddress(clientIP, PortAssignment.unique()), new InetSocketAddress(clientIP, clientPort), LearnerType.PARTICIPANT));
 
-    @Before
-    public void setUp() throws IOException, X509Exception {
-        qp = new QuorumPeer();
         quorumVerifierMock = mock(QuorumVerifier.class);
-        when(quorumVerifierMock.getAllMembers()).thenReturn(getMockedPeerViews(qp.getId()));
+        when(quorumVerifierMock.getAllMembers()).thenReturn(peersView);
 
         qp.setQuorumVerifier(quorumVerifierMock, false);
         File tmpDir = ClientBase.createEmptyTestDir();

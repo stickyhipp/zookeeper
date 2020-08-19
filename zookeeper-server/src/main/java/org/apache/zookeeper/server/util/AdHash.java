@@ -29,7 +29,7 @@ package org.apache.zookeeper.server.util;
 public class AdHash {
 
     /* we use 64 bits so that we can be fast an efficient */
-    private volatile long hash;
+    private long hash;
 
     /**
      * Add new digest to the hash value maintained in this class.
@@ -54,6 +54,13 @@ public class AdHash {
     }
 
     /**
+     * Return hex string of the hash value.
+     */
+    public String toHexString() {
+        return Long.toHexString(hash);
+    }
+
+    /**
      * Return the long value of the hash.
      */
     public long getHash() {
@@ -72,10 +79,7 @@ public class AdHash {
 
     @Override
     public String toString() {
-        return Long.toHexString(hash);
+        return toHexString();
     }
 
-    public void clear() {
-        hash = 0;
-    }
 }

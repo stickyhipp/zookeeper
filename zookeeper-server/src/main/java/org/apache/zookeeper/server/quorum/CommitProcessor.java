@@ -345,7 +345,6 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements RequestP
                                  */
                                 topPending.setHdr(request.getHdr());
                                 topPending.setTxn(request.getTxn());
-                                topPending.setTxnDigest(request.getTxnDigest());
                                 topPending.zxid = request.zxid;
                                 topPending.commitRecvTime = request.commitRecvTime;
                                 request = topPending;

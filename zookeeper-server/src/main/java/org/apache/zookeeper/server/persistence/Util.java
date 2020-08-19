@@ -34,7 +34,6 @@ import org.apache.jute.BinaryOutputArchive;
 import org.apache.jute.InputArchive;
 import org.apache.jute.OutputArchive;
 import org.apache.jute.Record;
-import org.apache.zookeeper.txn.TxnDigest;
 import org.apache.zookeeper.txn.TxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,20 +180,12 @@ public class Util {
      * @throws IOException
      */
     public static byte[] marshallTxnEntry(TxnHeader hdr, Record txn) throws IOException {
-        return marshallTxnEntry(hdr, txn, null);
-    }
-
-    public static byte[] marshallTxnEntry(TxnHeader hdr, Record txn, TxnDigest digest)
-            throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         OutputArchive boa = BinaryOutputArchive.getArchive(baos);
 
         hdr.serialize(boa, "hdr");
         if (txn != null) {
             txn.serialize(boa, "txn");
-        }
-        if (digest != null) {
-            digest.serialize(boa, "digest");
         }
         return baos.toByteArray();
     }

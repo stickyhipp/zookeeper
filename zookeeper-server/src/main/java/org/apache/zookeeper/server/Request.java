@@ -29,7 +29,6 @@ import org.apache.zookeeper.metrics.Summary;
 import org.apache.zookeeper.metrics.SummarySet;
 import org.apache.zookeeper.server.quorum.flexible.QuorumVerifier;
 import org.apache.zookeeper.server.util.AuthUtil;
-import org.apache.zookeeper.txn.TxnDigest;
 import org.apache.zookeeper.txn.TxnHeader;
 
 /**
@@ -105,8 +104,6 @@ public class Request {
     private KeeperException e;
 
     public QuorumVerifier qv = null;
-
-    private TxnDigest txnDigest;
 
     /**
      * If this is a create or close request for a local-only session.
@@ -438,6 +435,7 @@ public class Request {
         logLatency(metric, key, Time.currentWallTime());
     }
 
+
     /**
      * Returns comma separated list of users authenticated in the current
      * session
@@ -463,13 +461,5 @@ public class Request {
             }
         }
         return users.toString();
-    }
-
-    public TxnDigest getTxnDigest() {
-        return txnDigest;
-    }
-
-    public void setTxnDigest(TxnDigest txnDigest) {
-        this.txnDigest = txnDigest;
     }
 }
