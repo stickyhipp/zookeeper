@@ -60,7 +60,6 @@ import org.apache.zookeeper.server.ZKDatabase;
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
 import org.apache.zookeeper.server.util.ZxidUtils;
-import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.TestUtils;
 import org.apache.zookeeper.txn.CreateSessionTxn;
 import org.apache.zookeeper.txn.CreateTxn;
@@ -853,7 +852,7 @@ public class Zab1_0Test extends ZKTestCase {
                 assertEquals(Leader.NEWLEADER, qp.getType());
                 assertEquals(ZxidUtils.makeZxid(1, 0), qp.getZxid());
                 assertEquals(1, l.self.getAcceptedEpoch());
-                assertCurrentEpochGotUpdated(1, l.self, ClientBase.CONNECTION_TIMEOUT);
+                assertEquals(1, l.self.getCurrentEpoch());
 
                 qp = new QuorumPacket(Leader.ACK, qp.getZxid(), null, null);
                 oa.writeRecord(qp, null);
@@ -894,7 +893,7 @@ public class Zab1_0Test extends ZKTestCase {
                 assertEquals(Leader.NEWLEADER, qp.getType());
                 assertEquals(ZxidUtils.makeZxid(1, 0), qp.getZxid());
                 assertEquals(1, l.self.getAcceptedEpoch());
-                assertCurrentEpochGotUpdated(1, l.self, ClientBase.CONNECTION_TIMEOUT);
+                assertEquals(1, l.self.getCurrentEpoch());
 
                 qp = new QuorumPacket(Leader.ACK, qp.getZxid(), null, null);
                 oa.writeRecord(qp, null);
@@ -1213,22 +1212,4 @@ public class Zab1_0Test extends ZKTestCase {
         }
     }
 
-    /*
-     * Epoch is first written to file then updated in memory. Give some time to
-     * write the epoch in file and then go for assert.
-     */
-    private void assertCurrentEpochGotUpdated(int expected, QuorumPeer self, long timeout)
-            throws IOException {
-        long elapsedTime = 0;
-        long waitInterval = 10;
-        while (self.getCurrentEpoch() != expected && elapsedTime < timeout) {
-            try {
-                Thread.sleep(waitInterval);
-            } catch (InterruptedException e) {
-                fail("CurrentEpoch update failed");
-            }
-            elapsedTime = elapsedTime + waitInterval;
-        }
-        assertEquals("CurrentEpoch update failed", expected, self.getCurrentEpoch());
-    }
 }
