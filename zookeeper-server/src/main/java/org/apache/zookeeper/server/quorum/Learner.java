@@ -266,12 +266,7 @@ public class Learner {
     protected void connectToLeader(MultipleAddresses multiAddr, String hostname) throws IOException {
 
         this.leaderAddr = multiAddr;
-        Set<InetSocketAddress> addresses;
-        if (self.isMultiAddressReachabilityCheckEnabled()) {
-            addresses = multiAddr.getAllReachableAddresses();
-        } else {
-            addresses = multiAddr.getAllAddresses();
-        }
+        Set<InetSocketAddress> addresses = multiAddr.getAllReachableAddresses();
         ExecutorService executor = Executors.newFixedThreadPool(addresses.size());
         CountDownLatch latch = new CountDownLatch(addresses.size());
         AtomicReference<Socket> socket = new AtomicReference<>(null);

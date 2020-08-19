@@ -35,7 +35,6 @@ import java.net.SocketTimeoutException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.UnresolvedAddressException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -535,8 +534,7 @@ public class QuorumCnxManager {
                 try {
                     InitialMessage init = InitialMessage.parse(protocolVersion, din);
                     sid = init.sid;
-                    electionAddr = new MultipleAddresses(init.electionAddr,
-                        Duration.ofMillis(self.getMultiAddressReachabilityCheckTimeoutMs()));
+                    electionAddr = new MultipleAddresses(init.electionAddr);
                 } catch (InitialMessage.InitialMessageException ex) {
                     LOG.error(ex.toString());
                     closeSocket(sock);
@@ -639,12 +637,10 @@ public class QuorumCnxManager {
     synchronized boolean connectOne(long sid, MultipleAddresses electionAddr) {
         if (senderWorkerMap.get(sid) != null) {
             LOG.debug("There is a connection already for server {}", sid);
-            if (electionAddr.size() > 1 && self.isMultiAddressReachabilityCheckEnabled()) {
-                // since ZOOKEEPER-3188 we can use multiple election addresses to reach a server. It is possible, that the
-                // one we are using is already dead and we need to clean-up, so when we will create a new connection
-                // then we will choose an other one, which is actually reachable
-                senderWorkerMap.get(sid).asyncValidateIfSocketIsStillReachable();
-            }
+            // since ZOOKEEPER-3188 we can use multiple election addresses to reach a server. It is possible, that the
+            // one we are using is already dead and we need to clean-up, so when we will create a new connection
+            // then we will choose an other one, which is actually reachable
+            senderWorkerMap.get(sid).asyncValidateIfSocketIsStillReachable();
             return true;
         }
 
@@ -657,7 +653,7 @@ public class QuorumCnxManager {
                 sock = new Socket();
             }
             setSockOpts(sock);
-            sock.connect(electionAddr.getReachableOrOne(), cnxTO);
+            sock.connect(electionAddr.getReachableAddress(), cnxTO);
             if (sock instanceof SSLSocket) {
                 SSLSocket sslSock = (SSLSocket) sock;
                 sslSock.startHandshake();
@@ -710,12 +706,10 @@ public class QuorumCnxManager {
     synchronized void connectOne(long sid) {
         if (senderWorkerMap.get(sid) != null) {
             LOG.debug("There is a connection already for server {}", sid);
-            if (self.isMultiAddressReachabilityCheckEnabled()) {
-                // since ZOOKEEPER-3188 we can use multiple election addresses to reach a server. It is possible, that the
-                // one we are using is already dead and we need to clean-up, so when we will create a new connection
-                // then we will choose an other one, which is actually reachable
-                senderWorkerMap.get(sid).asyncValidateIfSocketIsStillReachable();
-            }
+            // since ZOOKEEPER-3188 we can use multiple election addresses to reach a server. It is possible, that the
+            // one we are using is already dead and we need to clean-up, so when we will create a new connection
+            // then we will choose an other one, which is actually reachable
+            senderWorkerMap.get(sid).asyncValidateIfSocketIsStillReachable();
             return;
         }
         synchronized (self.QV_LOCK) {
