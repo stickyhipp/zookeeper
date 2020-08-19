@@ -47,7 +47,6 @@ import org.apache.zookeeper.server.ServerCnxn;
 import org.apache.zookeeper.server.ZooTrace;
 import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
 import org.apache.zookeeper.server.quorum.flexible.QuorumVerifier;
-import org.apache.zookeeper.server.util.MessageTracker;
 import org.apache.zookeeper.server.util.SerializeUtils;
 import org.apache.zookeeper.server.util.ZxidUtils;
 import org.apache.zookeeper.txn.SetDataTxn;
@@ -75,7 +74,6 @@ public class Learner {
     protected BufferedOutputStream bufferedOutput;
 
     protected Socket sock;
-    protected InetSocketAddress leaderAddr;
 
     /**
      * Socket getter
@@ -89,9 +87,6 @@ public class Learner {
     protected OutputArchive leaderOs;
     /** the protocol version of the leader */
     protected int leaderProtocolVersion = 0x01;
-
-    private static final int BUFFERED_MESSAGE_SIZE = 10;
-    protected final MessageTracker messageTracker = new MessageTracker(BUFFERED_MESSAGE_SIZE);
 
     protected static final Logger LOG = LoggerFactory.getLogger(Learner.class);
 
@@ -151,7 +146,6 @@ public class Learner {
     void writePacket(QuorumPacket pp, boolean flush) throws IOException {
         synchronized (leaderOs) {
             if (pp != null) {
-                messageTracker.trackSent(pp.getType());
                 leaderOs.writeRecord(pp, "packet");
             }
             if (flush) {
@@ -170,7 +164,6 @@ public class Learner {
     void readPacket(QuorumPacket pp) throws IOException {
         synchronized (leaderIs) {
             leaderIs.readRecord(pp, "packet");
-            messageTracker.trackReceived(pp.getType());
         }
         long traceMask = ZooTrace.SERVER_PACKET_TRACE_MASK;
         if (pp.getType() == Leader.PING) {
@@ -257,7 +250,6 @@ public class Learner {
      */
     protected void connectToLeader(InetSocketAddress addr, String hostname) throws IOException, InterruptedException, X509Exception {
         this.sock = createSocket();
-        this.leaderAddr = addr;
 
         // leader connection timeout defaults to tickTime * initLimit
         int connectTimeout = self.tickTime * self.initLimit;
