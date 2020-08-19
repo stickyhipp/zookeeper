@@ -52,7 +52,6 @@ import org.apache.zookeeper.server.util.SerializeUtils;
 import org.apache.zookeeper.server.util.ZxidUtils;
 import org.apache.zookeeper.txn.SetDataTxn;
 import org.apache.zookeeper.txn.TxnHeader;
-import org.apache.zookeeper.util.ServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -456,13 +455,14 @@ public class Learner {
                 if (!truncated) {
                     // not able to truncate the log
                     LOG.error("Not able to truncate the log 0x{}", Long.toHexString(qp.getZxid()));
-                    ServiceUtils.requestSystemExit(ExitCode.QUORUM_PACKET_ERROR.getValue());
+                    System.exit(ExitCode.QUORUM_PACKET_ERROR.getValue());
                 }
                 zk.getZKDatabase().setlastProcessedZxid(qp.getZxid());
 
             } else {
                 LOG.error("Got unexpected packet from leader: {}, exiting ... ", LearnerHandler.packetToString(qp));
-                ServiceUtils.requestSystemExit(ExitCode.QUORUM_PACKET_ERROR.getValue());
+                System.exit(ExitCode.QUORUM_PACKET_ERROR.getValue());
+
             }
             zk.getZKDatabase().initConfigInZKDatabase(self.getQuorumVerifier());
             zk.createSessionTracker();

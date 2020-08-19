@@ -66,7 +66,6 @@ import org.apache.zookeeper.cli.SyncCommand;
 import org.apache.zookeeper.cli.VersionCommand;
 import org.apache.zookeeper.client.ZKClientConfig;
 import org.apache.zookeeper.server.ExitCode;
-import org.apache.zookeeper.util.ServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -354,7 +353,7 @@ public class ZooKeeperMain {
             // Command line args non-null.  Run what was passed.
             processCmd(cl);
         }
-        ServiceUtils.requestSystemExit(exitCode);
+        System.exit(exitCode);
     }
 
     public void executeLine(String line) throws CliException, InterruptedException, IOException {
@@ -397,7 +396,7 @@ public class ZooKeeperMain {
 
         if (cmd.equals("quit")) {
             zk.close();
-            ServiceUtils.requestSystemExit(exitCode);
+            System.exit(exitCode);
         } else if (cmd.equals("redo") && args.length >= 2) {
             Integer i = Integer.decode(args[1]);
             if (commandCount <= i || i < 0) { // don't allow redoing this redo
