@@ -18,56 +18,36 @@
 
 if [ "x$1" == "x" ]
 then
-    echo "USAGE: $0 startClean|start|stop"
+    echo "USAGE: $0 startClean|start|stop hostPorts"
     exit 2
 fi
 
-if [ "x${base_dir}" == "x" ]
+if [ "x$1" == "xstartClean" ]
 then
-  PROJECT_ROOT="../../"
-else
-  PROJECT_ROOT=${base_dir}
-fi
-WORK_DIR=${PROJECT_ROOT}/zookeeper-contrib/zookeeper-contrib-zkpython/target/zkpython_tests
-TEST_DIR=${PROJECT_ROOT}/zookeeper-contrib/zookeeper-contrib-zkpython/src/test
-
-
-if [ -r "${WORK_DIR}/../zk.pid" ]
-then
-  pid=`cat "${WORK_DIR}/../zk.pid"`
-  kill -9 $pid
-  rm -f "${WORK_DIR}/../zk.pid"
-fi
-
-which lsof &> /dev/null
-if [ $? -eq 0  ]
-then
-    pid=`lsof -i :22182 | grep LISTEN | awk '{print $2}'`
-    if [ -n "$pid" ]
+    if [ "x${base_dir}" == "x" ]
     then
-        kill -9 $pid
+    rm -rf /tmp/zkdata
+    else
+    rm -rf ${base_dir}/build/tmp
     fi
 fi
 
-
-
-
-if [ "x$1" == "xstartClean" ]
+if [ "x${base_dir}" == "x" ]	
 then
-    rm -rf ${WORK_DIR}
+zk_base="../../"
+else
+zk_base="${base_dir}"
 fi
 
-
-
-CLASSPATH="$CLASSPATH:${PROJECT_ROOT}/zookeeper-server/target/classes"
+CLASSPATH="$CLASSPATH:${zk_base}/build/classes"
 CLASSPATH="$CLASSPATH:${zk_base}/conf"
 
-for i in "${PROJECT_ROOT}"/zookeeper-server/target/lib/*.jar
+for i in "${zk_base}"/build/lib/*.jar
 do
     CLASSPATH="$CLASSPATH:$i"
 done
 
-for i in "${PROJECT_ROOT}"/zookeeper-server/src/main/resource/lib/*.jar
+for i in "${zk_base}"/zookeeper-server/src/main/resource/lib/*.jar
 do
     CLASSPATH="$CLASSPATH:$i"
 done
@@ -77,20 +57,15 @@ done
 
 case $1 in
 start|startClean)
-    mkdir -p ${WORK_DIR}/zkdata
-
-    rm -rf ${WORK_DIR}/ssl
-    mkdir -p ${WORK_DIR}/ssl
-    cp ${PROJECT_ROOT}/zookeeper-client/zookeeper-client-c/ssl/gencerts.sh ${WORK_DIR}/ssl/
-    cd ${WORK_DIR}/ssl/
-    ./gencerts.sh
-    cd -
-
-    sed "s#WORKDIR#${WORK_DIR}#g" ${TEST_DIR}/zoo.cfg > "${WORK_DIR}/zoo.cfg"
-    java  -Dzookeeper.extendedTypesEnabled=true -Dznode.container.checkIntervalMs=100 -cp $CLASSPATH org.apache.zookeeper.server.ZooKeeperServerMain "${WORK_DIR}/zoo.cfg" &> "${WORK_DIR}/zoo.log" &
-    pid=$!
-    echo -n $! > ${WORK_DIR}/../zk.pid
-    sleep 5
+    if [ "x${base_dir}" == "x" ]
+        then
+        mkdir -p /tmp/zkdata
+        java -cp $CLASSPATH org.apache.zookeeper.server.ZooKeeperServerMain 22182 /tmp/zkdata &> /tmp/zk.log &
+        else
+        mkdir -p ${base_dir}/build/tmp/zkdata
+        java -cp $CLASSPATH org.apache.zookeeper.server.ZooKeeperServerMain 22182 ${base_dir}/build/tmp/zkdata &> ${base_dir}/build/tmp/zk.log &
+    fi
+        sleep 5
     ;;
 stop)
     # Already killed above
