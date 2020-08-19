@@ -1003,8 +1003,6 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     AdminServer adminServer;
 
-    private final boolean reconfigEnabled;
-
     public static QuorumPeer testingQuorumPeer() throws SaslException {
         return new QuorumPeer();
     }
@@ -1016,7 +1014,6 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         adminServer = AdminServerFactory.createAdminServer();
         x509Util = createX509Util();
         initialize();
-        reconfigEnabled = QuorumPeerConfig.isReconfigEnabled();
     }
 
     // VisibleForTesting
@@ -1807,11 +1804,6 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     }
 
     public void setLastSeenQuorumVerifier(QuorumVerifier qv, boolean writeToDisk) {
-        if (!isReconfigEnabled()) {
-            LOG.info("Dynamic reconfig is disabled, we don't store the last seen config.");
-            return;
-        }
-
         // If qcm is non-null, we may call qcm.connectOne(), which will take the lock on qcm
         // and then take QV_LOCK.  Take the locks in the same order to ensure that we don't
         // deadlock against other callers of connectOne().  If qcmRef gets set in another
@@ -2161,7 +2153,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     }
 
     public boolean processReconfig(QuorumVerifier qv, Long suggestedLeaderId, Long zxid, boolean restartLE) {
-        if (!isReconfigEnabled()) {
+        if (!QuorumPeerConfig.isReconfigEnabled()) {
             LOG.debug("Reconfig feature is disabled, skip reconfig processing.");
             return false;
         }
@@ -2525,10 +2517,6 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     boolean isLeader(long id) {
         Vote vote = getCurrentVote();
         return vote != null && id == vote.getId();
-    }
-
-    public boolean isReconfigEnabled() {
-        return reconfigEnabled;
     }
 
     @InterfaceAudience.Private

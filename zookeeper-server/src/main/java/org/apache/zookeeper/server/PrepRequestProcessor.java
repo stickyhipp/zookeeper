@@ -133,7 +133,6 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements Req
     }
     @Override
     public void run() {
-        LOG.info(String.format("PrepRequestProcessor (sid:%d) started, reconfigEnabled=%s", zks.getServerId(), zks.reconfigEnabled));
         try {
             while (true) {
                 ServerMetrics.getMetrics().PREP_PROCESSOR_QUEUE_SIZE.add(submittedRequests.size());
@@ -406,7 +405,7 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements Req
             addChangeRecord(nodeRecord);
             break;
         case OpCode.reconfig:
-            if (!zks.isReconfigEnabled()) {
+            if (!QuorumPeerConfig.isReconfigEnabled()) {
                 LOG.error("Reconfig operation requested but reconfig feature is disabled.");
                 throw new KeeperException.ReconfigDisabledException();
             }

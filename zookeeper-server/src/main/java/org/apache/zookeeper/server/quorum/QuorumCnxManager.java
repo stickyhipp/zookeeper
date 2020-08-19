@@ -1476,8 +1476,4 @@ public class QuorumCnxManager {
         return senderWorkerMap.get(peerSid) != null;
     }
 
-    public boolean isReconfigEnabled() {
-        return self.isReconfigEnabled();
-    }
-
 }

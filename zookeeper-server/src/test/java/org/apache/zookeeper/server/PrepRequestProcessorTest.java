@@ -81,9 +81,6 @@ public class PrepRequestProcessorTest extends ClientBase {
     private PrepRequestProcessor processor;
     private Request outcome;
 
-    private boolean isReconfigEnabledPreviously;
-    private boolean isStandaloneEnabledPreviously;
-
     @Before
     public void setup() throws Exception {
         File tmpDir = ClientBase.createTmpDir();
@@ -96,9 +93,6 @@ public class PrepRequestProcessorTest extends ClientBase {
         servcnxnf.startup(zks);
         assertTrue("waiting for server being up ", ClientBase.waitForServerUp(HOSTPORT, CONNECTION_TIMEOUT));
         zks.sessionTracker = new MySessionTracker();
-
-        isReconfigEnabledPreviously = QuorumPeerConfig.isReconfigEnabled();
-        isStandaloneEnabledPreviously = QuorumPeerConfig.isStandaloneEnabled();
     }
 
     @After
@@ -109,10 +103,6 @@ public class PrepRequestProcessorTest extends ClientBase {
         if (zks != null) {
             zks.shutdown();
         }
-
-        // reset the reconfig option
-        QuorumPeerConfig.setReconfigEnabled(isReconfigEnabledPreviously);
-        QuorumPeerConfig.setStandaloneEnabled(isStandaloneEnabledPreviously);
     }
 
     @Test
@@ -189,9 +179,6 @@ public class PrepRequestProcessorTest extends ClientBase {
 
     @Test
     public void testReconfigWithAnotherOutstandingChange() throws Exception {
-        QuorumPeerConfig.setReconfigEnabled(true);
-        QuorumPeerConfig.setStandaloneEnabled(false);
-
         QuorumPeer qp = new QuorumPeer();
         QuorumVerifier quorumVerifierMock = mock(QuorumVerifier.class);
         when(quorumVerifierMock.getAllMembers()).thenReturn(LeaderBeanTest.getMockedPeerViews(qp.getId()));
@@ -209,12 +196,22 @@ public class PrepRequestProcessorTest extends ClientBase {
         processor.pRequest(createRequest(record, OpCode.create, false));
         assertTrue("request hasn't been processed in chain", pLatch.await(5, TimeUnit.SECONDS));
 
-        String newMember = "server.0=localhost:" + PortAssignment.unique()  + ":" + PortAssignment.unique() + ":participant";
-        record = new ReconfigRequest(null, null, newMember, 0);
-        pLatch = new CountDownLatch(1);
-        processor.pRequest(createRequest(record, OpCode.reconfig, true));
-        assertTrue("request hasn't been processed in chain", pLatch.await(5, TimeUnit.SECONDS));
-        assertEquals(outcome.getHdr().getType(), OpCode.reconfig);   // Verifies that there was no error.
+        boolean isReconfigEnabledPreviously = QuorumPeerConfig.isReconfigEnabled();
+        boolean isStandaloneEnabledPreviously = QuorumPeerConfig.isStandaloneEnabled();
+        QuorumPeerConfig.setReconfigEnabled(true);
+        QuorumPeerConfig.setStandaloneEnabled(false);
+        try {
+            String newMember = "server.0=localhost:" + PortAssignment.unique()  + ":" + PortAssignment.unique() + ":participant";
+            record = new ReconfigRequest(null, null, newMember, 0);
+            pLatch = new CountDownLatch(1);
+            processor.pRequest(createRequest(record, OpCode.reconfig, true));
+            assertTrue("request hasn't been processed in chain", pLatch.await(5, TimeUnit.SECONDS));
+            assertEquals(outcome.getHdr().getType(), OpCode.reconfig);   // Verifies that there was no error.
+        } finally {
+            // reset the reconfig option
+            QuorumPeerConfig.setReconfigEnabled(isReconfigEnabledPreviously);
+            QuorumPeerConfig.setStandaloneEnabled(isStandaloneEnabledPreviously);
+        }
     }
 
     /**

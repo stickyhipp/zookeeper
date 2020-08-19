@@ -52,8 +52,7 @@ public class ReadOnlyZooKeeperServer extends ZooKeeperServer {
             self.maxSessionTimeout,
             self.clientPortListenBacklog,
             zkDb,
-            self.getInitialConfig(),
-            self.isReconfigEnabled());
+            self.getInitialConfig());
         this.self = self;
     }
 
