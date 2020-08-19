@@ -40,10 +40,6 @@ public class QuorumKerberosAuthTest extends KerberosSecurityTestcase {
 
     static {
         String keytabFilePath = FilenameUtils.normalize(KerberosTestUtils.getKeytabFile(), true);
-
-        // note: we use "refreshKrb5Config=true" to refresh the kerberos config in the JVM,
-        // making sure that we use the latest config even if other tests already have been executed
-        // and initialized the kerberos client configs before)
         String jaasEntries = ""
                                      + "QuorumServer {\n"
                                      + "       com.sun.security.auth.module.Krb5LoginModule required\n"
@@ -54,7 +50,6 @@ public class QuorumKerberosAuthTest extends KerberosSecurityTestcase {
                                      + "       storeKey=true\n"
                                      + "       useTicketCache=false\n"
                                      + "       debug=false\n"
-                                     + "       refreshKrb5Config=true\n"
                                      + "       principal=\""
                                      + KerberosTestUtils.getServerPrincipal()
                                      + "\";\n"
@@ -68,7 +63,6 @@ public class QuorumKerberosAuthTest extends KerberosSecurityTestcase {
                                      + "       storeKey=true\n"
                                      + "       useTicketCache=false\n"
                                      + "       debug=false\n"
-                                     + "       refreshKrb5Config=true\n"
                                      + "       principal=\""
                                      + KerberosTestUtils.getLearnerPrincipal()
                                      + "\";\n"
