@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.zookeeper.Watcher.Event.EventType;
 import org.apache.zookeeper.Watcher.WatcherType;
+import org.apache.zookeeper.ZooKeeper.ZKWatchManager;
 
 /**
  * Handles the special case of removing watches which has registered for a

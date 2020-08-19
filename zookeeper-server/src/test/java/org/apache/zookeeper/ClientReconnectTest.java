@@ -66,14 +66,8 @@ public class ClientReconnectTest extends ZKTestCase {
         sc = SocketChannel.open();
 
         ClientCnxnSocketNIO nioCnxn = new MockCnxn();
-        ClientCnxn clientCnxn = new ClientCnxn(
-            "tmp",
-            hostProvider,
-            5000,
-            zk.getClientConfig(),
-            DummyWatcher.INSTANCE,
-            nioCnxn,
-            false);
+        ClientWatchManager watcher = mock(ClientWatchManager.class);
+        ClientCnxn clientCnxn = new ClientCnxn("tmp", hostProvider, 5000, zk, watcher, nioCnxn, false);
         clientCnxn.start();
         countDownLatch.await(5000, TimeUnit.MILLISECONDS);
         assertTrue(countDownLatch.getCount() == 0);

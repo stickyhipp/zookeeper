@@ -165,11 +165,13 @@ public class ClientCnxn {
 
     private final int sessionTimeout;
 
-    private final ZKWatchManager watchManager;
+    private final ZooKeeper zooKeeper;
+
+    private final ClientWatchManager watcher;
 
     private long sessionId;
 
-    private byte[] sessionPasswd;
+    private byte[] sessionPasswd = new byte[16];
 
     /**
      * If true, the connection is allowed to go to r-o mode. This field's value
@@ -221,10 +223,6 @@ public class ClientCnxn {
      * then it is assumed that the response packet is lost.
      */
     private long requestTimeout;
-
-    ZKWatchManager getWatcherManager() {
-        return watchManager;
-    }
 
     public long getSessionId() {
         return sessionId;
@@ -364,29 +362,35 @@ public class ClientCnxn {
      * established until needed. The start() instance method must be called
      * subsequent to construction.
      *
-     * @param chrootPath the chroot of this client. Should be removed from this Class in ZOOKEEPER-838
-     * @param hostProvider the list of ZooKeeper servers to connect to
-     * @param sessionTimeout the timeout for connections.
-     * @param clientConfig the client configuration.
-     * @param defaultWatcher default watcher for this connection
-     * @param clientCnxnSocket the socket implementation used (e.g. NIO/Netty)
-     * @param canBeReadOnly whether the connection is allowed to go to read-only mode in case of partitioning
+     * @param chrootPath - the chroot of this client. Should be removed from this Class in ZOOKEEPER-838
+     * @param hostProvider
+     *                the list of ZooKeeper servers to connect to
+     * @param sessionTimeout
+     *                the timeout for connections.
+     * @param zooKeeper
+     *                the zookeeper object that this connection is related to.
+     * @param watcher watcher for this connection
+     * @param clientCnxnSocket
+     *                the socket implementation used (e.g. NIO/Netty)
+     * @param canBeReadOnly
+     *                whether the connection is allowed to go to read-only
+     *                mode in case of partitioning
+     * @throws IOException
      */
     public ClientCnxn(
         String chrootPath,
         HostProvider hostProvider,
         int sessionTimeout,
-        ZKClientConfig clientConfig,
-        Watcher defaultWatcher,
+        ZooKeeper zooKeeper,
+        ClientWatchManager watcher,
         ClientCnxnSocket clientCnxnSocket,
-        boolean canBeReadOnly
-    ) throws IOException {
+        boolean canBeReadOnly) throws IOException {
         this(
             chrootPath,
             hostProvider,
             sessionTimeout,
-            clientConfig,
-            defaultWatcher,
+            zooKeeper,
+            watcher,
             clientCnxnSocket,
             0,
             new byte[16],
@@ -398,45 +402,48 @@ public class ClientCnxn {
      * established until needed. The start() instance method must be called
      * subsequent to construction.
      *
-     * @param chrootPath the chroot of this client. Should be removed from this Class in ZOOKEEPER-838
-     * @param hostProvider the list of ZooKeeper servers to connect to
-     * @param sessionTimeout the timeout for connections.
-     * @param clientConfig the client configuration.
-     * @param defaultWatcher default watcher for this connection
-     * @param clientCnxnSocket the socket implementation used (e.g. NIO/Netty)
+     * @param chrootPath - the chroot of this client. Should be removed from this Class in ZOOKEEPER-838
+     * @param hostProvider
+     *                the list of ZooKeeper servers to connect to
+     * @param sessionTimeout
+     *                the timeout for connections.
+     * @param zooKeeper
+     *                the zookeeper object that this connection is related to.
+     * @param watcher watcher for this connection
+     * @param clientCnxnSocket
+     *                the socket implementation used (e.g. NIO/Netty)
      * @param sessionId session id if re-establishing session
      * @param sessionPasswd session passwd if re-establishing session
-     * @param canBeReadOnly whether the connection is allowed to go to read-only mode in case of partitioning
+     * @param canBeReadOnly
+     *                whether the connection is allowed to go to read-only
+     *                mode in case of partitioning
      * @throws IOException in cases of broken network
      */
     public ClientCnxn(
         String chrootPath,
         HostProvider hostProvider,
         int sessionTimeout,
-        ZKClientConfig clientConfig,
-        Watcher defaultWatcher,
+        ZooKeeper zooKeeper,
+        ClientWatchManager watcher,
         ClientCnxnSocket clientCnxnSocket,
         long sessionId,
         byte[] sessionPasswd,
-        boolean canBeReadOnly
-    ) throws IOException {
-        this.chrootPath = chrootPath;
-        this.hostProvider = hostProvider;
-        this.sessionTimeout = sessionTimeout;
-        this.clientConfig = clientConfig;
+        boolean canBeReadOnly) throws IOException {
+        this.zooKeeper = zooKeeper;
+        this.watcher = watcher;
         this.sessionId = sessionId;
         this.sessionPasswd = sessionPasswd;
-        this.readOnly = canBeReadOnly;
+        this.sessionTimeout = sessionTimeout;
+        this.hostProvider = hostProvider;
+        this.chrootPath = chrootPath;
 
-        this.watchManager = new ZKWatchManager(
-                clientConfig.getBoolean(ZKClientConfig.DISABLE_AUTO_WATCH_RESET),
-                defaultWatcher);
+        connectTimeout = sessionTimeout / hostProvider.size();
+        readTimeout = sessionTimeout * 2 / 3;
+        readOnly = canBeReadOnly;
 
-        this.connectTimeout = sessionTimeout / hostProvider.size();
-        this.readTimeout = sessionTimeout * 2 / 3;
-
-        this.sendThread = new SendThread(clientCnxnSocket);
-        this.eventThread = new EventThread();
+        sendThread = new SendThread(clientCnxnSocket);
+        eventThread = new EventThread();
+        this.clientConfig = zooKeeper.getClientConfig();
         initRequestTimeout();
     }
 
@@ -499,9 +506,10 @@ public class ClientCnxn {
             final Set<Watcher> watchers;
             if (materializedWatchers == null) {
                 // materialize the watchers based on the event
-                watchers = watchManager.materialize(event.getState(), event.getType(), event.getPath());
+                watchers = watcher.materialize(event.getState(), event.getType(), event.getPath());
             } else {
-                watchers = new HashSet<>(materializedWatchers);
+                watchers = new HashSet<Watcher>();
+                watchers.addAll(materializedWatchers);
             }
             WatcherSetEventPair pair = new WatcherSetEventPair(watchers, event);
             // queue the pair (watch set & event) for later processing
@@ -999,12 +1007,14 @@ public class ClientCnxn {
             ConnectRequest conReq = new ConnectRequest(0, lastZxid, sessionTimeout, sessId, sessionPasswd);
             // We add backwards since we are pushing into the front
             // Only send if there's a pending watch
+            // TODO: here we have the only remaining use of zooKeeper in
+            // this class. It's to be eliminated!
             if (!clientConfig.getBoolean(ZKClientConfig.DISABLE_AUTO_WATCH_RESET)) {
-                List<String> dataWatches = watchManager.getDataWatchList();
-                List<String> existWatches = watchManager.getExistWatchList();
-                List<String> childWatches = watchManager.getChildWatchList();
-                List<String> persistentWatches = watchManager.getPersistentWatchList();
-                List<String> persistentRecursiveWatches = watchManager.getPersistentRecursiveWatchList();
+                List<String> dataWatches = zooKeeper.getDataWatches();
+                List<String> existWatches = zooKeeper.getExistWatches();
+                List<String> childWatches = zooKeeper.getChildWatches();
+                List<String> persistentWatches = zooKeeper.getPersistentWatches();
+                List<String> persistentRecursiveWatches = zooKeeper.getPersistentRecursiveWatches();
                 if (!dataWatches.isEmpty() || !existWatches.isEmpty() || !childWatches.isEmpty()
                         || !persistentWatches.isEmpty() || !persistentRecursiveWatches.isEmpty()) {
                     Iterator<String> dataWatchesIter = prependChroot(dataWatches).iterator();

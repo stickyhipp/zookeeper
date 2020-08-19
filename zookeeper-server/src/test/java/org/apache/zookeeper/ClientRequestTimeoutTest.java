@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.client.HostProvider;
-import org.apache.zookeeper.client.ZKClientConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerTestBase;
 import org.apache.zookeeper.test.ClientBase;
 import org.apache.zookeeper.test.ClientBase.CountdownWatcher;
@@ -111,23 +110,15 @@ public class ClientRequestTimeoutTest extends QuorumPeerTestBase {
 
     class CustomClientCnxn extends ClientCnxn {
 
-        CustomClientCnxn(
+        public CustomClientCnxn(
             String chrootPath,
             HostProvider hostProvider,
             int sessionTimeout,
-            ZKClientConfig clientConfig,
-            Watcher defaultWatcher,
+            ZooKeeper zooKeeper,
+            ClientWatchManager watcher,
             ClientCnxnSocket clientCnxnSocket,
-            boolean canBeReadOnly
-        ) throws IOException {
-            super(
-                chrootPath,
-                hostProvider,
-                sessionTimeout,
-                clientConfig,
-                defaultWatcher,
-                clientCnxnSocket,
-                canBeReadOnly);
+            boolean canBeReadOnly) throws IOException {
+            super(chrootPath, hostProvider, sessionTimeout, zooKeeper, watcher, clientCnxnSocket, canBeReadOnly);
         }
 
         @Override
@@ -149,23 +140,15 @@ public class ClientRequestTimeoutTest extends QuorumPeerTestBase {
         }
 
         @Override
-        ClientCnxn createConnection(
+        protected ClientCnxn createConnection(
             String chrootPath,
             HostProvider hostProvider,
             int sessionTimeout,
-            ZKClientConfig clientConfig,
-            Watcher defaultWatcher,
+            ZooKeeper zooKeeper,
+            ClientWatchManager watcher,
             ClientCnxnSocket clientCnxnSocket,
-            boolean canBeReadOnly
-        ) throws IOException {
-            return new CustomClientCnxn(
-                chrootPath,
-                hostProvider,
-                sessionTimeout,
-                clientConfig,
-                defaultWatcher,
-                clientCnxnSocket,
-                canBeReadOnly);
+            boolean canBeReadOnly) throws IOException {
+            return new CustomClientCnxn(chrootPath, hostProvider, sessionTimeout, zooKeeper, watcher, clientCnxnSocket, canBeReadOnly);
         }
 
     }
