@@ -81,9 +81,7 @@ public class LeaderZooKeeperServer extends QuorumZooKeeperServer {
             getZKDatabase(),
             prepRequestProcessor,
             Integer.getInteger("znode.container.checkIntervalMs", (int) TimeUnit.MINUTES.toMillis(1)),
-            Integer.getInteger("znode.container.maxPerMinute", 10000),
-            Long.getLong("znode.container.maxNeverUsedIntervalMs", 0)
-        );
+            Integer.getInteger("znode.container.maxPerMinute", 10000));
     }
 
     @Override
