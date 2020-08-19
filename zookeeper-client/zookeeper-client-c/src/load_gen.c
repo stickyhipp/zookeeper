@@ -27,6 +27,8 @@
 
 static zhandle_t *zh;
 
+static int shutdownThisThing=0;
+
 // *****************************************************************************
 //
 static pthread_cond_t cond=PTHREAD_COND_INITIALIZER;

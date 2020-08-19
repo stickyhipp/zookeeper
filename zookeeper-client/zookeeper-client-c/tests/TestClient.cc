@@ -325,10 +325,9 @@ public:
     
     /** have a callback in the default watcher **/
     static void default_zoo_watcher(zhandle_t *zzh, int type, int state, const char *path, void *context){
-        int zrc;
+        int zrc = 0;
         struct String_vector str_vec = {0, NULL};
         zrc = zoo_wget_children(zzh, "/mytest", default_zoo_watcher, NULL, &str_vec);
-        CPPUNIT_ASSERT(zrc == ZOK || zrc == ZCLOSING);
     }
 
     /** ZOOKEEPER-1057 This checks that the client connects to the second server when the first is not reachable **/
@@ -354,28 +353,24 @@ public:
 
     /** this checks for a deadlock in calling zookeeper_close and calls from a default watcher that might get triggered just when zookeeper_close() is in progress **/
     void testHangingClient() {
-        int zrc;
+        int zrc = 0;
         char buff[10] = "testall";
         char path[512];
-        watchctx_t *ctx = NULL;
+        watchctx_t *ctx;
         struct String_vector str_vec = {0, NULL};
         zhandle_t *zh = zookeeper_init(hostPorts, NULL, 10000, 0, ctx, 0);
         sleep(1);
         zrc = zoo_create(zh, "/mytest", buff, 10, &ZOO_OPEN_ACL_UNSAFE, 0, path, 512);
-        CPPUNIT_ASSERT_EQUAL((int)ZOK, zrc);
         zrc = zoo_wget_children(zh, "/mytest", default_zoo_watcher, NULL, &str_vec);
-        CPPUNIT_ASSERT_EQUAL((int)ZOK, zrc);
         zrc = zoo_create(zh, "/mytest/test1", buff, 10, &ZOO_OPEN_ACL_UNSAFE, 0, path, 512);
-        CPPUNIT_ASSERT_EQUAL((int)ZOK, zrc);
         zrc = zoo_wget_children(zh, "/mytest", default_zoo_watcher, NULL, &str_vec);
-        CPPUNIT_ASSERT_EQUAL((int)ZOK, zrc);
         zrc = zoo_delete(zh, "/mytest/test1", -1);
-        CPPUNIT_ASSERT_EQUAL((int)ZOK, zrc);
         zookeeper_close(zh);
     }
 
     void testBadDescriptor() {
-        watchctx_t *ctx = NULL;
+        int zrc = 0;
+        watchctx_t *ctx;
         zhandle_t *zh = zookeeper_init(hostPorts, NULL, 10000, 0, ctx, 0);
         sleep(1);
         zh->io_count = 0;
@@ -1044,8 +1039,8 @@ public:
         CPPUNIT_ASSERT_EQUAL(zoo_get_log_callback(zk), &logMessageHandler);
 
         // Log 10 messages and ensure all go to callback
-        const std::size_t expected = 10;
-        for (std::size_t i = 0; i < expected; i++)
+        int expected = 10;
+        for (int i = 0; i < expected; i++)
         {
             LOG_INFO(LOGCALLBACK(zk), "%s #%d", __FUNCTION__, i);
         }
@@ -1062,12 +1057,12 @@ public:
 
         // All the connection messages should have gone to the callback -- don't
         // want this to be a maintenance issue so we're not asserting exact count
-        std::size_t numBefore = logMessages.size();
+        int numBefore = logMessages.size();
         CPPUNIT_ASSERT(numBefore != 0);
 
         // Log 10 messages and ensure all go to callback
-        const std::size_t expected = 10;
-        for (std::size_t i = 0; i < expected; i++)
+        int expected = 10;
+        for (int i = 0; i < expected; i++)
         {
             LOG_INFO(LOGCALLBACK(zk), "%s #%d", __FUNCTION__, i);
         }

@@ -342,7 +342,6 @@ static int is_sasl_auth_in_progress(zhandle_t* zh)
 #endif /* HAVE_CYRUS_SASL_H */
 }
 
-#ifndef THREADED
 /*
  * abort due to the use of a sync api in a singlethreaded environment
  */
@@ -351,7 +350,6 @@ static void abort_singlethreaded(zhandle_t *zh)
     LOG_ERROR(LOGCALLBACK(zh), "Sync completion used without threads");
     abort();
 }
-#endif  /* THREADED */
 
 static ssize_t zookeeper_send(zsock_t *fd, const void* buf, size_t len)
 {

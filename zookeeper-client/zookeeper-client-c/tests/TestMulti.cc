@@ -486,6 +486,8 @@ public:
         watchctx_t ctx;
         zhandle_t *zk = createClient(&ctx);
         int sz = 512;
+        char buf[sz];
+        int blen;
         char p1[sz];
         p1[0] = '\0';
         struct Stat stat;
@@ -571,6 +573,7 @@ public:
         int sz = 512;
         char p1[sz];
         p1[0] = '\0';
+        struct Stat s1;
 
         rc = zoo_create(zk, "/multi0", "", 0, &ZOO_OPEN_ACL_UNSAFE, 0, p1, sz);
         CPPUNIT_ASSERT_EQUAL((int)ZOK, rc);
