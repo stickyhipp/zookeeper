@@ -236,7 +236,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     // Connection throttling
-    private BlueThrottle connThrottle = new BlueThrottle();
+    private BlueThrottle connThrottle;
 
     @SuppressFBWarnings(value = "IS2_INCONSISTENT_SYNC", justification =
         "Internally the throttler has a BlockingQueue so "
@@ -307,6 +307,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         listener = new ZooKeeperServerListenerImpl(this);
 
         readResponseCache = new ResponseCache();
+
+        connThrottle = new BlueThrottle();
 
         this.initialConfig = initialConfig;
 
