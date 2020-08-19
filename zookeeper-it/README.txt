@@ -7,12 +7,11 @@ The easiest way to do all of this is to use the zookeeper fat jar.
 
 Steps to run system test
 ------------------------
-1) build and transfer the fatjar from the `zookeeper-contrib/zookeeper-contrib-fatjar/target`
-   directory to all systems participating in the test
+1) transfer the fatjar from the release directory to all systems
+   participating in the test. fatjar is in contrib/fatjar directory.
 
-   Command to build fatjar without executing the tests:
-
-   `mvn clean install -P fatjar -DskipTests`
+   (developers can generate by running "ant jar compile-test"
+   targets in trunk, then compiling using "ant jar" in src/contrib/jarjar)
 
 2) run a zookeeper standalone instance (cluster is ok too)
 

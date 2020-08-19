@@ -40,15 +40,6 @@
     <module>zookeeper-contrib-zooinspector</module>
   </modules>
 
-  <profiles>
-    <profile>
-      <id>fatjar</id>
-      <modules>
-        <module>zookeeper-contrib-fatjar</module>
-      </modules>
-    </profile>
-  </profiles>
-
   <build>
     <pluginManagement>
       <plugins>
